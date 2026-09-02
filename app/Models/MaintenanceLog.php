@@ -33,7 +33,7 @@ class MaintenanceLog extends Model
     // Relationships
     public function ticket()
     {
-        return $this->belongsTo(MaintenanceTicket::class);
+        return $this->belongsTo(MaintenanceTicket::class, 'ticket_id');
     }
 
     public function handledBy()

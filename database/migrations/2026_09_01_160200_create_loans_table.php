@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->foreignId('item_id')->constrained()->cascadeOnDelete();
-            $table->enum('status', ['aktif','menunggu_approval','selesai'])->default('aktif');
+            $table->enum('status', ['aktif','menunggu_approval_kembali','selesai'])->default('aktif');
             $table->enum('condition_in', ['bagus','rusak'])->nullable();
             $table->dateTime('borrowed_at');
             $table->dateTime('returned_at')->nullable();

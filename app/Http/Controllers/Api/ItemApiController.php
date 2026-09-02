@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\ItemStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Item;
-use Illuminate\Http\Request;
 
 class ItemApiController extends Controller
 {
@@ -13,8 +13,8 @@ class ItemApiController extends Controller
      */
     public function index()
     {
-        $items = Item::where('status', 'tersedia')
-            ->select('id', 'item_code', 'name', 'type', 'location', 'epc_tag')
+        $items = Item::where('status', ItemStatus::TERSEDIA)
+            ->select('id', 'item_code', 'name', 'type', 'status', 'stock', 'location', 'epc_tag')
             ->get();
 
         return response()->json(['success' => true, 'data' => $items]);

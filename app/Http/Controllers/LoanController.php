@@ -2,9 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ItemStatus;
+use App\Enums\LoanDuration;
 use App\Models\Item;
 use App\Models\Loan;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class LoanController extends Controller
 {
@@ -22,7 +27,7 @@ class LoanController extends Controller
      */
     public function create()
     {
-        $items = Item::where('status', 'tersedia')->get();
+        $items = Item::where('status', ItemStatus::TERSEDIA)->get();
         return view('loans.create', compact('items'));
     }
 
@@ -34,25 +39,38 @@ class LoanController extends Controller
         $validated = $request->validate([
             'user_id' => 'required|exists:users,id',
             'item_id' => 'required|exists:items,id',
+            'usage_duration' => ['required', Rule::enum(LoanDuration::class)],
         ]);
 
-        // Cek apakah item tersedia
-        $item = Item::findOrFail($validated['item_id']);
-        if ($item->status !== 'tersedia') {
+        $user = User::findOrFail($validated['user_id']);
+
+        if (blank($user->phone)) {
             return redirect()->back()
-                ->withErrors(['item_id' => 'Barang tidak tersedia.'])
+                ->withErrors(['user_id' => 'Nomor WhatsApp siswa belum terdaftar.'])
                 ->withInput();
         }
 
-        // Buat loan dan update status item
-        $loan = Loan::create([
-            'user_id' => $validated['user_id'],
-            'item_id' => $validated['item_id'],
-            'status' => 'aktif',
-            'borrowed_at' => now(),
-        ]);
+        $borrowedAt = now();
 
-        $item->update(['status' => 'dipinjam']);
+        DB::transaction(function () use ($validated, $borrowedAt) {
+            // Kunci baris item agar tidak terjadi double-borrow
+            $item = Item::query()->lockForUpdate()->findOrFail($validated['item_id']);
+
+            if ($item->status !== ItemStatus::TERSEDIA) {
+                abort(422, 'Barang tidak tersedia.');
+            }
+
+            Loan::create([
+                'user_id' => $validated['user_id'],
+                'item_id' => $item->id,
+                'status' => 'aktif',
+                'usage_duration' => $validated['usage_duration'],
+                'borrowed_at' => $borrowedAt,
+                'due_at' => Loan::calculateDueAt($validated['usage_duration'], $borrowedAt),
+            ]);
+
+            $item->update(['status' => ItemStatus::DIPINJAM]);
+        });
 
         return redirect()->route('loans.index')
             ->with('success', 'Peminjaman berhasil dicatat.');
@@ -77,17 +95,37 @@ class LoanController extends Controller
     }
 
     /**
-     * Update loan di database.
+     * Update loan di database (termasuk sinkronisasi status barang).
      */
     public function update(Request $request, string $id)
     {
-        $loan = Loan::findOrFail($id);
+        $loan = Loan::with('item')->findOrFail($id);
 
         $validated = $request->validate([
-            'status' => 'required|in:aktif,menunggu_approval,selesai',
+            'status' => 'required|in:aktif,menunggu_approval_kembali,selesai',
         ]);
 
-        $loan->update($validated);
+        DB::transaction(function () use ($loan, $validated) {
+            $item = $loan->item;
+
+            if ($validated['status'] === 'selesai') {
+                $loan->update([
+                    'status' => $validated['status'],
+                    'returned_at' => $loan->returned_at ?? now(),
+                ]);
+                // Barang dikembalikan → tersedia (bila sebelumnya dipinjam)
+                if ($item && $item->status === ItemStatus::DIPINJAM) {
+                    $item->update(['status' => ItemStatus::TERSEDIA]);
+                }
+            } elseif ($validated['status'] === 'aktif' && $item && $item->status !== ItemStatus::DIPINJAM) {
+                $loan->update(['status' => 'aktif', 'returned_at' => null]);
+                if ($item->status === ItemStatus::TERSEDIA) {
+                    $item->update(['status' => ItemStatus::DIPINJAM]);
+                }
+            } else {
+                $loan->update(['status' => $validated['status']]);
+            }
+        });
 
         return redirect()->route('loans.index')
             ->with('success', 'Status loan diperbarui.');

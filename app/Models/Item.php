@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\ItemType;
 use App\Enums\ItemStatus;
+use App\Enums\LoanStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;

@@ -2,11 +2,18 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\ItemStatus;
+use App\Enums\LoanDuration;
+use App\Enums\LoanStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Item;
 use App\Models\Loan;
+use App\Models\MaintenanceTicket;
+use App\Models\User;
 use App\Services\CameraService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class LoanApiController extends Controller
 {
@@ -18,43 +25,69 @@ class LoanApiController extends Controller
         $validated = $request->validate([
             'user_id' => 'required|exists:users,id',
             'item_id' => 'required|exists:items,id',
+            'usage_duration' => ['required', Rule::enum(LoanDuration::class)],
             'photo' => 'nullable|string', // base64 dari webcam
         ]);
 
-        // Cek status barang
-        $item = Item::findOrFail($validated['item_id']);
-        if ($item->status !== 'tersedia') {
+        $user = User::query()->findOrFail($validated['user_id']);
+
+        if (blank($user->phone)) {
             return response()->json([
                 'success' => false,
-                'message' => sprintf('Barang "%s" tidak tersedia.', $item->name),
+                'message' => 'Nomor WhatsApp siswa belum terdaftar. Hubungi admin untuk melengkapi data.',
             ], 422);
         }
 
-        // Simpan foto snapshot jika ada
+        $borrowedAt = now();
+
         $photoPath = null;
-        if (!empty($validated['photo'])) {
-            // Decode base64 dan simpan ke storage
-            $imageData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $validated['photo']));
-            $photoPath = $cameraService->capture($imageData, 'photos/loans');
-        }
+        $loan = DB::transaction(function () use ($validated, $cameraService, $borrowedAt, &$photoPath) {
+            $item = Item::query()->lockForUpdate()->findOrFail($validated['item_id']);
 
-        // Buat loan record
-        $loan = Loan::create([
-            'user_id' => $validated['user_id'],
-            'item_id' => $validated['item_id'],
-            'status' => 'aktif',
-            'borrowed_at' => now(),
-        ]);
+            if ($item->status !== ItemStatus::TERSEDIA) {
+                abort(422, sprintf('Barang "%s" tidak tersedia.', $item->name));
+            }
 
-        // Update status item menjadi dipinjam
-        $item->update(['status' => 'dipinjam']);
+            if (Loan::query()
+                ->where('item_id', $item->id)
+                ->where('status', LoanStatus::AKTIF)
+                ->exists()) {
+                abort(422, 'Barang sedang memiliki peminjaman aktif.');
+            }
+
+            if (!empty($validated['photo'])) {
+                $imageData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $validated['photo']), true);
+                if ($imageData === false) {
+                    abort(422, 'Format snapshot tidak valid.');
+                }
+                $photoPath = $cameraService->capture($imageData, 'photos/loans');
+            }
+
+            $dueAt = Loan::calculateDueAt($validated['usage_duration'], $borrowedAt);
+
+            $loan = Loan::create([
+                'user_id' => $validated['user_id'],
+                'item_id' => $item->id,
+                'status' => LoanStatus::AKTIF,
+                'usage_duration' => $validated['usage_duration'],
+                'borrowed_at' => $borrowedAt,
+                'due_at' => $dueAt,
+            ]);
+
+            $item->update(['status' => ItemStatus::DIPINJAM]);
+
+            return $loan;
+        });
+
+        $item = $loan->item;
 
         return response()->json([
             'success' => true,
             'message' => 'Peminjaman berhasil dicatat.',
             'data' => [
-                'loan' => $loan,
+                'loan' => $loan->load('user:id,name,nis_nip,phone'),
                 'item_name' => $item->name,
+                'due_at' => $loan->due_at,
                 'photo_path' => $photoPath,
             ],
         ]);
@@ -70,35 +103,42 @@ class LoanApiController extends Controller
             'photo' => 'nullable|string',
         ]);
 
-        $loan = Loan::with('item')->findOrFail($id);
+        $result = DB::transaction(function () use ($id, $validated) {
+            $loan = Loan::query()->with('item')->lockForUpdate()->findOrFail($id);
 
-        // Simpan kondisi barang dikembalikan di loan
-        $loan->update([
-            'condition_in' => $validated['condition_in'],
-            'returned_at' => now(),
-        ]);
+            if ($loan->status !== LoanStatus::AKTIF) {
+                abort(422, 'Peminjaman sudah dikembalikan.');
+            }
 
-        // Update status item berdasarkan kondisi
-        $item = $loan->item;
-        if ($validated['condition_in'] === 'rusak') {
-            // Jika rusak, otomatis buat tiket M&R
-            $issueDesc = "Dikembalikan dalam kondisi rusak oleh user {$loan->user_id}. Silakan periksa fisik barang.";
-            $ticket = \App\Models\MaintenanceTicket::create([
-                'item_id' => $item->id,
-                'reported_by' => $loan->user_id,
-                'issue_description' => $issueDesc,
-                'status' => 'open',
+            $item = Item::query()->lockForUpdate()->findOrFail($loan->item_id);
+            $loan->update([
+                'condition_in' => $validated['condition_in'],
+                'status' => LoanStatus::SELESAI,
+                'returned_at' => now(),
             ]);
 
-            $item->update(['status' => 'under_maintenance']);
-        } else {
-            $item->update(['status' => 'tersedia']);
-        }
+            if ($validated['condition_in'] === 'rusak') {
+                MaintenanceTicket::create([
+                    'item_id' => $item->id,
+                    'reported_by' => $loan->user_id,
+                    'issue_description' => 'Barang dikembalikan dalam kondisi rusak. Silakan periksa fisik barang.',
+                    'status' => 'open',
+                ]);
+                $item->update(['status' => ItemStatus::UNDER_MAINTENANCE]);
+            } else {
+                $item->update(['status' => ItemStatus::TERSEDIA]);
+            }
+
+            return ['loan' => $loan->fresh(), 'item' => $item->fresh()];
+        });
 
         return response()->json([
             'success' => true,
             'message' => 'Pengembalian berhasil dicatat.',
-            'item_status' => $item->status,
+            'data' => [
+                'loan' => $result['loan'],
+                'item_status' => $result['item']->status->value,
+            ],
         ]);
     }
 }

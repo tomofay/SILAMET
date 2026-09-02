@@ -14,16 +14,11 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', [DashboardController::class, 'index'])
-    ->middleware(['auth', 'verified'])
+    ->middleware(['auth', 'verified', 'role:teknisi|kabeng|kaprog'])
     ->name('dashboard');
 
-// Modules — Protected Auth Routes
-Route::middleware(['auth'])->group(function () {
-
-    // Profile
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+// Modules — Protected Auth Routes (dashboard & modul web khusus staff non-siswa)
+Route::middleware(['auth', 'role:teknisi|kabeng|kaprog'])->group(function () {
 
     // Master Aset / Items
     Route::resource('items', MasterController::class)->names([
@@ -53,23 +48,32 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/{id}', [GateLogController::class, 'show'])->name('gate-logs.show');
     });
 
-    // Maintenance & Repair
-    Route::resource('maintenance', MaintenanceController::class)->names([
-        '' => 'maintenance.index',
-        'create' => 'maintenance.create',
-        'store' => 'maintenance.store',
-        'show' => 'maintenance.show',
-        'edit' => 'maintenance.edit',
-        'update' => 'maintenance.update',
-        'destroy' => 'maintenance.destroy',
-    ]);
+    // Maintenance & Repair — khusus teknisi & kabeng
+    Route::middleware('role:teknisi|kabeng')->group(function () {
+        Route::resource('maintenance', MaintenanceController::class)->names([
+            '' => 'maintenance.index',
+            'create' => 'maintenance.create',
+            'store' => 'maintenance.store',
+            'show' => 'maintenance.show',
+            'edit' => 'maintenance.edit',
+            'update' => 'maintenance.update',
+            'destroy' => 'maintenance.destroy',
+        ]);
+    });
 
-    // Reports
+    // Reports — kaprog dapat akses penuh laporan
     Route::prefix('reports')->group(function () {
         Route::get('/', [ReportController::class, 'index'])->name('reports.index');
         Route::get('/pdf/{type}', [ReportController::class, 'downloadPdf'])->name('reports.pdf');
         Route::get('/excel/{type}', [ReportController::class, 'downloadExcel'])->name('reports.excel');
     });
+});
+
+// Profile — setiap user terautentikasi dapat mengelola profilnya sendiri
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
 require __DIR__.'/auth.php';

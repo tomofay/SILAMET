@@ -39,6 +39,6 @@ class MaintenanceTicket extends Model
 
     public function logs()
     {
-        return $this->hasMany(MaintenanceLog::class);
+        return $this->hasMany(MaintenanceLog::class, 'ticket_id');
     }
 }

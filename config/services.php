@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    'whatsapp' => [
+        // Driver: 'log' (development) atau 'fonnte' (produksi)
+        'driver' => env('WHATSAPP_DRIVER', 'log'),
+        // Token API dari Fonnte (https://fonnte.com)
+        'token' => env('WHATSAPP_TOKEN'),
+    ],
+
 ];

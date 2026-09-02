@@ -9,7 +9,7 @@ class CameraService
     /**
      * Simpan snapshot webcam sebagai file PNG.
      */
-    public function capture(array $imageData, string $type = 'photo'): string
+    public function capture(string $imageData, string $type = 'photo'): string
     {
         // $imageData bisa base64 atau binary dari client/webcam
         $filename = sprintf(

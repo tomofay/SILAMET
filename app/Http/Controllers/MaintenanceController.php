@@ -9,14 +9,29 @@ use Illuminate\Http\Request;
 class MaintenanceController extends Controller
 {
     /**
-     * Tampilkan daftar semua tickets M&R.
+     * Tampilkan daftar semua tickets M&R dengan filter status.
      */
-    public function index()
+    public function index(Request $request)
     {
+        $status = $request->query('status', 'open');
+
+        if (! in_array($status, ['open', 'in_progress', 'resolved'], true)) {
+            $status = 'open';
+        }
+
         $tickets = MaintenanceTicket::with(['item', 'reportedBy', 'logs'])
+            ->where('status', $status)
             ->latest()
             ->paginate(15);
-        return view('maintenance.index', compact('tickets'));
+
+        // Hitungan global per status untuk badge tab
+        $counts = [
+            'open' => MaintenanceTicket::where('status', 'open')->count(),
+            'in_progress' => MaintenanceTicket::where('status', 'in_progress')->count(),
+            'resolved' => MaintenanceTicket::where('status', 'resolved')->count(),
+        ];
+
+        return view('maintenance.index', compact('tickets', 'counts'));
     }
 
     /**

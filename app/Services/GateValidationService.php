@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\ItemStatus;
 use App\Models\Item;
 
 class GateValidationService
@@ -16,29 +17,27 @@ class GateValidationService
 
         if (!$item) {
             return [
-                'action' => 'denied',
+                'status' => 'denied',
                 'reason' => 'EPC tag tidak ditemukan di database.',
             ];
         }
 
-        switch ($item->status) {
-            case 'dipinjam':
-                return [
-                    'action' => 'allowed',
-                    'message' => 'Barang dengan status "dipinjam" — akses diizinkan.',
-                    'item_name' => $item->name,
-                ];
-
-            default:
-                return [
-                    'action' => 'denied',
-                    'reason' => sprintf(
-                        'Barang "%s" status "%s" — tidak memiliki izin keluar.',
-                        $item->name,
-                        $item->status
-                    ),
-                    'item_name' => $item->name,
-                ];
+        if ($item->status === ItemStatus::DIPINJAM) {
+            return [
+                'status' => 'allowed',
+                'message' => 'Barang dengan status "dipinjam" — akses diizinkan.',
+                'item_name' => $item->name,
+            ];
         }
+
+        return [
+            'status' => 'denied',
+            'reason' => sprintf(
+                'Barang "%s" status "%s" — tidak memiliki izin keluar.',
+                $item->name,
+                $item->status->value
+            ),
+            'item_name' => $item->name,
+        ];
     }
 }

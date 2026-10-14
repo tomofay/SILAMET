@@ -63,6 +63,12 @@
                             <span class="inline-block w-5 text-center mr-2">📊</span> Laporan
                         </x-sidebar-link>
                     @endif
+
+                    @if(auth()->user()?->role?->value === 'kabeng')
+                        <x-sidebar-link :href="route('users.index')" :active="request()->routeIs('users.*')">
+                            <span class="inline-block w-5 text-center mr-2">👥</span> Manajemen User
+                        </x-sidebar-link>
+                    @endif
                 </nav>
 
                 <div class="absolute bottom-0 inset-x-0 p-3 border-t border-white/10">

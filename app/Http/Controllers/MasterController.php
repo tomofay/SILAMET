@@ -102,4 +102,20 @@ class MasterController extends Controller
         return redirect()->route('items.index')
             ->with('success', 'Item berhasil dihapus.');
     }
+
+    /**
+     * Cetak label barcode barang (halaman print-friendly).
+     */
+    public function printBarcodes(Request $request)
+    {
+        $ids = $request->get('ids');
+
+        if ($ids) {
+            $items = Item::whereIn('id', explode(',', $ids))->get();
+        } else {
+            $items = Item::all();
+        }
+
+        return view('items.barcodes', compact('items'));
+    }
 }

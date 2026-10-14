@@ -40,6 +40,7 @@ class AuthController extends Controller
                     'id' => $user->id,
                     'name' => $user->name,
                     'nis_nip' => $user->nis_nip,
+                    'phone' => $user->phone,
                     'role' => $user->role?->value ?? 'siswa',
                 ],
             ],

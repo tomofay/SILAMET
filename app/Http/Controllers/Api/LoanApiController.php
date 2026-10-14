@@ -141,4 +141,79 @@ class LoanApiController extends Controller
             ],
         ]);
     }
+
+    /**
+     * Pengembalian Mandiri di Kiosk (Layar 4 UI/UX Design).
+     * Siswa cukup scan barcode/QR barang tanpa login NIS.
+     */
+    public function returnKiosk(Request $request)
+    {
+        $validated = $request->validate([
+            'item_code' => 'required|string',
+            'condition_in' => 'required|in:bagus,rusak',
+            'issue_description' => 'nullable|string',
+        ]);
+
+        $item = Item::where('item_code', $validated['item_code'])->first();
+
+        if (!$item) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Barang dengan kode tersebut tidak ditemukan.',
+            ], 404);
+        }
+
+        $activeLoan = Loan::where('item_id', $item->id)
+            ->where('status', LoanStatus::AKTIF)
+            ->latest()
+            ->first();
+
+        if (!$activeLoan) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Barang ini tidak sedang dalam status peminjaman aktif.',
+            ], 422);
+        }
+
+        $result = DB::transaction(function () use ($activeLoan, $item, $validated) {
+            $loan = Loan::query()->lockForUpdate()->findOrFail($activeLoan->id);
+            $lockedItem = Item::query()->lockForUpdate()->findOrFail($item->id);
+
+            $loan->update([
+                'condition_in' => $validated['condition_in'],
+                'status' => LoanStatus::SELESAI,
+                'returned_at' => now(),
+            ]);
+
+            if ($validated['condition_in'] === 'rusak') {
+                $description = $validated['issue_description']
+                    ? $validated['issue_description']
+                    : 'Barang dikembalikan dalam kondisi rusak melalui Kiosk Mandiri.';
+
+                MaintenanceTicket::create([
+                    'item_id' => $lockedItem->id,
+                    'reported_by' => $loan->user_id,
+                    'issue_description' => $description,
+                    'status' => 'open',
+                ]);
+                $lockedItem->update(['status' => ItemStatus::UNDER_MAINTENANCE]);
+            } else {
+                $lockedItem->update(['status' => ItemStatus::TERSEDIA]);
+            }
+
+            return ['loan' => $loan->fresh(), 'item' => $lockedItem->fresh()];
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => $validated['condition_in'] === 'rusak' 
+                ? 'Pengembalian barang tercatat dengan kondisi rusak. Tiket perbaikan (M&R) telah dibuat otomatis.'
+                : 'Pengembalian barang berhasil! Terima kasih telah mengembalikan tepat waktu.',
+            'data' => [
+                'loan' => $result['loan'],
+                'item_name' => $item->name,
+                'item_status' => $result['item']->status->value,
+            ],
+        ]);
+    }
 }

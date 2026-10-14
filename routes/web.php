@@ -7,11 +7,13 @@ use App\Http\Controllers\GateLogController;
 use App\Http\Controllers\MaintenanceController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\KioskController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// Mode Kiosk Layanan Mandiri (Siswa) — Fullscreen, tanpa login web admin
+Route::get('/', [KioskController::class, 'index'])->name('kiosk.home');
+Route::get('/kiosk', [KioskController::class, 'index'])->name('kiosk.index');
 
 Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified', 'role:teknisi|kabeng|kaprog'])
@@ -21,6 +23,7 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
 Route::middleware(['auth', 'role:teknisi|kabeng|kaprog'])->group(function () {
 
     // Master Aset / Items
+    Route::get('items/barcodes', [MasterController::class, 'printBarcodes'])->name('items.barcodes');
     Route::resource('items', MasterController::class)->names([
         '' => 'items.index',
         'create' => 'items.create',
@@ -66,6 +69,14 @@ Route::middleware(['auth', 'role:teknisi|kabeng|kaprog'])->group(function () {
         Route::get('/', [ReportController::class, 'index'])->name('reports.index');
         Route::get('/pdf/{type}', [ReportController::class, 'downloadPdf'])->name('reports.pdf');
         Route::get('/excel/{type}', [ReportController::class, 'downloadExcel'])->name('reports.excel');
+    });
+
+    // Manajemen User — khusus kabeng (superadmin)
+    Route::middleware('role:kabeng')->group(function () {
+        Route::post('users/import', [UserController::class, 'import'])->name('users.import');
+        Route::get('users/download-template', [UserController::class, 'downloadTemplate'])->name('users.download-template');
+        Route::get('users/cards', [UserController::class, 'printCards'])->name('users.cards');
+        Route::resource('users', UserController::class)->except(['show']);
     });
 });
 

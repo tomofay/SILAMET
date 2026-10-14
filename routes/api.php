@@ -22,7 +22,10 @@ Route::prefix('v1')->group(function () {
     Route::get('/items', [\App\Http\Controllers\Api\ItemApiController::class, 'index']);
     Route::get('/items/{id}', [\App\Http\Controllers\Api\ItemApiController::class, 'show']);
 
-    // Loans — Kiosk flow (requires authenticated NIS/NIP token)
+    // Loans — Kiosk flow
+    // Endpoint pengembalian mandiri tanpa scan NIS (Layar 4 UI/UX Design)
+    Route::post('/loans/return-kiosk', [LoanApiController::class, 'returnKiosk']);
+
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/loans', [LoanApiController::class, 'store']);
         Route::post('/loans/{id}/return', [LoanApiController::class, 'return']);

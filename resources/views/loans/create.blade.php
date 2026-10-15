@@ -19,16 +19,25 @@
             </div>
 
             <div>
-                <x-input-label for="item_id" value="Barang *" />
-                <select id="item_id" name="item_id" class="mt-1 w-full rounded-md border-neutral-300 shadow-sm focus:border-primary focus:ring-primary" required>
-                    <option value="">— Pilih barang tersedia —</option>
-                    @foreach(\App\Models\Item::where('status', 'tersedia')->orderBy('name')->get() as $item)
-                        <option value="{{ $item->id }}" @selected(old('item_id') == $item->id)>
-                            {{ $item->name }} ({{ $item->item_code }})
-                        </option>
-                    @endforeach
-                </select>
-                <x-input-error :messages="$errors->get('item_id')" class="mt-2" />
+                <x-input-label for="item_ids" value="Pilih Barang (Bisa Pilih Lebih dari 1) *" />
+                <div class="mt-1 border border-neutral-300 rounded-md p-3 max-h-56 overflow-y-auto space-y-2 bg-neutral-50/50">
+                    @forelse(\App\Models\Item::where('status', 'tersedia')->orderBy('name')->get() as $item)
+                        <label class="flex items-center gap-3 p-2 bg-white rounded border border-neutral-200 hover:border-primary hover:bg-primary/5 cursor-pointer text-sm">
+                            <input type="checkbox" name="item_ids[]" value="{{ $item->id }}" 
+                                @checked(is_array(old('item_ids')) && in_array($item->id, old('item_ids')))
+                                class="rounded border-neutral-300 text-primary focus:ring-primary h-4 w-4">
+                            <div class="flex-1">
+                                <span class="font-medium text-neutral-800">{{ $item->name }}</span>
+                                <span class="text-xs text-neutral-500 font-mono ml-1">({{ $item->item_code }})</span>
+                            </div>
+                            <span class="text-xs text-neutral-500">{{ $item->location }}</span>
+                        </label>
+                    @empty
+                        <p class="text-xs text-neutral-400 py-3 text-center">Tidak ada barang yang berstatus tersedia.</p>
+                    @endforelse
+                </div>
+                <x-input-error :messages="$errors->get('item_ids')" class="mt-2" />
+                <p class="text-xs text-neutral-500 mt-1">Centang satu atau lebih barang yang akan dipinjam sekaligus.</p>
             </div>
 
             <div>

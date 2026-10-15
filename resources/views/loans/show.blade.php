@@ -33,7 +33,12 @@
                         {{ optional($loan->due_at)->translatedFormat('d M Y, H:i') ?? '—' }}
                     </dd>
                     @if($loan->status->value === 'aktif' && $loan->due_at?->isPast())
-                        <dd class="text-xs text-danger mt-0.5">⚠️ Terlambat</dd>
+                        <dd class="text-xs text-danger mt-0.5 flex items-center gap-1">
+                            <svg class="w-3.5 h-3.5 text-danger" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                            <span>Terlambat</span>
+                        </dd>
                     @endif
                 </div>
                 <div>
@@ -53,7 +58,12 @@
             </dl>
 
             @if($loan->overdue_notified_at)
-                <p class="mt-4 text-xs text-success">✓ Notifikasi keterlambatan WhatsApp telah dikirim pada {{ $loan->overdue_notified_at->translatedFormat('d M Y, H:i') }}</p>
+                <p class="mt-4 text-xs text-success flex items-center gap-1.5">
+                    <svg class="w-4 h-4 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span>Notifikasi keterlambatan WhatsApp telah dikirim pada {{ $loan->overdue_notified_at->translatedFormat('d M Y, H:i') }}</span>
+                </p>
             @endif
         </div>
 

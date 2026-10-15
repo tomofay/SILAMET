@@ -4,7 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\MaintenanceTicket;
 use App\Models\MaintenanceLog;
+use App\Models\Item;
+use App\Enums\ItemStatus;
+use App\Enums\TicketStatus;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class MaintenanceController extends Controller
 {
@@ -96,10 +100,25 @@ class MaintenanceController extends Controller
             'issue_description' => 'nullable|string',
         ]);
 
-        $ticket->update($validated);
+        DB::transaction(function () use ($ticket, $validated) {
+            $ticket->update($validated);
+
+            // Jika status tiket berubah menjadi resolved, kembalikan status barang menjadi 'tersedia'
+            if ($validated['status'] === 'resolved' || $validated['status'] === TicketStatus::RESOLVED->value) {
+                if ($ticket->item_id) {
+                    Item::where('id', $ticket->item_id)->update([
+                        'status' => ItemStatus::TERSEDIA
+                    ]);
+                }
+            }
+        });
+
+        $message = $validated['status'] === 'resolved'
+            ? 'Tiket telah diselesaikan (Resolved). Barang sekarang berstatus TERSEDIA kembali.'
+            : 'Status tiket diperbarui.';
 
         return redirect()->route('maintenance.index')
-            ->with('success', 'Status tiket diperbarui.');
+            ->with('success', $message);
     }
 
     /**

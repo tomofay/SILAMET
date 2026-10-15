@@ -207,7 +207,12 @@
 </head>
 <body>
     <div class="print-controls">
-        <button onclick="window.print()">🖨️ Cetak {{ count($items) }} Label Barcode</button>
+        <button onclick="window.print()" style="display: inline-flex; align-items: center; gap: 8px;">
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+            </svg>
+            <span>Cetak {{ count($items) }} Label Barcode</span>
+        </button>
         <a href="{{ route('items.index') }}">← Kembali ke Master Aset</a>
         <div class="info">Label barcode berisi kode barang, nama, lokasi, dan EPC tag (jika ada). Siap dicetak pada kertas label stiker.</div>
     </div>
@@ -236,8 +241,12 @@
                 <div class="label-epc">EPC: {{ $item->epc_tag }}</div>
             @endif
 
-            <div class="label-location">
-                📍 {{ $item->location }}
+            <div class="label-location" style="display: flex; align-items: center; justify-content: center; gap: 4px;">
+                <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="display: inline-block;">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span>{{ $item->location }}</span>
             </div>
 
             <div class="label-footer">

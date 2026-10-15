@@ -38,9 +38,22 @@ class LoanController extends Controller
     {
         $validated = $request->validate([
             'user_id' => 'required|exists:users,id',
-            'item_id' => 'required|exists:items,id',
+            'item_id' => 'nullable|exists:items,id',
+            'item_ids' => 'nullable|array|min:1',
+            'item_ids.*' => 'exists:items,id',
             'usage_duration' => ['required', Rule::enum(LoanDuration::class)],
         ]);
+
+        $itemIds = [];
+        if (!empty($validated['item_ids'])) {
+            $itemIds = array_values(array_unique($validated['item_ids']));
+        } elseif (!empty($validated['item_id'])) {
+            $itemIds = [$validated['item_id']];
+        } else {
+            return redirect()->back()
+                ->withErrors(['item_ids' => 'Pilih minimal satu barang untuk dipinjam.'])
+                ->withInput();
+        }
 
         $user = User::findOrFail($validated['user_id']);
 
@@ -51,29 +64,36 @@ class LoanController extends Controller
         }
 
         $borrowedAt = now();
+        $count = 0;
 
-        DB::transaction(function () use ($validated, $borrowedAt) {
-            // Kunci baris item agar tidak terjadi double-borrow
-            $item = Item::query()->lockForUpdate()->findOrFail($validated['item_id']);
+        DB::transaction(function () use ($validated, $itemIds, $borrowedAt, &$count) {
+            foreach ($itemIds as $itemId) {
+                // Kunci baris item agar tidak terjadi double-borrow
+                $item = Item::query()->lockForUpdate()->findOrFail($itemId);
 
-            if ($item->status !== ItemStatus::TERSEDIA) {
-                abort(422, 'Barang tidak tersedia.');
+                if ($item->status !== ItemStatus::TERSEDIA) {
+                    abort(422, sprintf('Barang "%s" tidak tersedia.', $item->name));
+                }
+
+                Loan::create([
+                    'user_id' => $validated['user_id'],
+                    'item_id' => $item->id,
+                    'status' => 'aktif',
+                    'usage_duration' => $validated['usage_duration'],
+                    'borrowed_at' => $borrowedAt,
+                    'due_at' => Loan::calculateDueAt($validated['usage_duration'], $borrowedAt),
+                ]);
+
+                $item->update(['status' => ItemStatus::DIPINJAM]);
+                $count++;
             }
-
-            Loan::create([
-                'user_id' => $validated['user_id'],
-                'item_id' => $item->id,
-                'status' => 'aktif',
-                'usage_duration' => $validated['usage_duration'],
-                'borrowed_at' => $borrowedAt,
-                'due_at' => Loan::calculateDueAt($validated['usage_duration'], $borrowedAt),
-            ]);
-
-            $item->update(['status' => ItemStatus::DIPINJAM]);
         });
 
-        return redirect()->route('loans.index')
-            ->with('success', 'Peminjaman berhasil dicatat.');
+        $msg = $count > 1 
+            ? sprintf('Peminjaman %d barang berhasil dicatat.', $count) 
+            : 'Peminjaman berhasil dicatat.';
+
+        return redirect()->route('loans.index')->with('success', $msg);
     }
 
     /**

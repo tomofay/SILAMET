@@ -13,12 +13,18 @@
                     + Tambah User
                 </a>
                 <button type="button" onclick="document.getElementById('import-modal').classList.remove('hidden'); document.getElementById('import-modal').classList.add('flex');"
-                    class="inline-flex items-center px-4 py-2 bg-success text-white text-sm font-medium rounded-md hover:bg-success-dark transition">
-                    📥 Import Excel
+                    class="inline-flex items-center gap-1.5 px-4 py-2 bg-success text-white text-sm font-medium rounded-md hover:bg-success-dark transition">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                    </svg>
+                    <span>Import Excel</span>
                 </button>
                 <a href="{{ route('users.cards') }}?ids={{ $users->pluck('id')->implode(',') }}" target="_blank"
-                    class="inline-flex items-center px-4 py-2 bg-info text-white text-sm font-medium rounded-md hover:bg-info-dark transition">
-                    🪪 Cetak Kartu
+                    class="inline-flex items-center gap-1.5 px-4 py-2 bg-info text-white text-sm font-medium rounded-md hover:bg-info-dark transition">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
+                    </svg>
+                    <span>Cetak Kartu</span>
                 </a>
             </div>
         </div>
@@ -81,7 +87,11 @@
                                     <span class="text-xs font-semibold px-2 py-0.5 rounded-full {{ $badge }}">{{ $user->role?->label() ?? '—' }}</span>
                                 </td>
                                 <td class="px-5 py-3 text-right space-x-2 whitespace-nowrap">
-                                    <a href="{{ route('users.cards') }}?ids={{ $user->id }}" target="_blank" class="text-info-dark hover:underline text-xs" title="Cetak Kartu">🪪</a>
+                                    <a href="{{ route('users.cards') }}?ids={{ $user->id }}" target="_blank" class="inline-flex text-info-dark hover:text-info text-xs" title="Cetak Kartu">
+                                        <svg class="w-4 h-4 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
+                                        </svg>
+                                    </a>
                                     <a href="{{ route('users.edit', $user->id) }}" class="text-info-dark hover:underline text-xs">Edit</a>
                                     @if($user->id !== auth()->id())
                                         <form method="POST" action="{{ route('users.destroy', $user->id) }}" class="inline" onsubmit="return confirm('Hapus user ini?')">
@@ -112,8 +122,11 @@
         <div id="bulk-actions" class="hidden bg-primary/5 border border-primary/20 rounded-lg p-3 flex items-center gap-3">
             <span class="text-sm text-primary-dark font-medium"><span id="selected-count">0</span> user dipilih</span>
             <a id="print-selected-btn" href="#" target="_blank"
-                class="inline-flex items-center px-3 py-1.5 bg-info text-white text-xs font-medium rounded-md hover:bg-info-dark transition">
-                🪪 Cetak Kartu Terpilih
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-info text-white text-xs font-medium rounded-md hover:bg-info-dark transition">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
+                </svg>
+                <span>Cetak Kartu Terpilih</span>
             </a>
         </div>
     </div>
@@ -123,7 +136,12 @@
         <div class="absolute inset-0 bg-black/60" onclick="document.getElementById('import-modal').classList.add('hidden'); document.getElementById('import-modal').classList.remove('flex');"></div>
         <div class="relative bg-white rounded-lg shadow-xl max-w-md w-full p-6">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="font-semibold text-neutral-800">📥 Import User dari Excel</h3>
+                <h3 class="font-semibold text-neutral-800 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                    </svg>
+                    <span>Import User dari Excel</span>
+                </h3>
                 <button type="button" onclick="document.getElementById('import-modal').classList.add('hidden'); document.getElementById('import-modal').classList.remove('flex');"
                     class="text-neutral-500 hover:text-neutral-800 text-xl leading-none">&times;</button>
             </div>
@@ -135,8 +153,11 @@
                 <p class="mt-1">Password default = NIS/NIP pengguna.</p>
             </div>
 
-            <a href="{{ route('users.download-template') }}" class="inline-flex items-center text-xs text-primary hover:underline mb-4">
-                📄 Download Template CSV
+            <a href="{{ route('users.download-template') }}" class="inline-flex items-center gap-1.5 text-xs text-primary hover:underline mb-4">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span>Download Template CSV</span>
             </a>
 
             <form method="POST" action="{{ route('users.import') }}" enctype="multipart/form-data" class="space-y-4">

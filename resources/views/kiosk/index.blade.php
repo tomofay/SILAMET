@@ -121,7 +121,24 @@
             }"
             class="p-4 rounded-2xl shadow-2xl border flex items-center gap-4"
         >
-            <div class="text-2xl" x-text="toast.type === 'success' ? '✅' : (toast.type === 'error' ? '⚠️' : 'ℹ️')"></div>
+            <!-- Toast Icon -->
+            <div class="w-8 h-8 rounded-full flex items-center justify-center shrink-0">
+                <template x-if="toast.type === 'success'">
+                    <svg class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </template>
+                <template x-if="toast.type === 'error'">
+                    <svg class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </template>
+                <template x-if="toast.type !== 'success' && toast.type !== 'error'">
+                    <svg class="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </template>
+            </div>
             <div class="flex-1">
                 <div class="font-bold text-sm tracking-wide uppercase" x-text="toast.title"></div>
                 <div class="text-sm opacity-90" x-text="toast.message"></div>
@@ -140,8 +157,13 @@
     >
         <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-neutral-200 flex flex-col items-center">
             <div class="w-full flex items-center justify-between mb-4 border-b border-neutral-200 pb-3">
-                <div class="flex items-center gap-2">
-                    <span class="text-2xl">📷</span>
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                    </div>
                     <div>
                         <h3 class="font-bold text-lg text-neutral-900" x-text="cameraScanner.title">Scan via Kamera</h3>
                         <p class="text-xs text-neutral-500">Posisikan barcode/QR code di dalam bingkai kotak</p>
@@ -151,11 +173,11 @@
             </div>
 
             <!-- Kamera Feed Container -->
-            <div class="relative w-full aspect-square bg-black rounded-2xl overflow-hidden mb-4 border-2 border-primary shadow-inner">
+            <div class="relative w-full aspect-[4/3] bg-black rounded-2xl overflow-hidden mb-4 border-2 border-primary shadow-inner">
                 <div id="camera-reader" class="w-full h-full"></div>
-                <div class="absolute inset-8 border-2 border-dashed border-white/70 rounded-xl pointer-events-none flex items-center justify-center">
+                <div class="absolute inset-x-6 inset-y-12 border-2 border-dashed border-white/80 rounded-xl pointer-events-none flex items-center justify-center">
                     <span class="bg-black/60 text-white text-xs font-semibold px-3 py-1 rounded-full tracking-wider">
-                        BIDIK KODE DISINI
+                        BIDIK BARCODE / QR DISINI
                     </span>
                 </div>
             </div>
@@ -233,7 +255,10 @@
                     type="button" 
                     class="inline-flex items-center gap-2 text-sm font-bold text-primary hover:text-primary-dark bg-primary/10 hover:bg-primary/20 border border-primary/30 px-5 py-2.5 rounded-xl transition duration-150 shadow-sm"
                 >
-                    <span>📷</span>
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
                     <span>Scanner USB bermasalah? Pindai Barcode via Kamera Webcam</span>
                 </button>
                 <p class="text-xs text-neutral-500 mt-2">
@@ -248,7 +273,9 @@
                     type="button" 
                     class="w-full sm:w-auto bg-white hover:bg-neutral-50 text-neutral-800 border-2 border-neutral-300 hover:border-primary font-bold px-8 py-3.5 rounded-2xl shadow-md hover:shadow-lg flex items-center justify-center gap-3 transition duration-150 text-base"
                 >
-                    <span class="text-2xl">🔄</span>
+                    <svg class="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
                     <span>Pengembalian Barang Mandiri</span>
                 </button>
             </div>
@@ -273,13 +300,19 @@
                         <div class="text-sm mt-0.5 flex items-center gap-2">
                             <span class="text-neutral-500">WhatsApp:</span>
                             <template x-if="currentUser.phone">
-                                <span class="font-semibold text-success-dark flex items-center gap-1">
-                                    <span class="text-xs">📱</span> <span x-text="currentUser.phone"></span> (Terverifikasi)
+                                <span class="font-semibold text-success-dark flex items-center gap-1.5">
+                                    <svg class="w-3.5 h-3.5 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                                    </svg>
+                                    <span x-text="currentUser.phone"></span> (Terverifikasi)
                                 </span>
                             </template>
                             <template x-if="!currentUser.phone">
-                                <span class="font-bold text-danger flex items-center gap-1">
-                                    <span>⚠️</span> Belum Terdaftar (Wajib Lapor Admin)
+                                <span class="font-bold text-danger flex items-center gap-1.5">
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                    </svg>
+                                    Belum Terdaftar (Wajib Lapor Admin)
                                 </span>
                             </template>
                         </div>
@@ -299,7 +332,11 @@
             <!-- Peringatan Jika Nomor Telepon Kosong -->
             <template x-if="!currentUser.phone">
                 <div class="bg-danger/15 border-2 border-danger text-danger-dark p-6 rounded-3xl mb-6 flex items-start gap-4">
-                    <div class="text-3xl">🚫</div>
+                    <div class="w-10 h-10 rounded-2xl bg-danger/20 text-danger flex items-center justify-center shrink-0">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                        </svg>
+                    </div>
                     <div>
                         <h3 class="font-bold text-lg mb-1">Nomor WhatsApp Siswa Belum Terdaftar!</h3>
                         <p class="text-sm">
@@ -321,14 +358,20 @@
                     <div class="bg-white rounded-3xl p-6 shadow-md border border-neutral-200">
                         <div class="flex items-center justify-between mb-4">
                             <h3 class="text-lg font-bold text-neutral-900 flex items-center gap-2">
-                                <span>📦</span> Pindai QR / Barcode Alat
+                                <svg class="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                                </svg>
+                                <span>Pindai QR / Barcode Alat</span>
                             </h3>
                             <button 
                                 @click="startCameraScanner('item')" 
                                 type="button"
-                                class="text-xs bg-primary/10 hover:bg-primary/20 text-primary font-bold px-3 py-1.5 rounded-xl border border-primary/30 flex items-center gap-1 transition"
+                                class="text-xs bg-primary/10 hover:bg-primary/20 text-primary font-bold px-3 py-1.5 rounded-xl border border-primary/30 flex items-center gap-1.5 transition"
                             >
-                                <span>📷</span>
+                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
                                 <span>Scan via Kamera</span>
                             </button>
                         </div>
@@ -347,24 +390,36 @@
                             Scanner USB siap membaca kode barang. Atau gunakan tombol <strong>Scan via Kamera</strong> di atas.
                         </p>
 
-                        <!-- Preview Barang Terpilih -->
-                        <template x-if="selectedItem">
-                            <div class="mt-4 p-4 rounded-2xl bg-success/10 border-2 border-success flex items-start justify-between">
-                                <div>
-                                    <div class="text-xs font-bold uppercase tracking-wider text-success-dark">Barang Terpilih:</div>
-                                    <div class="text-lg font-extrabold text-neutral-900" x-text="selectedItem.name"></div>
-                                    <div class="text-xs text-neutral-600 mt-0.5">
-                                        Kode: <span class="font-mono font-bold" x-text="selectedItem.item_code"></span> | Lokasi: <span class="font-semibold" x-text="selectedItem.location"></span>
-                                    </div>
-                                    <div class="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-0.5 rounded-full bg-success text-white">
-                                        <span>Status:</span> <span x-text="selectedItem.status"></span>
-                                    </div>
-                                </div>
-                                <button @click="selectedItem = null" class="text-neutral-400 hover:text-danger text-sm font-bold p-1">
-                                    Ganti &times;
+                        <!-- Preview Daftar Barang Terpilih (Multi-Item) -->
+                        <div x-show="selectedItems.length > 0" class="mt-4 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold uppercase tracking-wider text-neutral-500">
+                                    Daftar Barang Dipinjam (<span x-text="selectedItems.length"></span> barang):
+                                </span>
+                                <button type="button" @click="selectedItems = []" class="text-xs text-danger hover:underline font-semibold">
+                                    Hapus Semua
                                 </button>
                             </div>
-                        </template>
+
+                            <div class="space-y-2 max-h-60 overflow-y-auto pr-1">
+                                <template x-for="(item, idx) in selectedItems" :key="item.id">
+                                    <div class="p-3.5 rounded-2xl bg-success/10 border-2 border-success/40 flex items-center justify-between gap-3">
+                                        <div class="flex items-center gap-3 min-w-0">
+                                            <span class="w-6 h-6 rounded-full bg-success text-white text-xs font-bold flex items-center justify-center shrink-0" x-text="idx + 1"></span>
+                                            <div class="min-w-0">
+                                                <div class="text-sm font-extrabold text-neutral-900 truncate" x-text="item.name"></div>
+                                                <div class="text-xs text-neutral-600">
+                                                    <span class="font-mono font-bold" x-text="item.item_code"></span> • Lokasi: <span x-text="item.location"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button type="button" @click="removeItem(item.id)" class="text-neutral-400 hover:text-danger text-lg font-bold px-2 py-1" title="Hapus dari daftar">
+                                            &times;
+                                        </button>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Quick Pick List (Barang Tersedia) -->
@@ -401,7 +456,10 @@
                         <div>
                             <div class="flex items-center justify-between mb-2">
                                 <h3 class="text-lg font-bold text-neutral-900 flex items-center gap-2">
-                                    <span>⏱️</span> Pilih Durasi Pemakaian
+                                    <svg class="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <span>Pilih Durasi Pemakaian</span>
                                 </h3>
                                 <span class="text-xs text-neutral-500">*Sentuh salah satu</span>
                             </div>
@@ -421,7 +479,9 @@
                                 >
                                     <div class="flex items-center justify-between w-full">
                                         <span class="font-bold text-base text-neutral-900">Pulang Sekolah</span>
-                                        <span class="text-xl" x-show="selectedDuration === 'pulang_sekolah'">🔘</span>
+                                        <span class="w-5 h-5 rounded-full border-2 border-primary flex items-center justify-center shrink-0" x-show="selectedDuration === 'pulang_sekolah'">
+                                            <span class="w-2.5 h-2.5 rounded-full bg-primary"></span>
+                                        </span>
                                     </div>
                                     <span class="text-xs text-neutral-500">Hari ini pukul 16:00 WIB</span>
                                 </button>
@@ -435,7 +495,9 @@
                                 >
                                     <div class="flex items-center justify-between w-full">
                                         <span class="font-bold text-base text-neutral-900">1 Hari</span>
-                                        <span class="text-xl" x-show="selectedDuration === '1_hari'">🔘</span>
+                                        <span class="w-5 h-5 rounded-full border-2 border-primary flex items-center justify-center shrink-0" x-show="selectedDuration === '1_hari'">
+                                            <span class="w-2.5 h-2.5 rounded-full bg-primary"></span>
+                                        </span>
                                     </div>
                                     <span class="text-xs text-neutral-500">Besok malam (23:59 WIB)</span>
                                 </button>
@@ -449,7 +511,9 @@
                                 >
                                     <div class="flex items-center justify-between w-full">
                                         <span class="font-bold text-base text-neutral-900">2 Hari</span>
-                                        <span class="text-xl" x-show="selectedDuration === '2_hari'">🔘</span>
+                                        <span class="w-5 h-5 rounded-full border-2 border-primary flex items-center justify-center shrink-0" x-show="selectedDuration === '2_hari'">
+                                            <span class="w-2.5 h-2.5 rounded-full bg-primary"></span>
+                                        </span>
                                     </div>
                                     <span class="text-xs text-neutral-500">2 Hari kemudian (23:59 WIB)</span>
                                 </button>
@@ -463,7 +527,9 @@
                                 >
                                     <div class="flex items-center justify-between w-full">
                                         <span class="font-bold text-base text-neutral-900">3 Hari</span>
-                                        <span class="text-xl" x-show="selectedDuration === '3_hari'">🔘</span>
+                                        <span class="w-5 h-5 rounded-full border-2 border-primary flex items-center justify-center shrink-0" x-show="selectedDuration === '3_hari'">
+                                            <span class="w-2.5 h-2.5 rounded-full bg-primary"></span>
+                                        </span>
                                     </div>
                                     <span class="text-xs text-neutral-500">3 Hari praktikum (23:59 WIB)</span>
                                 </button>
@@ -480,7 +546,9 @@
                                             <span class="font-bold text-base text-neutral-900">1 Minggu</span>
                                             <span class="ml-2 text-xs bg-neutral-200 text-neutral-700 px-2 py-0.5 rounded-full font-semibold">Proyek Khusus</span>
                                         </div>
-                                        <span class="text-xl" x-show="selectedDuration === '1_minggu'">🔘</span>
+                                        <span class="w-5 h-5 rounded-full border-2 border-primary flex items-center justify-center shrink-0" x-show="selectedDuration === '1_minggu'">
+                                            <span class="w-2.5 h-2.5 rounded-full bg-primary"></span>
+                                        </span>
                                     </div>
                                     <span class="text-xs text-neutral-500">7 Hari kalender (23:59 WIB)</span>
                                 </button>
@@ -490,7 +558,9 @@
                             <div class="bg-neutral-50 rounded-2xl p-4 border border-neutral-200 mb-6">
                                 <div class="text-xs font-bold uppercase text-neutral-500 tracking-wider">Estimasi Batas Pengembalian:</div>
                                 <div class="text-base font-extrabold text-primary-dark mt-1 flex items-center gap-2">
-                                    <span>📅</span>
+                                    <svg class="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
                                     <span x-text="estimatedDueText">Pilih durasi pemakaian...</span>
                                 </div>
                             </div>
@@ -500,12 +570,13 @@
                         <div>
                             <button 
                                 @click="proceedToSnapshotScreen()"
-                                :disabled="!selectedItem"
+                                :disabled="selectedItems.length === 0"
                                 type="button"
                                 class="w-full py-4 rounded-2xl font-bold text-lg text-white shadow-xl transition flex items-center justify-center gap-3"
-                                :class="selectedItem ? 'bg-primary hover:bg-primary/90 cursor-pointer shadow-primary/30' : 'bg-neutral-300 cursor-not-allowed text-neutral-500'"
+                                :class="selectedItems.length > 0 ? 'bg-primary hover:bg-primary/90 cursor-pointer shadow-primary/30' : 'bg-neutral-300 cursor-not-allowed text-neutral-500'"
                             >
                                 <span>Lanjutkan ke Foto Wajah</span>
+                                <span x-show="selectedItems.length > 0" class="text-xs bg-white text-primary px-2.5 py-1 rounded-full font-extrabold" x-text="selectedItems.length + ' Barang'"></span>
                                 <span>&rarr;</span>
                             </button>
                         </div>
@@ -560,7 +631,12 @@
 
                             <!-- Loading/Error Indicator jika webcam belum izin -->
                             <div x-show="cameraStatus !== 'ready'" class="absolute inset-0 bg-neutral-900 text-white flex flex-col items-center justify-center p-6 text-center">
-                                <span class="text-4xl mb-2">📷</span>
+                                <div class="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center mb-3">
+                                    <svg class="w-8 h-8 text-white/80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                </div>
                                 <span class="text-sm font-semibold" x-text="cameraStatusMessage">Menghubungkan webcam...</span>
                             </div>
                         </div>
@@ -584,9 +660,20 @@
                             </div>
 
                             <div class="border-b border-neutral-200 pb-2">
-                                <div class="text-xs text-neutral-500">Barang</div>
-                                <div class="font-bold text-neutral-900 text-sm" x-text="selectedItem ? selectedItem.name : '-'"></div>
-                                <div class="text-xs text-neutral-600 font-mono" x-text="selectedItem ? selectedItem.item_code : '-'"></div>
+                                <div class="text-xs text-neutral-500 mb-1">
+                                    Daftar Barang (<span class="font-bold text-neutral-800" x-text="selectedItems.length"></span> item):
+                                </div>
+                                <div class="space-y-1.5 max-h-36 overflow-y-auto pr-1">
+                                    <template x-for="(item, idx) in selectedItems" :key="item.id">
+                                        <div class="flex items-center justify-between text-xs bg-white p-2 rounded-lg border border-neutral-200">
+                                            <div class="min-w-0 pr-2">
+                                                <div class="font-bold text-neutral-900 truncate" x-text="(idx + 1) + '. ' + item.name"></div>
+                                                <div class="text-[11px] text-neutral-500 font-mono" x-text="item.item_code"></div>
+                                            </div>
+                                            <span class="text-[11px] text-neutral-500 shrink-0" x-text="item.location"></span>
+                                        </div>
+                                    </template>
+                                </div>
                             </div>
 
                             <div>
@@ -605,7 +692,10 @@
                             >
                                 <template x-if="!isSubmitting">
                                     <div class="flex items-center gap-2">
-                                        <span>📸</span>
+                                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        </svg>
                                         <span>Konfirmasi Peminjaman</span>
                                     </div>
                                 </template>
@@ -637,8 +727,10 @@
         <!-- LAYAR SUKSES TRANSAKSI (3 Detik Auto-Reset ke Standby) -->
         <!-- ===================================================================== -->
         <section x-show="screen === 'success'" class="flex flex-col items-center justify-center text-center py-12">
-            <div class="w-28 h-28 rounded-full bg-success/20 border-4 border-success text-success flex items-center justify-center text-6xl mb-6 shadow-2xl animate-bounce">
-                ✓
+            <div class="w-28 h-28 rounded-full bg-success/20 border-4 border-success text-success flex items-center justify-center mb-6 shadow-2xl animate-bounce">
+                <svg class="w-16 h-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                </svg>
             </div>
             <h2 class="text-3xl md:text-4xl font-extrabold text-neutral-900 mb-2" x-text="successMessage.title">
                 Peminjaman Berhasil!
@@ -680,9 +772,12 @@
                         <button 
                             @click="startCameraScanner('return_item')" 
                             type="button" 
-                            class="text-xs bg-primary/10 hover:bg-primary/20 text-primary font-bold px-3 py-1.5 rounded-xl border border-primary/30 flex items-center gap-1 transition"
+                            class="text-xs bg-primary/10 hover:bg-primary/20 text-primary font-bold px-3 py-1.5 rounded-xl border border-primary/30 flex items-center gap-1.5 transition"
                         >
-                            <span>📷</span>
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
                             <span>Scan via Kamera</span>
                         </button>
                     </div>
@@ -732,9 +827,13 @@
                                     type="button" 
                                     @click="returnFlow.condition = 'bagus'"
                                     :class="returnFlow.condition === 'bagus' ? 'border-success ring-4 ring-success/20 bg-success/10' : 'border-neutral-200 bg-white'"
-                                    class="p-4 rounded-2xl border-2 text-center transition"
+                                    class="p-4 rounded-2xl border-2 text-center transition flex flex-col items-center"
                                 >
-                                    <div class="text-3xl mb-1">👍</div>
+                                    <div class="w-10 h-10 rounded-full bg-success/20 text-success flex items-center justify-center mb-2">
+                                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
+                                        </svg>
+                                    </div>
                                     <div class="font-bold text-base text-neutral-900">Bagus / Normal</div>
                                     <div class="text-xs text-neutral-500 mt-1">Siap disimpan di rak</div>
                                 </button>
@@ -743,9 +842,13 @@
                                     type="button" 
                                     @click="returnFlow.condition = 'rusak'"
                                     :class="returnFlow.condition === 'rusak' ? 'border-danger ring-4 ring-danger/20 bg-danger/10' : 'border-neutral-200 bg-white'"
-                                    class="p-4 rounded-2xl border-2 text-center transition"
+                                    class="p-4 rounded-2xl border-2 text-center transition flex flex-col items-center"
                                 >
-                                    <div class="text-3xl mb-1">⚠️</div>
+                                    <div class="w-10 h-10 rounded-full bg-danger/20 text-danger flex items-center justify-center mb-2">
+                                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                        </svg>
+                                    </div>
                                     <div class="font-bold text-base text-neutral-900">Rusak / Ada Kendala</div>
                                     <div class="text-xs text-neutral-500 mt-1">Buat tiket perbaikan</div>
                                 </button>
@@ -817,7 +920,7 @@
                     phone: '',
                     token: ''
                 },
-                selectedItem: null,
+                selectedItems: [], // Daftar barang yang dipinjam (multi-item)
                 selectedDuration: 'pulang_sekolah',
                 estimatedDueText: '',
 
@@ -982,28 +1085,58 @@
                                 try { await this.cameraScanner.instance.stop(); } catch(e) {}
                             }
 
-                            const html5QrCode = new window.Html5Qrcode("camera-reader");
+                            const formatsToSupport = window.Html5QrcodeSupportedFormats ? [
+                                window.Html5QrcodeSupportedFormats.CODE_128,
+                                window.Html5QrcodeSupportedFormats.CODE_39,
+                                window.Html5QrcodeSupportedFormats.CODE_93,
+                                window.Html5QrcodeSupportedFormats.EAN_13,
+                                window.Html5QrcodeSupportedFormats.EAN_8,
+                                window.Html5QrcodeSupportedFormats.UPC_A,
+                                window.Html5QrcodeSupportedFormats.UPC_E,
+                                window.Html5QrcodeSupportedFormats.QR_CODE,
+                                window.Html5QrcodeSupportedFormats.DATA_MATRIX
+                            ] : undefined;
+
+                            const html5QrCode = new window.Html5Qrcode("camera-reader", {
+                                formatsToSupport: formatsToSupport,
+                                verbose: false
+                            });
                             this.cameraScanner.instance = html5QrCode;
 
-                            const config = {
-                                fps: 15,
-                                qrbox: { width: 250, height: 250 },
-                                aspectRatio: 1.0
+                            // Barcode 1D berbentuk persegi panjang (lebar > tinggi), QR code berbentuk kotak
+                            const qrboxFunction = (viewfinderWidth, viewfinderHeight) => {
+                                const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+                                const width = Math.floor(viewfinderWidth * 0.85);
+                                const height = Math.floor(Math.min(viewfinderHeight * 0.65, 200));
+                                return { width: Math.max(width, 240), height: Math.max(height, 120) };
                             };
 
-                            await html5QrCode.start(
-                                { facingMode: "environment" },
-                                config,
-                                (decodedText) => {
-                                    this.onCameraScanSuccess(decodedText);
-                                },
-                                (errorMessage) => {
-                                    // continuous scanning
-                                }
-                            );
+                            const config = {
+                                fps: 20,
+                                qrbox: qrboxFunction,
+                                aspectRatio: 1.333333
+                            };
+
+                            // Coba akses kamera dengan fallback kamera laptop/webcam default
+                            try {
+                                await html5QrCode.start(
+                                    { facingMode: "environment" },
+                                    config,
+                                    (decodedText) => this.onCameraScanSuccess(decodedText),
+                                    () => {}
+                                );
+                            } catch (fallbackErr) {
+                                // Jika kamera belakang tidak ada (khas PC/Laptop), gunakan kamera depan / default
+                                await html5QrCode.start(
+                                    { facingMode: "user" },
+                                    config,
+                                    (decodedText) => this.onCameraScanSuccess(decodedText),
+                                    () => {}
+                                );
+                            }
                         } catch (err) {
                             console.error('Camera Scanner start error:', err);
-                            this.showToast('error', 'Izin Kamera Ditolak', 'Tidak dapat mengakses perangkat kamera untuk pemindaian.');
+                            this.showToast('error', 'Izin Kamera Gagal', 'Pastikan izin kamera di browser aktif dan kamera tidak sedang dipakai aplikasi lain.');
                             this.cameraScanner.active = false;
                         }
                     });
@@ -1133,7 +1266,7 @@
                     this.estimatedDueText = due.toLocaleDateString('id-ID', options) + ' WIB';
                 },
 
-                // LAYAR 2: Handle Scan QR Item
+                // LAYAR 2: Handle Scan QR Item (Bisa tambah banyak barang)
                 async handleItemScan() {
                     const code = this.scanInputs.itemCode.trim();
                     if (!code) return;
@@ -1159,10 +1292,19 @@
                             return;
                         }
 
+                        // Cek apakah barang sudah ada di list keranjang
+                        const exists = this.selectedItems.some(i => i.id === item.id);
+                        if (exists) {
+                            this.playAudioTone('error');
+                            this.showToast('info', 'Sudah Dipilih', `Alat "${item.name}" sudah ada di daftar peminjaman.`);
+                            this.scanInputs.itemCode = '';
+                            return;
+                        }
+
                         this.playAudioTone('beep');
-                        this.selectedItem = item;
+                        this.selectedItems.push(item);
                         this.scanInputs.itemCode = '';
-                        this.showToast('info', 'Barang Terpilih', `Alat "${item.name}" berhasil dipindai.`);
+                        this.showToast('success', 'Barang Ditambahkan', `"${item.name}" masuk ke daftar (${this.selectedItems.length} barang).`);
 
                     } catch (error) {
                         this.playAudioTone('error');
@@ -1171,13 +1313,24 @@
                 },
 
                 selectItemDirectly(item) {
-                    this.selectedItem = item;
+                    const exists = this.selectedItems.some(i => i.id === item.id);
+                    if (exists) {
+                        this.removeItem(item.id);
+                        this.showToast('info', 'Barang Dihapus', `"${item.name}" dihapus dari daftar.`);
+                        return;
+                    }
+                    this.selectedItems.push(item);
                     this.playAudioTone('beep');
+                    this.showToast('success', 'Barang Ditambahkan', `"${item.name}" masuk ke daftar (${this.selectedItems.length} barang).`);
+                },
+
+                removeItem(itemId) {
+                    this.selectedItems = this.selectedItems.filter(i => i.id !== itemId);
                 },
 
                 // LAYAR 2 -> LAYAR 3: Pindah ke Layar Snapshot Webcam
                 proceedToSnapshotScreen() {
-                    if (!this.selectedItem) return;
+                    if (this.selectedItems.length === 0) return;
                     this.screen = 'snapshot_confirm';
                     this.startWebcam();
                 },
@@ -1229,12 +1382,13 @@
                     return canvas.toDataURL('image/jpeg', 0.85);
                 },
 
-                // LAYAR 3: Konfirmasi Peminjaman (Kirim ke API)
+                // LAYAR 3: Konfirmasi Peminjaman (Kirim ke API dengan banyak item_ids)
                 async confirmLoan() {
-                    if (this.isSubmitting) return;
+                    if (this.isSubmitting || this.selectedItems.length === 0) return;
                     this.isSubmitting = true;
 
                     const photoBase64 = this.captureSnapshot();
+                    const itemIds = this.selectedItems.map(i => i.id);
 
                     try {
                         const response = await fetch('/api/v1/loans', {
@@ -1246,7 +1400,7 @@
                             },
                             body: JSON.stringify({
                                 user_id: this.currentUser.id,
-                                item_id: this.selectedItem.id,
+                                item_ids: itemIds,
                                 usage_duration: this.selectedDuration,
                                 photo: photoBase64
                             })
@@ -1267,11 +1421,12 @@
 
                         this.successMessage = {
                             title: 'Peminjaman Berhasil!',
-                            body: `Peralatan "${result.data.item_name}" berhasil dipinjam atas nama ${this.currentUser.name}.`,
+                            body: `${this.selectedItems.length} Peralatan (${result.data.item_name}) berhasil dipinjam atas nama ${this.currentUser.name}.`,
                             dueAt: this.estimatedDueText
                         };
 
                         this.screen = 'success';
+                        this.selectedItems = [];
                         this.isSubmitting = false;
                         this.startSuccessCountdown();
 

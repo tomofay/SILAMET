@@ -68,7 +68,13 @@
         <div class="absolute inset-0 bg-black/60" id="photo-modal-backdrop"></div>
         <div class="relative bg-white rounded-lg shadow-xl max-w-lg w-full p-5">
             <div class="flex items-center justify-between mb-3">
-                <h3 class="font-semibold text-neutral-800">📸 Foto Pelanggar</h3>
+                <h3 class="font-semibold text-neutral-800 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <span>Foto Pelanggar</span>
+                </h3>
                 <button id="photo-modal-close" class="text-neutral-500 hover:text-neutral-800 text-xl leading-none">&times;</button>
             </div>
             <p id="photo-modal-epoch" class="text-xs text-neutral-500 font-mono mb-3"></p>

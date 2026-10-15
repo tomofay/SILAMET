@@ -12,8 +12,11 @@
                     + Tambah Barang
                 </a>
                 <a href="{{ route('items.barcodes') }}" target="_blank"
-                    class="inline-flex items-center px-4 py-2 bg-info text-white text-sm font-medium rounded-md hover:bg-info-dark transition">
-                    🏷️ Cetak Barcode
+                    class="inline-flex items-center gap-1.5 px-4 py-2 bg-info text-white text-sm font-medium rounded-md hover:bg-info-dark transition">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                    </svg>
+                    <span>Cetak Barcode</span>
                 </a>
             </div>
         </div>
@@ -62,7 +65,11 @@
                                     <span class="text-xs font-semibold px-2 py-0.5 rounded-full {{ $badge }}">{{ $item->status->label() }}</span>
                                 </td>
                                 <td class="px-5 py-3 text-right space-x-2 whitespace-nowrap">
-                                    <a href="{{ route('items.barcodes') }}?ids={{ $item->id }}" target="_blank" class="text-info-dark hover:underline text-xs" title="Cetak Barcode">🏷️</a>
+                                    <a href="{{ route('items.barcodes') }}?ids={{ $item->id }}" target="_blank" class="inline-flex text-info-dark hover:text-info text-xs" title="Cetak Barcode">
+                                        <svg class="w-4 h-4 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                                        </svg>
+                                    </a>
                                     <a href="{{ route('items.show', $item->id) }}" class="text-primary hover:underline text-xs">Detail</a>
                                     <a href="{{ route('items.edit', $item->id) }}" class="text-info-dark hover:underline text-xs">Edit</a>
                                     <form method="POST" action="{{ route('items.destroy', $item->id) }}" class="inline" onsubmit="return confirm('Hapus barang ini? (soft delete)')">
@@ -92,8 +99,11 @@
         <div id="bulk-actions-items" class="hidden bg-primary/5 border border-primary/20 rounded-lg p-3 flex items-center gap-3">
             <span class="text-sm text-primary-dark font-medium"><span id="selected-item-count">0</span> barang dipilih</span>
             <a id="print-selected-items-btn" href="#" target="_blank"
-                class="inline-flex items-center px-3 py-1.5 bg-info text-white text-xs font-medium rounded-md hover:bg-info-dark transition">
-                🏷️ Cetak Barcode Terpilih
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-info text-white text-xs font-medium rounded-md hover:bg-info-dark transition">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                </svg>
+                <span>Cetak Barcode Terpilih</span>
             </a>
         </div>
     </div>

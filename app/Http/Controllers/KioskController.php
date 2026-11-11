@@ -14,7 +14,7 @@ class KioskController extends Controller
     public function index()
     {
         $availableItems = Item::where('status', ItemStatus::TERSEDIA)
-            ->select('id', 'item_code', 'name', 'type', 'location')
+            ->select('id', 'item_code', 'barcode_token', 'name', 'type', 'location')
             ->orderBy('name')
             ->get();
 

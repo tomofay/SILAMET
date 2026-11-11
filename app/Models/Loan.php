@@ -19,11 +19,13 @@ class Loan extends Model
         'item_id',
         'status',
         'condition_in',
+        'capture_image_path',
         'usage_duration',
         'borrowed_at',
         'due_at',
         'returned_at',
         'overdue_notified_at',
+        'overdue_notified_count',
     ];
 
     protected function casts(): array
@@ -35,6 +37,7 @@ class Loan extends Model
             'due_at' => 'datetime',
             'returned_at' => 'datetime',
             'overdue_notified_at' => 'datetime',
+            'overdue_notified_count' => 'integer',
         ];
     }
 
@@ -78,5 +81,19 @@ class Loan extends Model
         return $this->status === LoanStatus::AKTIF
             && $this->due_at !== null
             && $this->due_at->isPast();
+    }
+
+    /**
+     * Hitung label lama keterlambatan (misal: "2 jam 15 menit" atau "1 hari 4 jam").
+     */
+    public function latenessLabel(?Carbon $now = null): ?string
+    {
+        $reference = $now ?? Carbon::now();
+
+        if ($this->status !== LoanStatus::AKTIF || $this->due_at === null || $this->due_at->greaterThanOrEqualTo($reference)) {
+            return null;
+        }
+
+        return \App\Services\TelegramService::formatOverdueDuration($this->due_at, $reference);
     }
 }

@@ -19,8 +19,8 @@ class AuthController extends Controller
             'device_id' => 'nullable|string',
         ]);
 
-        // Find user by nis_nip
-        $user = \App\Models\User::where('nis_nip', $validated['nis_nip'])->first();
+        // Find user by barcode_token (SLM-XXXXXXXX) or fallback to nis_nip
+        $user = \App\Services\BarcodeTokenService::resolveUser($validated['nis_nip']);
 
         if (!$user) {
             return response()->json([

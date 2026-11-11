@@ -2,8 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ItemType;
+use App\Enums\StockMovementType;
 use App\Models\Item;
+use App\Models\StockMovement;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class MasterController extends Controller
 {
@@ -30,11 +36,11 @@ class MasterController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'item_code' => 'required|string|max:50|unique:items,item_code',
-            'epc_tag' => 'nullable|string|max:100|unique:items,epc_tag',
+            'item_code' => ['required', 'string', 'max:50', Rule::unique('items', 'item_code')->whereNull('deleted_at')],
+            'epc_tag' => ['nullable', 'string', 'max:100', Rule::unique('items', 'epc_tag')->whereNull('deleted_at')],
             'name' => 'required|string|max:100',
             'type' => 'required|in:aset,bahan_habis_pakai',
-            'stock' => 'nullable|integer|min:1',
+            'stock' => 'nullable|integer|min:0',
             'status' => 'required|in:tersedia,dipinjam,under_maintenance',
             'location' => 'required|string|max:100',
         ]);
@@ -42,9 +48,25 @@ class MasterController extends Controller
         // Set default stock untuk aset
         if ($validated['type'] === 'aset') {
             $validated['stock'] = 1;
+        } else {
+            $validated['stock'] = (int) ($validated['stock'] ?? 0);
         }
 
-        Item::create($validated);
+        DB::transaction(function () use ($validated) {
+            $item = Item::create($validated);
+
+            if ($item->type === ItemType::BAHAN_HABIS_PAKAI && $item->stock > 0 && Auth::id()) {
+                StockMovement::create([
+                    'item_id' => $item->id,
+                    'user_id' => Auth::id(),
+                    'type' => StockMovementType::IN,
+                    'quantity' => $item->stock,
+                    'stock_before' => 0,
+                    'stock_after' => $item->stock,
+                    'description' => 'Stok awal pendaftaran barang habis pakai',
+                ]);
+            }
+        });
 
         return redirect()->route('items.index')
             ->with('success', 'Item berhasil ditambahkan.');
@@ -55,7 +77,7 @@ class MasterController extends Controller
      */
     public function show(string $id)
     {
-        $item = Item::with(['loans', 'tickets'])->findOrFail($id);
+        $item = Item::with(['loans.user', 'tickets.reportedBy', 'stockMovements.user'])->findOrFail($id);
         return view('items.show', compact('item'));
     }
 
@@ -73,19 +95,42 @@ class MasterController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $item = Item::findOrFail($id);
-
         $validated = $request->validate([
-            'item_code' => "required|string|max:50|unique:items,item_code,$id",
-            'epc_tag' => "nullable|string|max:100|unique:items,epc_tag,$id",
+            'item_code' => ['required', 'string', 'max:50', Rule::unique('items', 'item_code')->ignore($id)->whereNull('deleted_at')],
+            'epc_tag' => ['nullable', 'string', 'max:100', Rule::unique('items', 'epc_tag')->ignore($id)->whereNull('deleted_at')],
             'name' => 'required|string|max:100',
             'type' => 'required|in:aset,bahan_habis_pakai',
-            'stock' => 'nullable|integer|min:1',
+            'stock' => 'nullable|integer|min:0',
             'status' => 'required|in:tersedia,dipinjam,under_maintenance',
             'location' => 'required|string|max:100',
         ]);
 
-        $item->update($validated);
+        DB::transaction(function () use ($id, $validated) {
+            $item = Item::query()->lockForUpdate()->findOrFail($id);
+            $oldStock = (int) $item->stock;
+
+            if ($validated['type'] === 'aset') {
+                $validated['stock'] = 1;
+            } elseif (! array_key_exists('stock', $validated) || $validated['stock'] === null) {
+                $validated['stock'] = $oldStock;
+            }
+
+            $item->update($validated);
+            $newStock = (int) $item->stock;
+
+            if ($item->type === ItemType::BAHAN_HABIS_PAKAI && $newStock !== $oldStock && Auth::id()) {
+                $diff = abs($newStock - $oldStock);
+                StockMovement::create([
+                    'item_id' => $item->id,
+                    'user_id' => Auth::id(),
+                    'type' => $newStock > $oldStock ? StockMovementType::IN : StockMovementType::OUT,
+                    'quantity' => $diff,
+                    'stock_before' => $oldStock,
+                    'stock_after' => $newStock,
+                    'description' => 'Penyesuaian stok melalui edit Master Aset',
+                ]);
+            }
+        });
 
         return redirect()->route('items.index')
             ->with('success', 'Item berhasil diperbarui.');

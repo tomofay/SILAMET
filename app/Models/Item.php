@@ -22,8 +22,18 @@ class Item extends Model
         'type',
         'stock',
         'status',
+        'barcode_token',
         'location',
     ];
+
+    protected static function booted()
+    {
+        static::creating(function ($item) {
+            if (empty($item->barcode_token)) {
+                $item->barcode_token = \App\Services\BarcodeTokenService::generateItemToken();
+            }
+        });
+    }
 
     protected function casts(): array
     {
@@ -48,5 +58,15 @@ class Item extends Model
     public function tickets()
     {
         return $this->hasMany(MaintenanceTicket::class);
+    }
+
+    public function preventiveSchedules()
+    {
+        return $this->hasMany(PreventiveSchedule::class);
+    }
+
+    public function stockMovements()
+    {
+        return $this->hasMany(StockMovement::class)->latest();
     }
 }

@@ -1,3 +1,48 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+    body {
+        @apply font-sans text-neutral-800 bg-neutral-50 antialiased selection:bg-primary/15 selection:text-primary-700;
+    }
+
+    /* Clean Minimalist Scrollbar */
+    ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+        background: #F8FAFC;
+    }
+    ::-webkit-scrollbar-thumb {
+        background: #CBD5E1;
+        border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background: #94A3B8;
+    }
+}
+
+@layer components {
+    /* Solid Border-First Surface Cards (Anti-AI Slop) */
+    .surface-card {
+        @apply bg-white border border-neutral-200 rounded-xl;
+    }
+
+    .surface-card-dark {
+        @apply bg-neutral-900 border border-neutral-800 rounded-xl;
+    }
+
+    /* Data-Dense Table Styling */
+    .table-row-clean {
+        @apply transition-colors duration-100 hover:bg-neutral-50;
+    }
+
+    /* Compact Icon-Only Table Action Button */
+    .btn-icon-action {
+        @apply inline-flex items-center justify-center w-8 h-8 rounded-lg border border-transparent text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 hover:border-neutral-200 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-primary/20;
+    }
+}

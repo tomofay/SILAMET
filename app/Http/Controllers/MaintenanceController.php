@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Controller;
+use App\Jobs\SendMaintenanceTicketTelegramJob;
 use App\Models\MaintenanceTicket;
 use App\Models\MaintenanceLog;
 use App\Models\Item;
@@ -58,12 +60,20 @@ class MaintenanceController extends Controller
             'status' => 'required|in:open,in_progress,resolved',
         ]);
 
-        MaintenanceTicket::create($validated);
+        $ticket = DB::transaction(function () use ($validated) {
+            $created = MaintenanceTicket::create($validated);
 
-        // Update status item jika belum under_maintenance
-        $item = \App\Models\Item::find($validated['item_id']);
-        if ($item && $item->status !== 'under_maintenance') {
-            $item->update(['status' => 'under_maintenance']);
+            // Update status item jika belum under_maintenance
+            $item = Item::query()->lockForUpdate()->find($validated['item_id']);
+            if ($item && $item->status !== ItemStatus::UNDER_MAINTENANCE && $validated['status'] !== 'resolved') {
+                $item->update(['status' => ItemStatus::UNDER_MAINTENANCE]);
+            }
+
+            return $created;
+        });
+
+        if (config('services.telegram.enabled') && $ticket->status !== TicketStatus::RESOLVED) {
+            dispatch(new SendMaintenanceTicketTelegramJob($ticket->id, 'created'));
         }
 
         return redirect()->route('maintenance.index')
@@ -100,6 +110,8 @@ class MaintenanceController extends Controller
             'issue_description' => 'nullable|string',
         ]);
 
+        $wasResolved = $ticket->status === TicketStatus::RESOLVED;
+
         DB::transaction(function () use ($ticket, $validated) {
             $ticket->update($validated);
 
@@ -112,6 +124,15 @@ class MaintenanceController extends Controller
                 }
             }
         });
+
+        if (
+            ! $wasResolved
+            && $validated['status'] === 'resolved'
+            && config('services.telegram.enabled')
+            && config('services.telegram.notify_ticket_resolved', false)
+        ) {
+            dispatch(new SendMaintenanceTicketTelegramJob($ticket->id, 'resolved'));
+        }
 
         $message = $validated['status'] === 'resolved'
             ? 'Tiket telah diselesaikan (Resolved). Barang sekarang berstatus TERSEDIA kembali.'

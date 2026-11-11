@@ -5,6 +5,7 @@ namespace Tests\Feature\Api;
 use App\Models\GateLog;
 use App\Models\Item;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class GateApiTest extends TestCase
@@ -91,11 +92,13 @@ class GateApiTest extends TestCase
 
     public function test_gate_denied_event_stores_capture_photo(): void
     {
+        Storage::fake('public');
+
         $item = Item::factory()->available()->create([
             'epc_tag' => 'E280689400004004',
         ]);
 
-        $fakeBase64 = 'data:image/png;base64,' . base64_encode('fake-image-content');
+        $fakeBase64 = 'data:image/jpeg;base64,' . base64_encode("\xFF\xD8\xFF\xE0\x00\x10JFIFfake-image");
 
         $response = $this->postJson('/api/v1/gate/check-tag', [
             'epc_tag' => 'E280689400004004',
@@ -107,5 +110,6 @@ class GateApiTest extends TestCase
 
         $log = GateLog::where('epc_tag_scanned', 'E280689400004004')->first();
         $this->assertNotNull($log->capture_image_path);
+        $this->assertTrue(Storage::disk('public')->exists($log->capture_image_path));
     }
 }

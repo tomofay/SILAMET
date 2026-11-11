@@ -5,7 +5,9 @@ use App\Http\Controllers\MasterController;
 use App\Http\Controllers\LoanController;
 use App\Http\Controllers\GateLogController;
 use App\Http\Controllers\MaintenanceController;
+use App\Http\Controllers\PreventiveScheduleController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\StockMovementController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\KioskController;
 use App\Http\Controllers\UserController;
@@ -34,7 +36,12 @@ Route::middleware(['auth', 'role:teknisi|kabeng|kaprog'])->group(function () {
         'destroy' => 'items.destroy',
     ]);
 
+    // Buku Stok Bahan Habis Pakai (Stock Ledger)
+    Route::get('stock-movements', [StockMovementController::class, 'index'])->name('stock-movements.index');
+    Route::post('stock-movements', [StockMovementController::class, 'store'])->name('stock-movements.store');
+
     // Peminjaman / Loans
+    Route::get('loans/{loan}/photo', [LoanController::class, 'photo'])->name('loans.photo');
     Route::resource('loans', LoanController::class)->names([
         '' => 'loans.index',
         'create' => 'loans.create',
@@ -48,11 +55,24 @@ Route::middleware(['auth', 'role:teknisi|kabeng|kaprog'])->group(function () {
     // Gate Logs — Read Only
     Route::prefix('gate-logs')->group(function () {
         Route::get('/', [GateLogController::class, 'index'])->name('gate-logs.index');
+        Route::get('/feed', [GateLogController::class, 'feed'])->name('gate-logs.feed');
+        Route::get('/{id}/photo', [GateLogController::class, 'photo'])->name('gate-logs.photo');
         Route::get('/{id}', [GateLogController::class, 'show'])->name('gate-logs.show');
     });
 
     // Maintenance & Repair — khusus teknisi & kabeng
     Route::middleware('role:teknisi|kabeng')->group(function () {
+        // Jadwal Perawatan Preventif (didaftarkan sebelum resource maintenance agar tidak tertangkap {maintenance})
+        Route::prefix('maintenance/schedules')->name('maintenance.schedules.')->group(function () {
+            Route::get('/', [PreventiveScheduleController::class, 'index'])->name('index');
+            Route::get('/create', [PreventiveScheduleController::class, 'create'])->name('create');
+            Route::post('/', [PreventiveScheduleController::class, 'store'])->name('store');
+            Route::get('/{schedule}/edit', [PreventiveScheduleController::class, 'edit'])->name('edit');
+            Route::put('/{schedule}', [PreventiveScheduleController::class, 'update'])->name('update');
+            Route::post('/{schedule}/mark-serviced', [PreventiveScheduleController::class, 'markServiced'])->name('mark-serviced');
+            Route::delete('/{schedule}', [PreventiveScheduleController::class, 'destroy'])->name('destroy');
+        });
+
         Route::resource('maintenance', MaintenanceController::class)->names([
             '' => 'maintenance.index',
             'create' => 'maintenance.create',

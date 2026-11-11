@@ -6,6 +6,7 @@ use App\Enums\ItemStatus;
 use App\Enums\LoanDuration;
 use App\Enums\LoanStatus;
 use App\Http\Controllers\Controller;
+use App\Jobs\SendMaintenanceTicketTelegramJob;
 use App\Models\Item;
 use App\Models\Loan;
 use App\Models\MaintenanceTicket;
@@ -85,6 +86,7 @@ class LoanApiController extends Controller
                     'user_id' => $validated['user_id'],
                     'item_id' => $item->id,
                     'status' => LoanStatus::AKTIF,
+                    'capture_image_path' => $photoPath,
                     'usage_duration' => $validated['usage_duration'],
                     'borrowed_at' => $borrowedAt,
                     'due_at' => $dueAt,
@@ -123,7 +125,11 @@ class LoanApiController extends Controller
     {
         $validated = $request->validate([
             'condition_in' => 'required|in:bagus,rusak',
+            'issue_description' => 'required_if:condition_in,rusak|nullable|string|min:3',
             'photo' => 'nullable|string',
+        ], [
+            'issue_description.required_if' => 'Catatan kerusakan wajib diisi jika kondisi alat rusak.',
+            'issue_description.min' => 'Catatan kerusakan minimal 3 karakter.',
         ]);
 
         $result = DB::transaction(function () use ($id, $validated) {
@@ -140,20 +146,30 @@ class LoanApiController extends Controller
                 'returned_at' => now(),
             ]);
 
+            $ticketId = null;
+
             if ($validated['condition_in'] === 'rusak') {
-                MaintenanceTicket::create([
+                $issueDesc = !empty($validated['issue_description']) 
+                    ? trim($validated['issue_description']) 
+                    : 'Barang dikembalikan dalam kondisi rusak. Silakan periksa fisik barang.';
+                $ticket = MaintenanceTicket::create([
                     'item_id' => $item->id,
                     'reported_by' => $loan->user_id,
-                    'issue_description' => 'Barang dikembalikan dalam kondisi rusak. Silakan periksa fisik barang.',
+                    'issue_description' => $issueDesc,
                     'status' => 'open',
                 ]);
+                $ticketId = $ticket->id;
                 $item->update(['status' => ItemStatus::UNDER_MAINTENANCE]);
             } else {
                 $item->update(['status' => ItemStatus::TERSEDIA]);
             }
 
-            return ['loan' => $loan->fresh(), 'item' => $item->fresh()];
+            return ['loan' => $loan->fresh(), 'item' => $item->fresh(), 'ticket_id' => $ticketId];
         });
+
+        if (! empty($result['ticket_id']) && config('services.telegram.enabled')) {
+            dispatch(new SendMaintenanceTicketTelegramJob($result['ticket_id'], 'created'));
+        }
 
         return response()->json([
             'success' => true,
@@ -166,116 +182,229 @@ class LoanApiController extends Controller
     }
 
     /**
-     * Pengembalian Mandiri di Kiosk (Layar 4 UI/UX Design).
-     * Mendukung pengembalian 1 barang maupun banyak barang sekaligus dari peminjam yang sama.
+     * Ambil daftar peminjaman aktif milik siswa berdasarkan NIS.
+     * Digunakan sebelum pengembalian barang di Kiosk Mandiri.
      */
-    public function returnKiosk(Request $request)
+    public function getActiveLoansByNis(Request $request)
     {
         $validated = $request->validate([
-            'item_code' => 'nullable|string',
-            'item_codes' => 'nullable|array|min:1',
-            'item_codes.*' => 'string',
-            'condition_in' => 'required|in:bagus,rusak',
-            'issue_description' => 'nullable|string',
+            'nis' => 'required|string',
         ]);
 
-        $itemCodes = [];
-        if (!empty($validated['item_codes'])) {
-            $itemCodes = array_values(array_unique($validated['item_codes']));
-        } elseif (!empty($validated['item_code'])) {
-            $itemCodes = [$validated['item_code']];
-        } else {
+        // Find user by barcode token (SLM-XXXXXXXX) or fallback to nis_nip
+        $user = \App\Services\BarcodeTokenService::resolveUser($validated['nis']);
+
+        if (!$user) {
             return response()->json([
                 'success' => false,
-                'message' => 'Pilih atau scan minimal satu kode barang.',
-            ], 422);
-        }
-
-        // Cari semua barang berdasarkan kode
-        $items = Item::whereIn('item_code', $itemCodes)->get();
-
-        if ($items->isEmpty()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Barang dengan kode tersebut tidak ditemukan.',
+                'message' => 'Siswa dengan NIS tersebut tidak ditemukan.',
             ], 404);
         }
 
-        // Kumpulkan pinjaman aktif untuk setiap barang
-        $activeLoans = Loan::with(['item', 'user'])
-            ->whereIn('item_id', $items->pluck('id'))
+        $activeLoans = Loan::with('item')
+            ->where('user_id', $user->id)
             ->where('status', LoanStatus::AKTIF)
+            ->latest()
             ->get();
 
-        if ($activeLoans->isEmpty()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Tidak ada barang yang sedang dalam status peminjaman aktif.',
-            ], 422);
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'nis_nip' => $user->nis_nip,
+                    'phone' => $user->phone,
+                ],
+                'active_loans' => $activeLoans->map(function ($loan) {
+                    return [
+                        'loan_id' => $loan->id,
+                        'item_id' => $loan->item_id,
+                        'item_code' => $loan->item->item_code,
+                        'barcode_token' => $loan->item->barcode_token,
+                        'item_name' => $loan->item->name,
+                        'category' => $loan->item->category,
+                        'borrowed_at' => $loan->borrowed_at?->format('Y-m-d H:i:s'),
+                        'due_at' => $loan->due_at?->format('Y-m-d H:i:s'),
+                        'is_overdue' => $loan->isOverdue(),
+                    ];
+                }),
+            ],
+        ]);
+    }
+
+    /**
+     * Pengembalian Mandiri di Kiosk (Layar 4 UI/UX Design).
+     * Wajib scan NIS peminjam dahulu, hanya peminjam yang boleh mengembalikan,
+     * dan mendukung pengembalian banyak barang sekaligus.
+     */
+    public function returnKiosk(Request $request)
+    {
+        // Mendukung format multi-item (items array) maupun single item format
+        if (!$request->has('items') && $request->has('item_code')) {
+            $request->merge([
+                'items' => [
+                    [
+                        'item_code' => $request->input('item_code'),
+                        'condition_in' => $request->input('condition_in'),
+                        'issue_description' => $request->input('issue_description'),
+                    ]
+                ]
+            ]);
+
+            // Jika request single lama tidak menyertakan NIS (seperti di test lama), ambil dari borrower aktif
+            if (!$request->filled('nis')) {
+                $tempItem = \App\Services\BarcodeTokenService::resolveItem($request->input('item_code'));
+                if ($tempItem) {
+                    $activeL = Loan::with('user')->where('item_id', $tempItem->id)->where('status', LoanStatus::AKTIF)->latest()->first();
+                    if ($activeL && $activeL->user) {
+                        $request->merge(['nis' => $activeL->user->barcode_token ?? $activeL->user->nis_nip]);
+                    }
+                }
+            }
         }
 
-        // Verifikasi bahwa semua barang dipinjam oleh peminjam (siswa) yang sama
-        $borrowerIds = $activeLoans->pluck('user_id')->unique();
-        if ($borrowerIds->count() > 1) {
-            $borrowerNames = $activeLoans->map(fn($l) => $l->item->name . ' (' . ($l->user->name ?? 'User') . ')')->implode(', ');
+        $validated = $request->validate([
+            'nis' => 'required|string',
+            'items' => 'required|array|min:1',
+            'items.*.item_code' => 'required|string',
+            'items.*.condition_in' => 'required|in:bagus,rusak',
+            'items.*.issue_description' => 'required_if:items.*.condition_in,rusak|nullable|string|min:3',
+        ], [
+            'items.*.issue_description.required_if' => 'Catatan kerusakan wajib diisi jika kondisi alat rusak.',
+            'items.*.issue_description.min' => 'Catatan kerusakan minimal 3 karakter.',
+        ]);
+
+        // Find user by barcode token (SLM-XXXXXXXX) or fallback to nis_nip
+        $user = \App\Services\BarcodeTokenService::resolveUser($validated['nis']);
+
+        if (!$user) {
             return response()->json([
                 'success' => false,
-                'message' => 'Barang yang dikembalikan berasal dari peminjam yang berbeda: ' . $borrowerNames . '. Harap kembalikan barang terpisah per peminjam.',
-            ], 422);
+                'message' => 'Siswa dengan NIS tersebut tidak ditemukan.',
+            ], 404);
         }
 
-        $borrower = $activeLoans->first()->user;
+        $itemCodes = collect($validated['items'])->pluck('item_code')->all();
 
-        $returnedLoans = DB::transaction(function () use ($activeLoans, $validated) {
-            $results = [];
+        // Cari item berdasarkan barcode_token, item_code, atau ID
+        $items = Item::whereIn('barcode_token', $itemCodes)
+            ->orWhereIn('item_code', $itemCodes)
+            ->orWhereIn('id', $itemCodes)
+            ->get();
 
-            foreach ($activeLoans as $activeLoan) {
-                $loan = Loan::query()->lockForUpdate()->findOrFail($activeLoan->id);
-                $lockedItem = Item::query()->lockForUpdate()->findOrFail($activeLoan->item_id);
+        // Validasi keberadaan setiap item
+        foreach ($validated['items'] as $entry) {
+            $code = (string) $entry['item_code'];
+            $found = $items->first(function ($it) use ($code) {
+                return (strcasecmp($it->barcode_token ?? '', $code) === 0)
+                    || (strcasecmp($it->item_code, $code) === 0)
+                    || ((string) $it->id === $code);
+            });
+            if (!$found) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Barang dengan kode/barcode '{$code}' tidak ditemukan di sistem.",
+                ], 404);
+            }
+        }
 
-                $loan->update([
-                    'condition_in' => $validated['condition_in'],
+        $processedLoans = [];
+        $createdTicketIds = [];
+        $hasDamaged = false;
+
+        $result = DB::transaction(function () use ($validated, $user, $items, &$processedLoans, &$createdTicketIds, &$hasDamaged) {
+            foreach ($validated['items'] as $entry) {
+                $code = (string) $entry['item_code'];
+                $item = $items->first(function ($it) use ($code) {
+                    return (strcasecmp($it->barcode_token ?? '', $code) === 0)
+                        || (strcasecmp($it->item_code, $code) === 0)
+                        || ((string) $it->id === $code);
+                });
+
+                // Kunci item
+                $lockedItem = Item::query()->lockForUpdate()->findOrFail($item->id);
+
+                // Cari pinjaman aktif untuk item ini
+                $activeLoan = Loan::query()
+                    ->lockForUpdate()
+                    ->where('item_id', $lockedItem->id)
+                    ->where('status', LoanStatus::AKTIF)
+                    ->latest()
+                    ->first();
+
+                if (!$activeLoan) {
+                    abort(422, "Barang '{$lockedItem->name}' ({$lockedItem->item_code}) tidak sedang dalam status peminjaman aktif.");
+                }
+
+                // Cek kepemilikan: hanya siswa peminjam yang boleh mengembalikan
+                if ($activeLoan->user_id !== $user->id) {
+                    abort(403, "Barang '{$lockedItem->name}' ({$lockedItem->item_code}) dipinjam oleh siswa lain, bukan oleh {$user->name}. Hanya peminjam yang boleh mengembalikan.");
+                }
+
+                $condition = $entry['condition_in'];
+                if ($condition === 'rusak') {
+                    $hasDamaged = true;
+                }
+
+                $activeLoan->update([
+                    'condition_in' => $condition,
                     'status' => LoanStatus::SELESAI,
                     'returned_at' => now(),
                 ]);
 
-                if ($validated['condition_in'] === 'rusak') {
-                    $description = $validated['issue_description']
-                        ? $validated['issue_description']
-                        : sprintf('Barang "%s" dikembalikan dalam kondisi rusak melalui Kiosk Mandiri.', $lockedItem->name);
+                if ($condition === 'rusak') {
+                    $description = !empty($entry['issue_description'])
+                        ? $entry['issue_description']
+                        : 'Barang dikembalikan dalam kondisi rusak melalui Kiosk Mandiri.';
 
-                    MaintenanceTicket::create([
+                    $ticket = MaintenanceTicket::create([
                         'item_id' => $lockedItem->id,
-                        'reported_by' => $loan->user_id,
+                        'reported_by' => $user->id,
                         'issue_description' => $description,
                         'status' => 'open',
                     ]);
+                    $createdTicketIds[] = $ticket->id;
                     $lockedItem->update(['status' => ItemStatus::UNDER_MAINTENANCE]);
                 } else {
                     $lockedItem->update(['status' => ItemStatus::TERSEDIA]);
                 }
 
-                $results[] = $loan;
+                $processedLoans[] = [
+                    'loan_id' => $activeLoan->id,
+                    'item_id' => $lockedItem->id,
+                    'item_code' => $lockedItem->item_code,
+                    'item_name' => $lockedItem->name,
+                    'condition_in' => $condition,
+                    'item_status' => $lockedItem->fresh()->status->value,
+                ];
             }
 
-            return $results;
+            return $processedLoans;
         });
 
-        $count = count($returnedLoans);
-        $itemNames = $activeLoans->map(fn($l) => $l->item->name)->implode(', ');
+        if (config('services.telegram.enabled')) {
+            foreach ($createdTicketIds as $ticketId) {
+                dispatch(new SendMaintenanceTicketTelegramJob($ticketId, 'created'));
+            }
+        }
 
-        $message = $validated['condition_in'] === 'rusak'
-            ? sprintf('%d barang berhasil dikembalikan dengan catatan rusak. Tiket perbaikan (M&R) telah dibuat otomatis.', $count)
-            : sprintf('%d barang (%s) berhasil dikembalikan oleh %s! Terima kasih.', $count, $itemNames, $borrower?->name ?? 'Siswa');
+        $count = count($result);
+        $message = $hasDamaged
+            ? "Pengembalian {$count} barang berhasil diproses. Tiket perbaikan (M&R) dibuat otomatis untuk barang rusak."
+            : "Pengembalian {$count} barang berhasil! Terima kasih telah mengembalikan tepat waktu.";
 
         return response()->json([
             'success' => true,
             'message' => $message,
             'data' => [
                 'total_returned' => $count,
-                'borrower_name' => $borrower?->name ?? 'Siswa',
-                'item_names' => $itemNames,
-                'condition' => $validated['condition_in'],
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'nis_nip' => $user->nis_nip,
+                ],
+                'returned_items' => $result,
             ],
         ]);
     }

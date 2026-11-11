@@ -16,9 +16,20 @@ class User extends Authenticatable
         'name',
         'email',
         'phone',
+        'telegram_chat_id',
         'nis_nip',
+        'barcode_token',
         'password',
     ];
+
+    protected static function booted()
+    {
+        static::creating(function ($user) {
+            if (empty($user->barcode_token)) {
+                $user->barcode_token = \App\Services\BarcodeTokenService::generateToken();
+            }
+        });
+    }
 
     protected $hidden = [
         'password',

@@ -35,11 +35,17 @@ return [
         ],
     ],
 
-    'whatsapp' => [
-        // Driver: 'log' (development) atau 'fonnte' (produksi)
-        'driver' => env('WHATSAPP_DRIVER', 'log'),
-        // Token API dari Fonnte (https://fonnte.com)
-        'token' => env('WHATSAPP_TOKEN'),
+    'telegram' => [
+        'enabled' => filter_var(env('TELEGRAM_ENABLED', false), FILTER_VALIDATE_BOOLEAN),
+        'bot_token' => env('TELEGRAM_BOT_TOKEN'),
+        'group_chat_id' => env('TELEGRAM_GROUP_CHAT_ID'),
+        'admin_chat_id' => env('TELEGRAM_ADMIN_CHAT_ID'),
+        'ca_bundle' => env('TELEGRAM_CA_BUNDLE'),
+        'timeout' => (int) env('TELEGRAM_TIMEOUT', 5),
+        'gate_cooldown_seconds' => (int) env('TELEGRAM_GATE_COOLDOWN_SECONDS', 15),
+        'overdue_reminder_hours' => (int) env('TELEGRAM_OVERDUE_REMINDER_HOURS', 4),
+        'daily_summary_enabled' => filter_var(env('TELEGRAM_DAILY_SUMMARY_ENABLED', true), FILTER_VALIDATE_BOOLEAN),
+        'notify_ticket_resolved' => filter_var(env('TELEGRAM_NOTIFY_TICKET_RESOLVED', false), FILTER_VALIDATE_BOOLEAN),
     ],
 
 ];

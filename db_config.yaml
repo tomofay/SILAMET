@@ -1,0 +1,159 @@
+# =============================================================================
+# MCP Toolbox for Databases — Configuration File
+# Project: SILAMET (Sistem Informasi Laboratorium & Aset Manajemen Terintegrasi)
+# Database: MySQL (db_silamet)
+# =============================================================================
+
+# 1. DATA SOURCE DEFINITION
+kind: source
+name: silamet-mysql
+type: mysql
+host: ${DB_HOST:127.0.0.1}
+port: ${DB_PORT:3306}
+database: ${DB_DATABASE:db_silamet}
+user: ${DB_USERNAME:root}
+password: ${DB_PASSWORD:}
+
+---
+
+# 2. CURATED TOOLS FOR SILAMET
+
+# Tool: Cari Detail Barang berdasarkan Kode atau Barcode Token
+kind: tool
+name: get_item_by_code
+type: mysql-sql
+source: silamet-mysql
+description: Mengambil data lengkap barang inventaris laboratorium berdasarkan item_code, barcode_token, atau epc_tag UHF RFID.
+parameters:
+  - name: code
+    type: string
+    description: Kode barang (contoh 'TL840_17'), token barcode (contoh 'ITM-2RZJV92Q'), atau nilai EPC UHF RFID.
+statement: |
+  SELECT 
+    id, item_code, name, type, location, status, stock,
+    barcode_token, epc_tag, created_at, updated_at
+  FROM items 
+  WHERE ? IN (item_code, barcode_token, epc_tag)
+    AND deleted_at IS NULL
+  LIMIT 1;
+
+---
+
+# Tool: Ambil Daftar Peminjaman Aktif Siswa berdasarkan NIS
+kind: tool
+name: get_active_loans_by_nis
+type: mysql-sql
+source: silamet-mysql
+description: Mengambil seluruh daftar peminjaman aktif yang belum dikembalikan oleh siswa berdasarkan NIS/NIP.
+parameters:
+  - name: nis_nip
+    type: string
+    description: Nomor Induk Siswa (contoh '23241001' atau 'NIS-2026-001').
+statement: |
+  SELECT 
+    l.id AS loan_id,
+    u.name AS student_name,
+    u.nis_nip,
+    u.phone,
+    i.item_code,
+    i.name AS item_name,
+    i.location,
+    l.usage_duration,
+    l.borrowed_at,
+    l.due_at,
+    CASE 
+      WHEN l.due_at IS NOT NULL AND l.due_at < NOW() THEN 1 
+      ELSE 0 
+    END AS is_overdue
+  FROM loans l
+  JOIN users u ON l.user_id = u.id
+  JOIN items i ON l.item_id = i.id
+  WHERE u.nis_nip = ? 
+    AND l.status = 'aktif'
+    AND u.deleted_at IS NULL
+    AND i.deleted_at IS NULL
+  ORDER BY l.borrowed_at DESC;
+
+---
+
+# Tool: Cek Log Insiden Pelanggaran Gate Security (Akses Ditolak)
+kind: tool
+name: get_recent_gate_incidents
+type: mysql-sql
+source: silamet-mysql
+description: Menampilkan riwayat insiden alarm gate security (status denied) beserta foto snapshot pelanggar dan status barang saat kejadian.
+parameters:
+  - name: limit
+    type: integer
+    description: Jumlah log insiden terbaru yang ingin ditampilkan (contoh 10).
+statement: |
+  SELECT 
+    g.id,
+    g.created_at AS scanned_at,
+    g.epc_tag_scanned AS epc_tag,
+    g.action_status,
+    g.capture_image_path,
+    i.item_code,
+    i.name AS item_name,
+    i.status AS current_item_status
+  FROM gate_logs g
+  LEFT JOIN items i ON g.epc_tag_scanned = i.epc_tag
+  WHERE g.action_status = 'denied'
+  ORDER BY g.created_at DESC
+  LIMIT ?;
+
+---
+
+# Tool: Ambil Daftar Barang Rusak / Dalam Pemeliharaan (M&R)
+kind: tool
+name: get_maintenance_items
+type: mysql-sql
+source: silamet-mysql
+description: Mengambil daftar tiket pemeliharaan dan alat praktikum yang sedang berstatus open atau in_progress.
+parameters: []
+statement: |
+  SELECT 
+    t.id AS ticket_id,
+    t.status AS ticket_status,
+    t.created_at AS reported_at,
+    t.updated_at,
+    t.issue_description,
+    i.item_code,
+    i.name AS item_name,
+    i.status AS item_status,
+    i.location,
+    u.name AS reporter_name
+  FROM maintenance_tickets t
+  JOIN items i ON t.item_id = i.id
+  LEFT JOIN users u ON t.reported_by = u.id
+  WHERE t.status IN ('open', 'in_progress')
+    AND t.deleted_at IS NULL
+  ORDER BY t.created_at DESC;
+
+---
+
+# Tool: Eksekusi Kueri SQL Terkontrol (Read-Only Safety)
+kind: tool
+name: execute_silamet_query
+type: mysql-sql
+source: silamet-mysql
+description: Menjalankan kueri SELECT khusus untuk inspeksi data atau statistik laboratorium db_silamet.
+templateParameters:
+  - name: sql_query
+    type: string
+    description: Perintah SQL kueri SELECT (hanya kueri baca).
+statement: |
+  {{.sql_query}}
+
+---
+
+# 3. TOOLSET GROUP DEFINITION
+kind: toolset
+name: silamet_toolbox
+tools:
+  - get_item_by_code
+  - get_active_loans_by_nis
+  - get_recent_gate_incidents
+  - get_maintenance_items
+  - execute_silamet_query
+

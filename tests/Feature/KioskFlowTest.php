@@ -19,8 +19,10 @@ class KioskFlowTest extends TestCase
         $response = $this->get('/kiosk');
 
         $response->assertStatus(200);
-        $response->assertSee('KIOSK MANDIRI');
-        $response->assertSee('Silakan Tempel / Scan Barcode Kartu Pelajar');
+        $response->assertSee('SILAMET');
+        $response->assertSee('Barcode Kartu Pelajar');
+        $response->assertDontSee('KIOSK MANDIRI');
+        $response->assertDontSee('Laboratorium SIJA');
     }
 
     public function test_kiosk_root_redirects_or_shows_kiosk(): void
@@ -28,7 +30,9 @@ class KioskFlowTest extends TestCase
         $response = $this->get('/');
 
         $response->assertStatus(200);
-        $response->assertSee('KIOSK MANDIRI');
+        $response->assertSee('SILAMET');
+        $response->assertSee('Pengembalian Barang Mandiri');
+        $response->assertDontSee('KIOSK MANDIRI');
     }
 
     public function test_kiosk_login_endpoint_returns_phone_field(): void

@@ -2,7 +2,14 @@
     "private": true,
     "scripts": {
         "build": "vite build",
-        "dev": "vite"
+        "dev": "vite",
+        "serve": "php artisan serve",
+        "gate": "python hardware/gate_listener.py",
+        "gate:sim": "python hardware/gate_listener.py --simulate",
+        "queue": "php artisan queue:work --sleep=0.25 --tries=3 --timeout=15",
+        "schedule": "php artisan schedule:work",
+        "start:all": "concurrently -n \"SERVER,VITE,HARDWARE,QUEUE,SCHED\" -c \"blue,green,magenta,cyan,yellow\" \"php artisan serve --port=8000\" \"npm run dev\" \"python hardware/gate_listener.py\" \"php artisan queue:work --sleep=0.25 --tries=3 --timeout=15\" \"php artisan schedule:work\"",
+        "start:sim": "concurrently -n \"SERVER,VITE,HARDWARE,QUEUE,SCHED\" -c \"blue,green,magenta,cyan,yellow\" \"php artisan serve --port=8000\" \"npm run dev\" \"python hardware/gate_listener.py --simulate\" \"php artisan queue:work --sleep=0.25 --tries=3 --timeout=15\" \"php artisan schedule:work\""
     },
     "devDependencies": {
         "@tailwindcss/forms": "^0.5.2",

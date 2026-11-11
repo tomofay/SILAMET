@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Enums\ItemStatus;
 use App\Enums\TicketStatus;
 use App\Http\Controllers\Controller;
+use App\Jobs\SendMaintenanceTicketTelegramJob;
 use App\Models\Item;
 use App\Models\MaintenanceLog;
 use App\Models\MaintenanceTicket;
@@ -69,6 +70,10 @@ class MaintenanceApiController extends Controller
 
             return $ticket->load('item', 'reportedBy:id,name');
         });
+
+        if (config('services.telegram.enabled')) {
+            dispatch(new SendMaintenanceTicketTelegramJob($result->id, 'created'));
+        }
 
         return response()->json([
             'success' => true,
@@ -151,6 +156,10 @@ class MaintenanceApiController extends Controller
 
             return $ticket->fresh(['item']);
         });
+
+        if (config('services.telegram.enabled') && config('services.telegram.notify_ticket_resolved', false)) {
+            dispatch(new SendMaintenanceTicketTelegramJob($result->id, 'resolved'));
+        }
 
         return response()->json([
             'success' => true,

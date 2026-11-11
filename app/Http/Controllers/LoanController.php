@@ -9,6 +9,7 @@ use App\Models\Loan;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
 class LoanController extends Controller
@@ -161,5 +162,70 @@ class LoanController extends Controller
 
         return redirect()->route('loans.index')
             ->with('success', 'Loan berhasil dihapus.');
+    }
+
+    /**
+     * Sajikan foto snapshot verifikasi wajah peminjam secara aman (terproteksi auth staff).
+     */
+    public function photo(string $id)
+    {
+        $loan = Loan::findOrFail($id);
+        $path = ltrim((string) $loan->capture_image_path, '/\\');
+
+        if ($path === '' || str_contains($path, '..')) {
+            abort(404);
+        }
+
+        $disk = Storage::disk('public');
+
+        if ($disk->exists($path)) {
+            $contents = $disk->get($path);
+
+            if ($contents !== null && $contents !== '') {
+                return response($contents, 200, [
+                    'Content-Type' => $this->detectImageMime($contents, $path),
+                    'Cache-Control' => 'private, max-age=3600',
+                ]);
+            }
+        }
+
+        $publicFallback = public_path('storage/' . $path);
+        if (is_file($publicFallback)) {
+            $contents = @file_get_contents($publicFallback);
+            if ($contents !== false && $contents !== '') {
+                return response($contents, 200, [
+                    'Content-Type' => $this->detectImageMime($contents, $path),
+                    'Cache-Control' => 'private, max-age=3600',
+                ]);
+            }
+        }
+
+        abort(404);
+    }
+
+    private function detectImageMime(string $binary, string $path): string
+    {
+        if (str_starts_with($binary, "\xFF\xD8\xFF")) {
+            return 'image/jpeg';
+        }
+
+        if (str_starts_with($binary, "\x89PNG\r\n\x1a\n")) {
+            return 'image/png';
+        }
+
+        if (str_starts_with($binary, 'GIF87a') || str_starts_with($binary, 'GIF89a')) {
+            return 'image/gif';
+        }
+
+        if (strlen($binary) >= 12 && substr($binary, 0, 4) === 'RIFF' && substr($binary, 8, 4) === 'WEBP') {
+            return 'image/webp';
+        }
+
+        return match (strtolower(pathinfo($path, PATHINFO_EXTENSION))) {
+            'jpg', 'jpeg' => 'image/jpeg',
+            'gif' => 'image/gif',
+            'webp' => 'image/webp',
+            default => 'image/png',
+        };
     }
 }

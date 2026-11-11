@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\UserRole;
+use App\Exports\UserTemplateExport;
 use App\Imports\UsersImport;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -54,6 +55,7 @@ class UserController extends Controller
             'nis_nip'  => 'required|string|max:30|unique:users,nis_nip',
             'email'    => 'nullable|email|max:100|unique:users,email',
             'phone'    => 'nullable|string|max:20',
+            'telegram_chat_id' => 'nullable|string|max:32|unique:users,telegram_chat_id',
             'role'     => 'required|in:siswa,teknisi,kabeng,kaprog',
             'password' => 'nullable|string|min:6',
         ]);
@@ -94,6 +96,7 @@ class UserController extends Controller
             'nis_nip'  => "required|string|max:30|unique:users,nis_nip,$id",
             'email'    => "nullable|email|max:100|unique:users,email,$id",
             'phone'    => 'nullable|string|max:20',
+            'telegram_chat_id' => "nullable|string|max:32|unique:users,telegram_chat_id,$id",
             'role'     => 'required|in:siswa,teknisi,kabeng,kaprog',
             'password' => 'nullable|string|min:6',
         ]);
@@ -135,7 +138,7 @@ class UserController extends Controller
     public function import(Request $request)
     {
         $request->validate([
-            'file' => 'required|file|mimes:xlsx,xls,csv|max:2048',
+            'file' => 'required|file|mimes:xlsx,xls,csv,txt|max:5120',
         ]);
 
         try {
@@ -143,7 +146,18 @@ class UserController extends Controller
             Excel::import($import, $request->file('file'));
 
             $count = $import->getRowCount();
-            return back()->with('success', "Berhasil mengimpor {$count} user dari file Excel.");
+            $errors = $import->getErrors();
+
+            if ($count === 0 && !empty($errors)) {
+                return back()->with('error', 'Gagal import: ' . implode(' | ', array_slice($errors, 0, 3)));
+            }
+
+            $successMsg = "Berhasil mengimpor {$count} user dari file Excel.";
+            if (!empty($errors)) {
+                $successMsg .= " (" . count($errors) . " baris dilewati karena format tidak sesuai: " . implode('; ', array_slice($errors, 0, 2)) . ")";
+            }
+
+            return back()->with('success', $successMsg);
         } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
             $failures = $e->failures();
             $messages = [];
@@ -152,36 +166,17 @@ class UserController extends Controller
             }
             return back()->with('error', 'Gagal import: ' . implode(' | ', $messages));
         } catch (\Exception $e) {
-            return back()->with('error', 'Gagal import: ' . $e->getMessage());
+            return back()->with('error', 'Gagal memproses file Excel: ' . $e->getMessage());
         }
     }
 
     /**
-     * Download template Excel untuk import user.
+     * Download template Excel asli (.xlsx) untuk import user.
+     * Tabel otomatis terpisah per kolom di Microsoft Excel, Google Sheets, dll.
      */
     public function downloadTemplate()
     {
-        $headers = ['nama', 'nis_nip', 'email', 'phone', 'role'];
-        $examples = [
-            ['Budi Santoso', '12345', 'budi@email.com', '08123456789', 'siswa'],
-            ['Ibu Teknisi', 'NIP001', 'teknisi@silamet.id', '', 'teknisi'],
-        ];
-
-        $callback = function () use ($headers, $examples) {
-            $file = fopen('php://output', 'w');
-            // BOM for UTF-8
-            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
-            fputcsv($file, $headers);
-            foreach ($examples as $row) {
-                fputcsv($file, $row);
-            }
-            fclose($file);
-        };
-
-        return response()->stream($callback, 200, [
-            'Content-Type' => 'text/csv; charset=UTF-8',
-            'Content-Disposition' => 'attachment; filename="template_import_user_silamet.csv"',
-        ]);
+        return Excel::download(new UserTemplateExport, 'template_import_user_silamet.xlsx');
     }
 
     /**

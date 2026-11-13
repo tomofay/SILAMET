@@ -95,7 +95,20 @@
                 </div>
                 <div class="p-3.5 rounded-xl bg-neutral-50/70 border border-neutral-200/80">
                     <dt class="text-neutral-500 text-[11px] font-bold uppercase tracking-wider">Tipe Barang</dt>
-                    <dd class="font-semibold text-neutral-900 text-xs mt-1.5">{{ $item->type->label() }}</dd>
+                    <dd class="font-semibold text-neutral-900 text-xs mt-1.5 flex items-center gap-1.5">
+                        @if($item->type === \App\Enums\ItemType::BAHAN_HABIS_PAKAI)
+                            <svg class="w-3.5 h-3.5 text-amber-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M9 16v-8l-2 2" />
+                                <path d="M13 16l4-4" />
+                                <path d="M17 16l-4-4" />
+                            </svg>
+                        @else
+                            <svg class="w-3.5 h-3.5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 12c-2-2.67-4-4-6-4a4 4 0 1 0 0 8c2 0 4-1.33 6-4Zm0 0c2 2.67 4 4 6 4a4 4 0 0 0 0-8c-2 0-4 1.33-6 4Z" />
+                            </svg>
+                        @endif
+                        <span>{{ $item->type->label() }}</span>
+                    </dd>
                 </div>
                 <div class="p-3.5 rounded-xl bg-neutral-50/70 border border-neutral-200/80">
                     <dt class="text-neutral-500 text-[11px] font-bold uppercase tracking-wider">Stok Tersedia</dt>

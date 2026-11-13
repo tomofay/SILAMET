@@ -79,11 +79,28 @@
                             @endif
 
                             @if(in_array(auth()->user()?->role?->value, ['teknisi', 'kabeng', 'kaprog'], true))
-                                <x-sidebar-link :href="route('loans.index')" :active="request()->routeIs('loans.*')">
+                                @php
+                                    $activeLoanCountBadge = \App\Models\Loan::query()
+                                        ->whereIn('status', [\App\Enums\LoanStatus::AKTIF->value, \App\Enums\LoanStatus::MENUNGGU_APPROVAL_KEMBALI->value])
+                                        ->count();
+                                @endphp
+                                <x-sidebar-link :href="route('loans.index')" :active="request()->routeIs('loans.index') || request()->routeIs('loans.create') || request()->routeIs('loans.edit') || (request()->routeIs('loans.show') && (!isset($loan) || $loan->status?->value !== 'selesai'))">
                                     <svg class="w-4 h-4 mr-2.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
                                     </svg>
                                     <span>Peminjaman Alat</span>
+                                    @if($activeLoanCountBadge > 0)
+                                        <span class="ml-auto px-1.5 py-0.5 rounded-full font-mono text-[10px] font-bold bg-sky-500/20 text-sky-300 border border-sky-500/30">
+                                            {{ $activeLoanCountBadge }}
+                                        </span>
+                                    @endif
+                                </x-sidebar-link>
+
+                                <x-sidebar-link :href="route('loans.history')" :active="request()->routeIs('loans.history') || (request()->routeIs('loans.show') && isset($loan) && $loan->status?->value === 'selesai')">
+                                    <svg class="w-4 h-4 mr-2.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <span>Histori Peminjaman</span>
                                 </x-sidebar-link>
                             @endif
 

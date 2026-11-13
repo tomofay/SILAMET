@@ -44,6 +44,7 @@ Route::middleware(['auth', 'role:teknisi|kabeng|kaprog'])->group(function () {
     Route::post('stock-movements', [StockMovementController::class, 'store'])->name('stock-movements.store');
 
     // Peminjaman / Loans
+    Route::get('loans/history', [LoanController::class, 'history'])->name('loans.history');
     Route::get('loans/{loan}/photo', [LoanController::class, 'photo'])->name('loans.photo');
     Route::resource('loans', LoanController::class)->names([
         '' => 'loans.index',

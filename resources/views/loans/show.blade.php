@@ -6,13 +6,13 @@
         <!-- Top Action Bar (Dribbble Orbix Studio Header) -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-neutral-200">
             <div class="flex items-center gap-3">
-                <a href="{{ route('loans.index') }}"
+                <a href="{{ $loan->status->value === 'selesai' ? route('loans.history') : route('loans.index') }}"
                    class="p-2 rounded-full border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-600 hover:text-neutral-900 transition-colors shadow-sm inline-flex items-center gap-1.5"
-                   title="Kembali ke Daftar Peminjaman">
+                   title="Kembali">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
-                    <span class="text-xs font-semibold pr-1">Kembali ke Daftar Peminjaman</span>
+                    <span class="text-xs font-semibold pr-1">{{ $loan->status->value === 'selesai' ? 'Kembali ke Histori' : 'Kembali ke Peminjaman Aktif' }}</span>
                 </a>
                 <div>
                     <div class="flex items-center gap-2">

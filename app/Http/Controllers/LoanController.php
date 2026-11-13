@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\ItemStatus;
 use App\Enums\LoanDuration;
+use App\Enums\LoanStatus;
 use App\Models\Item;
 use App\Models\Loan;
 use App\Models\User;
@@ -15,12 +16,105 @@ use Illuminate\Validation\Rule;
 class LoanController extends Controller
 {
     /**
-     * Tampilkan daftar semua loan.
+     * Tampilkan daftar peminjaman yang sedang berlangsung (aktif / menunggu approval kembali).
      */
-    public function index()
+    public function index(Request $request)
     {
-        $loans = Loan::with(['user', 'item'])->latest()->paginate(15);
-        return view('loans.index', compact('loans'));
+        $search = trim((string) $request->query('q', ''));
+        $statusFilter = $request->query('status', '');
+
+        $query = Loan::with(['user', 'item'])
+            ->whereIn('status', [LoanStatus::AKTIF->value, LoanStatus::MENUNGGU_APPROVAL_KEMBALI->value]);
+
+        if ($statusFilter !== '' && in_array($statusFilter, [LoanStatus::AKTIF->value, LoanStatus::MENUNGGU_APPROVAL_KEMBALI->value], true)) {
+            $query->where('status', $statusFilter);
+        }
+
+        if ($search !== '') {
+            $query->where(function ($sub) use ($search) {
+                $sub->whereHas('user', function ($uq) use ($search) {
+                    $uq->where('name', 'like', "%{$search}%")
+                        ->orWhere('nis_nip', 'like', "%{$search}%");
+                })->orWhereHas('item', function ($iq) use ($search) {
+                    $iq->where('name', 'like', "%{$search}%")
+                        ->orWhere('item_code', 'like', "%{$search}%");
+                });
+            });
+        }
+
+        // Metrics for active circulation
+        $activeTotal = Loan::where('status', LoanStatus::AKTIF->value)->count();
+        $pendingApprovalTotal = Loan::where('status', LoanStatus::MENUNGGU_APPROVAL_KEMBALI->value)->count();
+        $overdueTotal = Loan::where('status', LoanStatus::AKTIF->value)
+            ->where('due_at', '<', now())
+            ->count();
+
+        $loans = $query->latest('borrowed_at')->paginate(15)->withQueryString();
+
+        return view('loans.index', compact(
+            'loans',
+            'search',
+            'statusFilter',
+            'activeTotal',
+            'pendingApprovalTotal',
+            'overdueTotal'
+        ));
+    }
+
+    /**
+     * Tampilkan histori rekapitulasi peminjaman alat yang telah selesai.
+     */
+    public function history(Request $request)
+    {
+        $search = trim((string) $request->query('q', ''));
+        $conditionFilter = $request->query('condition', '');
+        $startDate = $request->query('start_date', '');
+        $endDate = $request->query('end_date', '');
+
+        $query = Loan::with(['user', 'item'])
+            ->where('status', LoanStatus::SELESAI->value);
+
+        if ($search !== '') {
+            $query->where(function ($sub) use ($search) {
+                $sub->whereHas('user', function ($uq) use ($search) {
+                    $uq->where('name', 'like', "%{$search}%")
+                        ->orWhere('nis_nip', 'like', "%{$search}%");
+                })->orWhereHas('item', function ($iq) use ($search) {
+                    $iq->where('name', 'like', "%{$search}%")
+                        ->orWhere('item_code', 'like', "%{$search}%");
+                });
+            });
+        }
+
+        if ($conditionFilter !== '' && in_array($conditionFilter, ['bagus', 'rusak'], true)) {
+            $query->where('condition_in', $conditionFilter);
+        }
+
+        if ($startDate !== '') {
+            $query->whereDate('borrowed_at', '>=', $startDate);
+        }
+
+        if ($endDate !== '') {
+            $query->whereDate('borrowed_at', '<=', $endDate);
+        }
+
+        // Metrics for history
+        $completedTotal = Loan::where('status', LoanStatus::SELESAI->value)->count();
+        $goodConditionTotal = Loan::where('status', LoanStatus::SELESAI->value)->where('condition_in', 'bagus')->count();
+        $damagedConditionTotal = Loan::where('status', LoanStatus::SELESAI->value)->where('condition_in', 'rusak')->count();
+
+        $loans = $query->latest('returned_at')->paginate(15)->withQueryString();
+
+        return view('loans.history', compact(
+            'loans',
+            'search',
+            'conditionFilter',
+            'startDate',
+            'endDate',
+            'completedTotal',
+            'goodConditionTotal',
+            'damagedConditionTotal'
+        ));
     }
 
     /**
@@ -29,6 +123,7 @@ class LoanController extends Controller
     public function create()
     {
         $items = Item::where('status', ItemStatus::TERSEDIA)->get();
+
         return view('loans.create', compact('items'));
     }
 
@@ -46,9 +141,9 @@ class LoanController extends Controller
         ]);
 
         $itemIds = [];
-        if (!empty($validated['item_ids'])) {
+        if (! empty($validated['item_ids'])) {
             $itemIds = array_values(array_unique($validated['item_ids']));
-        } elseif (!empty($validated['item_id'])) {
+        } elseif (! empty($validated['item_id'])) {
             $itemIds = [$validated['item_id']];
         } else {
             return redirect()->back()
@@ -90,8 +185,8 @@ class LoanController extends Controller
             }
         });
 
-        $msg = $count > 1 
-            ? sprintf('Peminjaman %d barang berhasil dicatat.', $count) 
+        $msg = $count > 1
+            ? sprintf('Peminjaman %d barang berhasil dicatat.', $count)
             : 'Peminjaman berhasil dicatat.';
 
         return redirect()->route('loans.index')->with('success', $msg);
@@ -103,6 +198,7 @@ class LoanController extends Controller
     public function show(string $id)
     {
         $loan = Loan::with(['user', 'item'])->findOrFail($id);
+
         return view('loans.show', compact('loan'));
     }
 
@@ -112,6 +208,7 @@ class LoanController extends Controller
     public function edit(string $id)
     {
         $loan = Loan::findOrFail($id);
+
         return view('loans.edit', compact('loan'));
     }
 
@@ -189,7 +286,7 @@ class LoanController extends Controller
             }
         }
 
-        $publicFallback = public_path('storage/' . $path);
+        $publicFallback = public_path('storage/'.$path);
         if (is_file($publicFallback)) {
             $contents = @file_get_contents($publicFallback);
             if ($contents !== false && $contents !== '') {

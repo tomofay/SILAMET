@@ -1,22 +1,34 @@
 <x-app-layout>
-    <x-slot name="heading">Daftar Peminjaman Alat</x-slot>
-    <x-slot name="title">Peminjaman Alat — SILAMET</x-slot>
+    <x-slot name="heading">Peminjaman Alat Aktif</x-slot>
+    <x-slot name="title">Peminjaman Alat Aktif — SILAMET</x-slot>
 
     <div class="space-y-6 max-w-7xl mx-auto">
         
         <!-- Top Action Bar (Dribbble Orbix Studio Header) -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-neutral-200">
             <div>
-                <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-neutral-900 font-heading">
-                    Sirkulasi Peminjaman Alat
-                </h1>
-                <p class="text-xs text-neutral-500 mt-0.5">
-                    Pemantauan sirkulasi perangkat praktikum siswa via Kiosk mandiri dan pencatatan staf teknisi.
+                <div class="flex items-center gap-2.5">
+                    <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-neutral-900 font-heading">
+                        Sirkulasi Peminjaman Alat Aktif
+                    </h1>
+                    <span class="px-2.5 py-0.5 rounded-full text-xs font-mono font-semibold bg-sky-50 text-sky-700 border border-sky-200">
+                        {{ $activeTotal + $pendingApprovalTotal }} Sedang Berlangsung
+                    </span>
+                </div>
+                <p class="text-xs text-neutral-500 mt-1">
+                    Daftar unit praktikum yang saat ini sedang dipinjam siswa dan belum selesai dikembalikan ke lab.
                 </p>
             </div>
 
             <!-- Top Right Action Buttons -->
-            <div class="flex items-center gap-2.5">
+            <div class="flex items-center gap-2.5 flex-wrap">
+                <a href="{{ route('loans.history') }}"
+                   class="px-4 py-2 rounded-full border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-700 text-xs font-semibold transition-colors shadow-2xs inline-flex items-center gap-1.5">
+                    <svg class="w-4 h-4 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>Histori Peminjaman</span>
+                </a>
                 <a href="{{ route('loans.create') }}"
                    class="px-5 py-2 rounded-full bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-semibold transition-colors shadow-sm inline-flex items-center gap-1.5">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -25,6 +37,97 @@
                     <span>Catat Peminjaman Baru</span>
                 </a>
             </div>
+        </div>
+
+        <!-- 3 Executive Metric Cards (Orbix Studio Style) -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="bg-white rounded-2xl border border-neutral-200 p-4 shadow-sm flex items-center gap-3.5">
+                <div class="w-10 h-10 rounded-xl bg-sky-50 border border-sky-100 flex items-center justify-center text-sky-600 shrink-0">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                    </svg>
+                </div>
+                <div>
+                    <div class="text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Aktif Dipinjam</div>
+                    <div class="flex items-baseline gap-1.5 mt-0.5">
+                        <span class="text-xl font-extrabold text-neutral-900 font-heading">{{ $activeTotal }}</span>
+                        <span class="text-xs text-neutral-400">unit di luar lab</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl border border-neutral-200 p-4 shadow-sm flex items-center gap-3.5">
+                <div class="w-10 h-10 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600 shrink-0">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div>
+                    <div class="text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Menunggu Approval</div>
+                    <div class="flex items-baseline gap-1.5 mt-0.5">
+                        <span class="text-xl font-extrabold text-neutral-900 font-heading">{{ $pendingApprovalTotal }}</span>
+                        <span class="text-xs text-neutral-400">perlu verifikasi</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl border border-neutral-200 p-4 shadow-sm flex items-center gap-3.5">
+                <div class="w-10 h-10 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-600 shrink-0">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </div>
+                <div>
+                    <div class="text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Terlambat (Overdue)</div>
+                    <div class="flex items-baseline gap-1.5 mt-0.5">
+                        <span class="text-xl font-extrabold text-rose-600 font-heading">{{ $overdueTotal }}</span>
+                        <span class="text-xs text-neutral-400">lewat jatuh tempo</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter & Search Capsule Bar -->
+        <div class="bg-white rounded-2xl border border-neutral-200 p-4 shadow-sm">
+            <form method="GET" action="{{ route('loans.index') }}" class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                <!-- Status Pills -->
+                <div class="inline-flex items-center p-1 rounded-full bg-neutral-100 border border-neutral-200/80 gap-1 flex-wrap">
+                    <a href="{{ route('loans.index', array_filter(['q' => $search])) }}"
+                       class="px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors {{ $statusFilter === '' ? 'bg-neutral-900 text-white shadow-2xs' : 'text-neutral-600 hover:text-neutral-900' }}">
+                        Semua Berlangsung
+                    </a>
+                    <a href="{{ route('loans.index', array_filter(['status' => 'aktif', 'q' => $search])) }}"
+                       class="px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors {{ $statusFilter === 'aktif' ? 'bg-neutral-900 text-white shadow-2xs' : 'text-neutral-600 hover:text-neutral-900' }}">
+                        Aktif Dipinjam
+                    </a>
+                    <a href="{{ route('loans.index', array_filter(['status' => 'menunggu_approval_kembali', 'q' => $search])) }}"
+                       class="px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors {{ $statusFilter === 'menunggu_approval_kembali' ? 'bg-neutral-900 text-white shadow-2xs' : 'text-neutral-600 hover:text-neutral-900' }}">
+                        Menunggu Approval
+                    </a>
+                </div>
+
+                <!-- Search Input -->
+                <div class="flex items-center gap-2 w-full md:w-auto">
+                    @if(filled($statusFilter))
+                        <input type="hidden" name="status" value="{{ $statusFilter }}">
+                    @endif
+                    <div class="relative w-full md:w-72">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-neutral-400">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </div>
+                        <input type="text" name="q" value="{{ $search }}"
+                               placeholder="Cari siswa, NIS, atau barang..."
+                               class="w-full pl-9 pr-3 py-1.5 text-xs rounded-xl border-neutral-200 focus:border-primary focus:ring-primary bg-neutral-50/50 focus:bg-white transition-colors" />
+                    </div>
+                    @if(filled($search) || filled($statusFilter))
+                        <a href="{{ route('loans.index') }}" class="px-3 py-1.5 rounded-xl border border-neutral-200 text-xs font-semibold text-neutral-500 hover:text-neutral-800 bg-white transition-colors whitespace-nowrap">
+                            Reset
+                        </a>
+                    @endif
+                </div>
+            </form>
         </div>
 
         <!-- Table Card (Rounded-2xl Container ala Dribbble) -->
@@ -38,7 +141,6 @@
                             <th class="px-5 py-3.5 text-left text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Durasi</th>
                             <th class="px-5 py-3.5 text-left text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Waktu Pinjam</th>
                             <th class="px-5 py-3.5 text-left text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Batas Waktu</th>
-                            <th class="px-5 py-3.5 text-left text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Kondisi Balik</th>
                             <th class="px-5 py-3.5 text-left text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Status</th>
                             <th class="px-5 py-3.5 text-right text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Aksi</th>
                         </tr>
@@ -85,20 +187,10 @@
                                     @endif
                                 </td>
                                 <td class="px-5 py-4 whitespace-nowrap">
-                                    @if($loan->condition_in)
-                                        <span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full border {{ $loan->condition_in === 'bagus' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200' }}">
-                                            {{ $loan->condition_in === 'bagus' ? 'Kondisi Bagus' : 'Rusak/Kendala' }}
-                                        </span>
-                                    @else
-                                        <span class="text-neutral-400 text-xs font-mono">—</span>
-                                    @endif
-                                </td>
-                                <td class="px-5 py-4 whitespace-nowrap">
                                     @php
                                         $lbadge = match($loan->status->value) {
                                             'aktif' => 'bg-sky-50 text-sky-700 border-sky-200',
                                             'menunggu_approval_kembali' => 'bg-amber-50 text-amber-800 border-amber-200',
-                                            'selesai' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
                                             default => 'bg-neutral-100 text-neutral-600 border-neutral-200',
                                         };
                                     @endphp
@@ -109,14 +201,19 @@
                                 <td class="px-5 py-4 text-right whitespace-nowrap">
                                     <div class="inline-flex items-center justify-end gap-1.5">
                                         @if($loan->capture_image_path)
-                                            <a href="{{ route('loans.show', $loan->id) }}" class="p-1.5 rounded-lg border border-neutral-200 bg-white hover:bg-neutral-50 text-sky-600 hover:text-sky-700 transition-colors shadow-sm" title="Lihat Foto Verifikasi Kiosk" aria-label="Foto Peminjam {{ $loan->id }}">
+                                            <a href="{{ route('loans.show', $loan->id) }}" class="p-1.5 rounded-lg border border-neutral-200 bg-white hover:bg-neutral-50 text-sky-600 hover:text-sky-700 transition-colors shadow-2xs" title="Lihat Foto Verifikasi Kiosk" aria-label="Foto Peminjam {{ $loan->id }}">
                                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                                                 </svg>
                                             </a>
                                         @endif
-                                        <a href="{{ route('loans.show', $loan->id) }}" class="p-1.5 rounded-lg border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-600 hover:text-neutral-900 transition-colors shadow-sm" title="Detail Peminjaman" aria-label="Detail Peminjaman {{ $loan->id }}">
+                                        <a href="{{ route('loans.edit', $loan->id) }}" class="p-1.5 rounded-lg border border-neutral-200 bg-white hover:bg-neutral-50 text-emerald-600 hover:text-emerald-700 transition-colors shadow-2xs" title="Proses Pengembalian / Update Status" aria-label="Proses Kembali {{ $loan->id }}">
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                        </a>
+                                        <a href="{{ route('loans.show', $loan->id) }}" class="p-1.5 rounded-lg border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-600 hover:text-neutral-900 transition-colors shadow-2xs" title="Detail Peminjaman" aria-label="Detail Peminjaman {{ $loan->id }}">
                                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
@@ -127,17 +224,25 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="py-16 px-4 text-center">
+                                <td colspan="7" class="py-16 px-4 text-center">
                                     <div class="flex flex-col items-center justify-center max-w-sm mx-auto">
                                         <div class="w-14 h-14 rounded-2xl bg-neutral-100 border border-neutral-200 flex items-center justify-center text-neutral-400 mb-3 shadow-inner">
                                             <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                             </svg>
                                         </div>
-                                        <h3 class="font-heading font-bold text-neutral-900 text-sm">Belum Ada Catatan Peminjaman</h3>
+                                        <h3 class="font-heading font-bold text-neutral-900 text-sm">Tidak Ada Peminjaman Sedang Berlangsung</h3>
                                         <p class="text-xs text-neutral-500 mt-1 text-center">
-                                            Siswa dapat meminjam langsung di Kiosk Layanan Mandiri atau dicatat manual.
+                                            Semua alat praktikum lab SIJA saat ini berada di ruang penyimpanan dan siap digunakan.
                                         </p>
+                                        <div class="mt-4 flex items-center gap-2">
+                                            <a href="{{ route('loans.history') }}" class="px-3.5 py-1.5 rounded-full border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-700 text-xs font-semibold transition-colors shadow-2xs">
+                                                Lihat Histori Selesai
+                                            </a>
+                                            <a href="{{ route('loans.create') }}" class="px-3.5 py-1.5 rounded-full bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-semibold transition-colors shadow-2xs">
+                                                Catat Pinjam
+                                            </a>
+                                        </div>
                                     </div>
                                 </td>
                             </tr>

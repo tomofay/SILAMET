@@ -20,6 +20,7 @@ class Loan extends Model
         'quantity_borrowed',
         'status',
         'condition_in',
+        'damage_note',
         'capture_image_path',
         'usage_duration',
         'borrowed_at',
@@ -97,5 +98,27 @@ class Loan extends Model
         }
 
         return \App\Services\TelegramService::formatOverdueDuration($this->due_at, $reference);
+    }
+
+    /**
+     * Dapatkan keterangan kerusakan saat pengembalian barang.
+     */
+    public function damageNote(): ?string
+    {
+        if (filled($this->damage_note)) {
+            return $this->damage_note;
+        }
+
+        if ($this->condition_in === 'rusak') {
+            $ticket = MaintenanceTicket::where('item_id', $this->item_id)
+                ->where('reported_by', $this->user_id)
+                ->when($this->borrowed_at, fn ($q) => $q->where('created_at', '>=', $this->borrowed_at->subMinutes(5)))
+                ->latest()
+                ->first();
+
+            return $ticket?->issue_description;
+        }
+
+        return null;
     }
 }

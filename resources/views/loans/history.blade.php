@@ -20,23 +20,7 @@
                 </p>
             </div>
 
-            <!-- Top Right Action Buttons -->
-            <div class="flex items-center gap-2.5 flex-wrap">
-                <a href="{{ route('loans.index') }}"
-                   class="px-4 py-2 rounded-full border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-700 text-xs font-semibold transition-colors shadow-2xs inline-flex items-center gap-1.5">
-                    <svg class="w-4 h-4 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-                    </svg>
-                    <span>Peminjaman Aktif</span>
-                </a>
-                <a href="{{ route('reports.dashboard', ['type' => 'loans']) }}"
-                   class="px-4 py-2 rounded-full border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-700 text-xs font-semibold transition-colors shadow-2xs inline-flex items-center gap-1.5">
-                    <svg class="w-4 h-4 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                    <span>Ekspor Laporan</span>
-                </a>
-            </div>
+            <!-- Top Right Action Buttons (Dibersihkan sesuai instruksi) -->
         </div>
 
         <!-- 3 Executive Metric Cards (Orbix Studio Style) -->
@@ -192,11 +176,23 @@
                                 <td class="px-5 py-4 font-mono text-xs text-neutral-600 whitespace-nowrap">
                                     {{ optional($loan->returned_at)->format('d/m/Y H:i') ?? '—' }}
                                 </td>
-                                <td class="px-5 py-4 whitespace-nowrap">
+                                <td class="px-5 py-4">
                                     @if($loan->condition_in)
-                                        <span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full border {{ $loan->condition_in === 'bagus' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200' }}">
-                                            {{ $loan->condition_in === 'bagus' ? 'Kondisi Bagus' : 'Rusak/Kendala' }}
-                                        </span>
+                                        <div>
+                                            <span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full border {{ $loan->condition_in === 'bagus' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200' }}">
+                                                {{ $loan->condition_in === 'bagus' ? 'Kondisi Bagus' : 'Rusak / Kendala' }}
+                                            </span>
+                                            @if($loan->condition_in === 'rusak')
+                                                @php
+                                                    $dNote = $loan->damageNote();
+                                                @endphp
+                                                @if(filled($dNote))
+                                                    <div class="text-[11px] text-rose-800 font-medium mt-1 max-w-xs break-words" title="{{ $dNote }}">
+                                                        {{ Str::limit($dNote, 50) }}
+                                                    </div>
+                                                @endif
+                                            @endif
+                                        </div>
                                     @else
                                         <span class="text-neutral-400 text-xs font-mono">—</span>
                                     @endif
@@ -222,6 +218,15 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                             </svg>
                                         </a>
+                                        <form method="POST" action="{{ route('loans.destroy', $loan->id) }}" class="inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus catatan histori peminjaman ini?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="p-1.5 rounded-lg border border-neutral-200 bg-white hover:bg-rose-50 text-neutral-500 hover:text-rose-600 hover:border-rose-200 transition-colors shadow-2xs" title="Hapus Catatan Histori" aria-label="Hapus Histori {{ $loan->id }}">
+                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                            </button>
+                                        </form>
                                     </div>
                                 </td>
                             </tr>

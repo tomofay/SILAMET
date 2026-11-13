@@ -6,7 +6,7 @@
         <!-- Action Header Bar (Orbix Studio style) -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-neutral-200/80">
             <div class="flex items-center gap-3">
-                <a href="{{ route('loans.show', $loan->id) }}" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-neutral-200 bg-white text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50 shadow-sm transition-colors">
+                <a href="{{ route('loans.index') }}" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-neutral-200 bg-white text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50 shadow-sm transition-colors" title="Kembali ke Daftar Peminjaman">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
@@ -19,7 +19,7 @@
                 </div>
             </div>
             <div class="flex items-center gap-2">
-                <a href="{{ route('loans.show', $loan->id) }}" class="px-4 py-2 rounded-full border border-neutral-200 bg-white hover:bg-neutral-50 text-xs font-semibold text-neutral-700 shadow-sm transition-colors">
+                <a href="{{ route('loans.index') }}" class="px-4 py-2 rounded-full border border-neutral-200 bg-white hover:bg-neutral-50 text-xs font-semibold text-neutral-700 shadow-sm transition-colors">
                     Batal
                 </a>
                 <button type="submit" form="edit-loan-form" class="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-neutral-900 hover:bg-neutral-800 text-xs font-semibold text-white shadow-sm transition-colors">
@@ -35,7 +35,11 @@
             @csrf
             @method('PUT')
 
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start"
+                 x-data="{
+                     loanStatus: '{{ old('status', $loan->status->value) }}',
+                     condition: '{{ old('condition_in', $loan->condition_in ?? 'bagus') }}'
+                 }">
                 <!-- Main Form (Left 8 Cols) -->
                 <div class="lg:col-span-8 space-y-6">
                     <div class="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm space-y-5">
@@ -46,12 +50,35 @@
 
                         <div>
                             <x-input-label for="status" value="Status Peminjaman *" />
-                            <select id="status" name="status" class="mt-1.5 w-full rounded-xl border-neutral-200 text-sm focus:border-neutral-900 focus:ring-neutral-900" required>
-                                <option value="aktif" @selected(old('status', $loan->status->value) === 'aktif')>Aktif (Sedang Dipinjam)</option>
-                                <option value="menunggu_approval_kembali" @selected(old('status', $loan->status->value) === 'menunggu_approval_kembali')>Menunggu Approval Kembali</option>
-                                <option value="selesai" @selected(old('status', $loan->status->value) === 'selesai')>Selesai (Sudah Dikembalikan)</option>
+                            <select id="status" name="status" x-model="loanStatus" class="mt-1.5 w-full rounded-xl border-neutral-200 text-sm focus:border-neutral-900 focus:ring-neutral-900" required>
+                                <option value="aktif">Aktif (Sedang Dipinjam)</option>
+                                <option value="menunggu_approval_kembali">Menunggu Approval Kembali</option>
+                                <option value="selesai">Selesai (Sudah Dikembalikan)</option>
                             </select>
                             <x-input-error :messages="$errors->get('status')" class="mt-2" />
+                        </div>
+
+                        <!-- Opsi Kondisi Barang Saat Kembali -->
+                        <div x-show="loanStatus === 'selesai'" x-transition class="space-y-4 pt-4 border-t border-neutral-100">
+                            <div>
+                                <x-input-label for="condition_in" value="Kondisi Fisik Saat Pengembalian *" />
+                                <select id="condition_in" name="condition_in" x-model="condition" class="mt-1.5 w-full rounded-xl border-neutral-200 text-sm focus:border-neutral-900 focus:ring-neutral-900">
+                                    <option value="bagus">Kondisi Bagus / Normal</option>
+                                    <option value="rusak">Rusak / Bermasalah</option>
+                                </select>
+                                <x-input-error :messages="$errors->get('condition_in')" class="mt-2" />
+                            </div>
+
+                            <div x-show="condition === 'rusak'" x-transition class="space-y-1.5">
+                                <x-input-label for="damage_note" value="Penjelasan Kerusakan / Kendala Alat *" />
+                                <textarea id="damage_note"
+                                          name="damage_note"
+                                          rows="3"
+                                          placeholder="Jelaskan bagian alat yang rusak, patah, hilang kelengkapan, atau gagal fungsi..."
+                                          class="mt-1.5 w-full rounded-xl border-neutral-200 text-sm focus:border-rose-600 focus:ring-rose-600">{{ old('damage_note', $loan->damageNote()) }}</textarea>
+                                <p class="text-[11px] text-neutral-500">Penjelasan ini akan tercatat di histori peminjaman dan otomatis membuka tiket maintenance untuk teknisi.</p>
+                                <x-input-error :messages="$errors->get('damage_note')" class="mt-2" />
+                            </div>
                         </div>
                     </div>
                 </div>

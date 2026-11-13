@@ -142,4 +142,63 @@ class LoanActiveAndHistoryTest extends TestCase
         $indexResponse->assertOk()
             ->assertSee('15 pcs');
     }
+
+    public function test_can_delete_active_loan_and_restores_item_status(): void
+    {
+        $teknisi = User::factory()->teknisi()->create();
+        $student = User::factory()->siswa()->create();
+        $item = Item::factory()->borrowed()->create();
+
+        $loan = Loan::factory()->create([
+            'user_id' => $student->id,
+            'item_id' => $item->id,
+            'status' => LoanStatus::AKTIF,
+        ]);
+
+        $response = $this->actingAs($teknisi)->delete(route('loans.destroy', $loan->id));
+        $response->assertRedirect();
+
+        $this->assertDatabaseMissing('loans', ['id' => $loan->id]);
+        $this->assertEquals(\App\Enums\ItemStatus::TERSEDIA, $item->fresh()->status);
+    }
+
+    public function test_damaged_loan_displays_damage_explanation_in_history_and_show(): void
+    {
+        $teknisi = User::factory()->teknisi()->create();
+        $student = User::factory()->siswa()->create(['name' => 'Ahmad Fadhil']);
+        $item = Item::factory()->create(['name' => 'MikroTik RB750Gr3']);
+
+        $loan = Loan::factory()->create([
+            'user_id' => $student->id,
+            'item_id' => $item->id,
+            'status' => LoanStatus::SELESAI,
+            'condition_in' => 'rusak',
+            'damage_note' => 'Port Ethernet 3 patah pin dalamnya',
+            'returned_at' => now(),
+        ]);
+
+        // History page shows badge and damage note
+        $historyResponse = $this->actingAs($teknisi)->get(route('loans.history'));
+        $historyResponse->assertOk()
+            ->assertSee('Rusak / Kendala')
+            ->assertSee('Port Ethernet 3 patah pin dalamnya');
+
+        // Show page shows detailed damage alert
+        $showResponse = $this->actingAs($teknisi)->get(route('loans.show', $loan->id));
+        $showResponse->assertOk()
+            ->assertSee('Penjelasan Kerusakan / Kendala Saat Pengembalian:')
+            ->assertSee('Port Ethernet 3 patah pin dalamnya')
+            ->assertSee('Hapus Peminjaman');
+    }
+
+    public function test_edit_loan_back_button_points_to_loans_index(): void
+    {
+        $teknisi = User::factory()->teknisi()->create();
+        $loan = Loan::factory()->create(['status' => LoanStatus::AKTIF]);
+
+        $response = $this->actingAs($teknisi)->get(route('loans.edit', $loan->id));
+        $response->assertOk()
+            ->assertSee(route('loans.index'))
+            ->assertDontSee('href="'.route('loans.show', $loan->id).'"', false);
+    }
 }

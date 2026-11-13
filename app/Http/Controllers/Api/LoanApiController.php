@@ -145,8 +145,13 @@ class LoanApiController extends Controller
             }
 
             $item = Item::query()->lockForUpdate()->findOrFail($loan->item_id);
+            $issueDesc = ($validated['condition_in'] === 'rusak')
+                ? (! empty($validated['issue_description']) ? trim($validated['issue_description']) : 'Barang dikembalikan dalam kondisi rusak. Silakan periksa fisik barang.')
+                : null;
+
             $loan->update([
                 'condition_in' => $validated['condition_in'],
+                'damage_note' => $issueDesc,
                 'status' => LoanStatus::SELESAI,
                 'returned_at' => now(),
             ]);
@@ -154,9 +159,6 @@ class LoanApiController extends Controller
             $ticketId = null;
 
             if ($validated['condition_in'] === 'rusak') {
-                $issueDesc = ! empty($validated['issue_description'])
-                    ? trim($validated['issue_description'])
-                    : 'Barang dikembalikan dalam kondisi rusak. Silakan periksa fisik barang.';
                 $ticket = MaintenanceTicket::create([
                     'item_id' => $item->id,
                     'reported_by' => $loan->user_id,
@@ -352,17 +354,18 @@ class LoanApiController extends Controller
                     $hasDamaged = true;
                 }
 
+                $description = ($condition === 'rusak')
+                    ? (! empty($entry['issue_description']) ? $entry['issue_description'] : 'Barang dikembalikan dalam kondisi rusak melalui Kiosk Mandiri.')
+                    : null;
+
                 $activeLoan->update([
                     'condition_in' => $condition,
+                    'damage_note' => $description,
                     'status' => LoanStatus::SELESAI,
                     'returned_at' => now(),
                 ]);
 
                 if ($condition === 'rusak') {
-                    $description = ! empty($entry['issue_description'])
-                        ? $entry['issue_description']
-                        : 'Barang dikembalikan dalam kondisi rusak melalui Kiosk Mandiri.';
-
                     $ticket = MaintenanceTicket::create([
                         'item_id' => $lockedItem->id,
                         'reported_by' => $user->id,

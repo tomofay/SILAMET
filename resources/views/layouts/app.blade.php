@@ -210,13 +210,6 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
                         </svg>
                     </button>
-                    @if(isset($heading) && filled($heading))
-                        <div>
-                            <h1 class="text-neutral-900 font-bold text-base tracking-tight font-heading">
-                                {{ $heading }}
-                            </h1>
-                        </div>
-                    @endif
                 </div>
 
                 <div class="flex items-center gap-3">

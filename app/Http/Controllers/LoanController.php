@@ -226,19 +226,43 @@ class LoanController extends Controller
 
         $validated = $request->validate([
             'status' => 'required|in:aktif,menunggu_approval_kembali,selesai',
+            'condition_in' => 'nullable|in:bagus,rusak',
+            'damage_note' => 'nullable|string|max:1000',
         ]);
 
         DB::transaction(function () use ($loan, $validated) {
             $item = $loan->item;
 
             if ($validated['status'] === 'selesai') {
+                $condition = $validated['condition_in'] ?? $loan->condition_in ?? 'bagus';
+                $damageNote = ($condition === 'rusak')
+                    ? ($validated['damage_note'] ?? $loan->damageNote() ?? 'Barang dilaporkan rusak saat pengembalian.')
+                    : null;
+
                 $loan->update([
                     'status' => $validated['status'],
+                    'condition_in' => $condition,
+                    'damage_note' => $damageNote,
                     'returned_at' => $loan->returned_at ?? now(),
                 ]);
-                // Barang dikembalikan → tersedia (bila sebelumnya dipinjam)
-                if ($item && $item->status === ItemStatus::DIPINJAM) {
-                    $item->update(['status' => ItemStatus::TERSEDIA]);
+
+                if ($item) {
+                    if ($condition === 'rusak') {
+                        $item->update(['status' => ItemStatus::UNDER_MAINTENANCE]);
+                        $hasOpenTicket = \App\Models\MaintenanceTicket::where('item_id', $item->id)
+                            ->whereIn('status', ['open', 'in_progress'])
+                            ->exists();
+                        if (! $hasOpenTicket) {
+                            \App\Models\MaintenanceTicket::create([
+                                'item_id' => $item->id,
+                                'reported_by' => $loan->user_id,
+                                'issue_description' => $damageNote,
+                                'status' => 'open',
+                            ]);
+                        }
+                    } elseif ($item->status === ItemStatus::DIPINJAM) {
+                        $item->update(['status' => ItemStatus::TERSEDIA]);
+                    }
                 }
             } elseif ($validated['status'] === 'aktif' && $item && $item->status !== ItemStatus::DIPINJAM) {
                 $loan->update(['status' => 'aktif', 'returned_at' => null]);
@@ -251,7 +275,7 @@ class LoanController extends Controller
         });
 
         return redirect()->route('loans.index')
-            ->with('success', 'Status loan diperbarui.');
+            ->with('success', 'Status peminjaman berhasil diperbarui.');
     }
 
     /**
@@ -259,11 +283,17 @@ class LoanController extends Controller
      */
     public function destroy(string $id)
     {
-        $loan = Loan::findOrFail($id);
-        $loan->delete();
+        $loan = Loan::with('item')->findOrFail($id);
 
-        return redirect()->route('loans.index')
-            ->with('success', 'Loan berhasil dihapus.');
+        DB::transaction(function () use ($loan) {
+            if ($loan->status !== LoanStatus::SELESAI && $loan->item && $loan->item->status === ItemStatus::DIPINJAM) {
+                $loan->item->update(['status' => ItemStatus::TERSEDIA]);
+            }
+            $loan->delete();
+        });
+
+        return redirect()->back()
+            ->with('success', 'Catatan peminjaman berhasil dihapus.');
     }
 
     /**

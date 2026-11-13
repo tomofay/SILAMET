@@ -23,6 +23,27 @@
                     <p class="text-xs text-neutral-500 font-mono mt-0.5">Waktu pinjam: {{ optional($loan->borrowed_at)->format('d/m/Y H:i') }}</p>
                 </div>
             </div>
+
+            <div class="flex items-center gap-2">
+                @if($loan->status->value !== 'selesai')
+                    <a href="{{ route('loans.edit', $loan->id) }}" class="px-4 py-2 rounded-full border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-700 text-xs font-semibold transition-colors shadow-2xs inline-flex items-center gap-1.5">
+                        <svg class="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>Ubah Status / Kembali</span>
+                    </a>
+                @endif
+                <form method="POST" action="{{ route('loans.destroy', $loan->id) }}" onsubmit="return confirm('Apakah Anda yakin ingin menghapus catatan peminjaman ini?')">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="px-4 py-2 rounded-full border border-neutral-200 bg-white hover:bg-rose-50 text-rose-600 hover:border-rose-200 text-xs font-semibold transition-colors shadow-2xs inline-flex items-center gap-1.5">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        <span>Hapus Peminjaman</span>
+                    </button>
+                </form>
+            </div>
         </div>
 
         <!-- Info Peminjaman (Rounded-2xl Card) -->
@@ -100,6 +121,23 @@
                     </dd>
                 </div>
             </dl>
+
+            @if($loan->condition_in === 'rusak')
+                @php
+                    $damageExplanation = $loan->damageNote();
+                @endphp
+                <div class="mt-4 p-4 rounded-xl bg-rose-50 border border-rose-200">
+                    <div class="flex items-center gap-2 text-rose-800 font-bold text-xs font-heading">
+                        <svg class="w-4 h-4 text-rose-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        <span>Penjelasan Kerusakan / Kendala Saat Pengembalian:</span>
+                    </div>
+                    <p class="mt-1.5 text-xs text-rose-900 leading-relaxed font-medium">
+                        {{ $damageExplanation ?: 'Barang dilaporkan rusak saat pengembalian (tidak ada rincian catatan tambahan).' }}
+                    </p>
+                </div>
+            @endif
 
             <div class="mt-6 pt-5 border-t border-neutral-100">
                 <dt class="text-neutral-500 text-[11px] font-bold uppercase tracking-wider font-heading mb-3">Foto Verifikasi Peminjam (Kiosk)</dt>

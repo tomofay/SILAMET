@@ -80,8 +80,8 @@
                             @click="itemType = 'aset'"
                             :class="itemType === 'aset' ? 'bg-neutral-900 text-white shadow-sm' : 'text-neutral-600 hover:text-neutral-900'"
                             class="px-4 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5">
-                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 12c-2-2.67-4-4-6-4a4 4 0 1 0 0 8c2 0 4-1.33 6-4Zm0 0c2 2.67 4 4 6 4a4 4 0 0 0 0-8c-2 0-4 1.33-6 4Z" />
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
                         </svg>
                         <span>Barang Praktikum (Aset)</span>
                     </button>
@@ -89,10 +89,8 @@
                             @click="itemType = 'bahan_habis_pakai'"
                             :class="itemType === 'bahan_habis_pakai' ? 'bg-primary text-white shadow-sm' : 'text-neutral-600 hover:text-neutral-900'"
                             class="px-4 py-1.5 rounded-full text-xs font-bold transition-all flex items-center gap-1.5">
-                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M9 16v-8l-2 2" />
-                            <path d="M13 16l4-4" />
-                            <path d="M17 16l-4-4" />
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                         </svg>
                         <span>Bahan Sekali Pakai (BHP)</span>
                     </button>

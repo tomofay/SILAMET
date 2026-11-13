@@ -137,16 +137,9 @@
                 <!-- SEKSI 1: BARANG PRAKTIKUM (ASET / DIPAKAI BERULANG) -->
                 <div x-show="groupTypeFilter === 'all' || groupTypeFilter === 'aset'" x-transition class="space-y-3">
                     <div class="flex items-center justify-between gap-3 px-1">
-                        <div class="flex items-center gap-2.5">
-                            <div class="w-7 h-7 rounded-lg bg-primary-50 text-primary border border-indigo-200 flex items-center justify-center shrink-0">
-                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M12 12c-2-2.67-4-4-6-4a4 4 0 1 0 0 8c2 0 4-1.33 6-4Zm0 0c2 2.67 4 4 6 4a4 4 0 0 0 0-8c-2 0-4 1.33-6 4Z" />
-                                </svg>
-                            </div>
-                            <div>
-                                <h2 class="text-xs font-bold uppercase tracking-wider text-neutral-900 font-heading">Barang Praktikum (Aset / Dipakai Berulang)</h2>
-                                <p class="text-[11px] text-neutral-500">Perangkat jaringan, komputer, dan peralatan praktikum berseri dengan pengamanan RFID &amp; pemeliharaan berkala.</p>
-                            </div>
+                        <div>
+                            <h2 class="text-xs font-bold uppercase tracking-wider text-neutral-900 font-heading">Barang Praktikum (Aset / Dipakai Berulang)</h2>
+                            <p class="text-[11px] text-neutral-500">Perangkat jaringan, komputer, dan peralatan praktikum berseri dengan pengamanan RFID &amp; pemeliharaan berkala.</p>
                         </div>
                         <span class="px-2.5 py-0.5 rounded-full font-mono text-[10px] font-bold bg-neutral-100 text-neutral-700 border border-neutral-200">
                             {{ $asetGroups->count() }} kelompok
@@ -171,8 +164,8 @@
                                             <td class="px-5 py-4">
                                                 <div class="flex items-center gap-3.5">
                                                     <div class="w-10 h-10 rounded-xl bg-primary-50 border border-indigo-100 flex items-center justify-center shrink-0 text-primary">
-                                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                            <path d="M12 12c-2-2.67-4-4-6-4a4 4 0 1 0 0 8c2 0 4-1.33 6-4Zm0 0c2 2.67 4 4 6 4a4 4 0 0 0 0-8c-2 0-4 1.33-6 4Z" />
+                                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
                                                         </svg>
                                                     </div>
                                                     <div>
@@ -182,11 +175,8 @@
                                                                 {{ $grp['label'] }}
                                                             </a>
                                                             @if($grp['is_explicit_category'])
-                                                                <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-primary-50 text-primary-700 border border-indigo-200 inline-flex items-center gap-1">
-                                                                    <svg class="w-2.5 h-2.5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                                        <path d="M12 12c-2-2.67-4-4-6-4a4 4 0 1 0 0 8c2 0 4-1.33 6-4Zm0 0c2 2.67 4 4 6 4a4 4 0 0 0 0-8c-2 0-4 1.33-6 4Z" />
-                                                                    </svg>
-                                                                    <span>Aset</span>
+                                                                <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-primary-50 text-primary-700 border border-indigo-200">
+                                                                    Aset
                                                                 </span>
                                                             @endif
                                                         </div>
@@ -203,11 +193,8 @@
                                                 </div>
                                             </td>
                                             <td class="px-5 py-4">
-                                                <span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full border bg-primary-50 text-primary-700 border-indigo-200 inline-flex items-center gap-1">
-                                                    <svg class="w-3 h-3 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                        <path d="M12 12c-2-2.67-4-4-6-4a4 4 0 1 0 0 8c2 0 4-1.33 6-4Zm0 0c2 2.67 4 4 6 4a4 4 0 0 0 0-8c-2 0-4 1.33-6 4Z" />
-                                                    </svg>
-                                                    <span>Aset Praktikum</span>
+                                                <span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full border bg-primary-50 text-primary-700 border-indigo-200">
+                                                    Aset Praktikum
                                                 </span>
                                                 <div class="text-[11px] font-mono text-neutral-500 mt-1">
                                                     {{ !empty($grp['locations']) ? implode(', ', array_slice($grp['locations'], 0, 2)) : '—' }}
@@ -292,18 +279,9 @@
                 <!-- SEKSI 2: BAHAN HABIS PAKAI (SEKALI PAKAI / BHP) -->
                 <div x-show="groupTypeFilter === 'all' || groupTypeFilter === 'bahan_habis_pakai'" x-transition class="space-y-3 pt-2">
                     <div class="flex items-center justify-between gap-3 px-1">
-                        <div class="flex items-center gap-2.5">
-                            <div class="w-7 h-7 rounded-lg bg-amber-50 text-amber-700 border border-amber-200 flex items-center justify-center shrink-0">
-                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M9 16v-8l-2 2" />
-                                    <path d="M13 16l4-4" />
-                                    <path d="M17 16l-4-4" />
-                                </svg>
-                            </div>
-                            <div>
-                                <h2 class="text-xs font-bold uppercase tracking-wider text-neutral-900 font-heading">Bahan Sekali Pakai (BHP)</h2>
-                                <p class="text-[11px] text-neutral-500">Konektor RJ-45, Fast Connector, kabel UTP, dan bahan praktikum sekali pakai yang dipindai via barcode kemasan.</p>
-                            </div>
+                        <div>
+                            <h2 class="text-xs font-bold uppercase tracking-wider text-neutral-900 font-heading">Bahan Sekali Pakai (BHP)</h2>
+                            <p class="text-[11px] text-neutral-500">Konektor RJ-45, Fast Connector, kabel UTP, dan bahan praktikum sekali pakai yang dipindai via barcode kemasan.</p>
                         </div>
                         <span class="px-2.5 py-0.5 rounded-full font-mono text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
                             {{ $bhpGroups->count() }} kelompok
@@ -328,10 +306,8 @@
                                             <td class="px-5 py-4">
                                                 <div class="flex items-center gap-3.5">
                                                     <div class="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center shrink-0 text-amber-700">
-                                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                            <path d="M9 16v-8l-2 2" />
-                                                            <path d="M13 16l4-4" />
-                                                            <path d="M17 16l-4-4" />
+                                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                                                         </svg>
                                                     </div>
                                                     <div>
@@ -340,13 +316,8 @@
                                                                class="text-sm font-bold text-neutral-900 group-hover:text-primary transition-colors font-heading uppercase tracking-wide">
                                                                 {{ $grp['label'] }}
                                                             </a>
-                                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-800 border border-amber-200 inline-flex items-center gap-1">
-                                                                <svg class="w-2.5 h-2.5 text-amber-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                                    <path d="M9 16v-8l-2 2" />
-                                                                    <path d="M13 16l4-4" />
-                                                                    <path d="M17 16l-4-4" />
-                                                                </svg>
-                                                                <span>Sekali Pakai</span>
+                                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-800 border border-amber-200">
+                                                                Sekali Pakai
                                                             </span>
                                                         </div>
                                                         @if(!empty($grp['preview_codes']))
@@ -362,13 +333,8 @@
                                                 </div>
                                             </td>
                                             <td class="px-5 py-4">
-                                                <span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full border bg-amber-50 text-amber-800 border-amber-200 inline-flex items-center gap-1">
-                                                    <svg class="w-3 h-3 text-amber-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                        <path d="M9 16v-8l-2 2" />
-                                                        <path d="M13 16l4-4" />
-                                                        <path d="M17 16l-4-4" />
-                                                    </svg>
-                                                    <span>Bahan Sekali Pakai (BHP)</span>
+                                                <span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full border bg-amber-50 text-amber-800 border-amber-200">
+                                                    Bahan Sekali Pakai (BHP)
                                                 </span>
                                                 <div class="text-[11px] font-mono text-neutral-500 mt-1">
                                                     {{ !empty($grp['locations']) ? implode(', ', array_slice($grp['locations'], 0, 2)) : '—' }}
@@ -438,14 +404,12 @@
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-xl {{ $isBhpGroup ? 'bg-amber-50 border border-amber-200 text-amber-700' : 'bg-indigo-50 border border-indigo-100 text-primary' }} flex items-center justify-center shrink-0">
                             @if($isBhpGroup)
-                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M9 16v-8l-2 2" />
-                                    <path d="M13 16l4-4" />
-                                    <path d="M17 16l-4-4" />
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                                 </svg>
                             @else
-                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M12 12c-2-2.67-4-4-6-4a4 4 0 1 0 0 8c2 0 4-1.33 6-4Zm0 0c2 2.67 4 4 6 4a4 4 0 0 0 0-8c-2 0-4 1.33-6 4Z" />
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
                                 </svg>
                             @endif
                         </div>
@@ -551,19 +515,8 @@
                                         </div>
                                     </td>
                                     <td class="px-4 py-3.5 whitespace-nowrap">
-                                        <span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full border {{ $item->type->value === 'aset' ? 'bg-primary-50 text-primary-700 border-primary-100' : 'bg-amber-50 text-amber-800 border-amber-200' }} inline-flex items-center gap-1">
-                                            @if($item->type->value === 'aset')
-                                                <svg class="w-3 h-3 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                    <path d="M12 12c-2-2.67-4-4-6-4a4 4 0 1 0 0 8c2 0 4-1.33 6-4Zm0 0c2 2.67 4 4 6 4a4 4 0 0 0 0-8c-2 0-4 1.33-6 4Z" />
-                                                </svg>
-                                            @else
-                                                <svg class="w-3 h-3 text-amber-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                    <path d="M9 16v-8l-2 2" />
-                                                    <path d="M13 16l4-4" />
-                                                    <path d="M17 16l-4-4" />
-                                                </svg>
-                                            @endif
-                                            <span>{{ $item->type->label() }}</span>
+                                        <span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full border {{ $item->type->value === 'aset' ? 'bg-primary-50 text-primary-700 border-primary-100' : 'bg-amber-50 text-amber-800 border-amber-200' }}">
+                                            {{ $item->type->label() }}
                                         </span>
                                     </td>
                                     <td class="px-4 py-3.5 text-center font-mono font-semibold text-xs text-neutral-800">

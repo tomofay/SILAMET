@@ -97,6 +97,7 @@ class MasterController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:80',
+            'type' => 'nullable|in:aset,bahan_habis_pakai',
         ], [
             'name.required' => 'Nama kelompok barang wajib diisi.',
             'name.max' => 'Nama kelompok barang maksimal 80 karakter.',
@@ -123,16 +124,104 @@ class MasterController extends Controller
             ]);
         }
 
-        DB::transaction(function () use ($cleanName, $slug) {
+        $groupType = $validated['type'] ?? 'aset';
+
+        DB::transaction(function () use ($cleanName, $slug, $groupType) {
             ItemGroup::create([
                 'name' => $cleanName,
                 'slug' => $slug,
+                'type' => $groupType,
                 'created_by' => Auth::id(),
             ]);
         });
 
         return redirect()->route('items.index')
             ->with('success', "Kelompok barang \"{$cleanName}\" berhasil ditambahkan.");
+    }
+
+    /**
+     * Ubah nama atau tipe kelompok barang.
+     */
+    public function updateGroup(Request $request)
+    {
+        $validated = $request->validate([
+            'old_slug' => 'required|string',
+            'name' => 'required|string|max:80',
+            'type' => 'nullable|in:aset,bahan_habis_pakai',
+        ], [
+            'name.required' => 'Nama kelompok barang wajib diisi.',
+            'name.max' => 'Nama kelompok barang maksimal 80 karakter.',
+        ]);
+
+        $cleanName = $this->itemGroupService->cleanCategory($validated['name']);
+        if ($cleanName === null || preg_replace('/[^a-z0-9]/i', '', $cleanName) === '') {
+            throw ValidationException::withMessages([
+                'name' => 'Nama kelompok barang harus mengandung minimal satu huruf atau angka.',
+            ]);
+        }
+
+        $oldSlug = $validated['old_slug'];
+        $newSlug = $this->itemGroupService->canonicalKey($cleanName);
+
+        // Jika nama berubah, pastikan tidak bentrok dengan kelompok lain
+        if ($oldSlug !== $newSlug) {
+            $allItems = Item::query()->orderBy('name')->orderBy('item_code')->get();
+            $existingGroups = $this->itemGroupService->buildGroups($allItems, false)['groups'];
+
+            if (
+                ItemGroup::where('slug', $newSlug)->where('slug', '!=', $oldSlug)->exists()
+                || ($this->itemGroupService->findGroup($existingGroups, $newSlug) !== null && $oldSlug !== $newSlug)
+            ) {
+                throw ValidationException::withMessages([
+                    'name' => "Nama kelompok \"{$cleanName}\" sudah digunakan oleh kelompok lain.",
+                ]);
+            }
+        }
+
+        DB::transaction(function () use ($cleanName, $newSlug, $oldSlug, $validated) {
+            $itemGroup = ItemGroup::where('slug', $oldSlug)->first();
+            $oldLabel = $oldSlug;
+
+            if ($itemGroup) {
+                $oldLabel = $itemGroup->name;
+                $updateData = [
+                    'name' => $cleanName,
+                    'slug' => $newSlug,
+                ];
+                if (! empty($validated['type'])) {
+                    $updateData['type'] = $validated['type'];
+                }
+                $itemGroup->update($updateData);
+            } else {
+                $allItems = Item::query()->get();
+                $groups = $this->itemGroupService->buildGroups($allItems, false)['groups'];
+                $matched = $this->itemGroupService->findGroup($groups, $oldSlug);
+                if ($matched) {
+                    $oldLabel = $matched['label'];
+                }
+
+                ItemGroup::create([
+                    'name' => $cleanName,
+                    'slug' => $newSlug,
+                    'type' => $validated['type'] ?? 'aset',
+                    'created_by' => Auth::id(),
+                ]);
+            }
+
+            // Update category on items
+            Item::where('category', $oldLabel)->update(['category' => $cleanName]);
+
+            // Also update any items where canonicalKey matches oldSlug
+            $items = Item::whereNotNull('category')->get();
+            foreach ($items as $item) {
+                if ($this->itemGroupService->canonicalKey((string) $item->category) === $oldSlug) {
+                    $item->update(['category' => $cleanName]);
+                }
+            }
+        });
+
+        return redirect()->route('items.index')
+            ->with('success', "Nama kelompok berhasil diubah menjadi \"{$cleanName}\".");
     }
 
     /**
@@ -143,13 +232,17 @@ class MasterController extends Controller
         $categorySuggestions = $this->itemGroupService->distinctCategorySuggestions();
         $preselectedCategory = $this->itemGroupService->cleanCategory($request->query('category'));
         $returnGroup = trim((string) ($request->query('return_group') ?: $request->query('group', '')));
+        $preselectedType = 'aset';
 
-        if ($preselectedCategory === null && $returnGroup !== '') {
+        if ($returnGroup !== '') {
             $allItems = Item::query()->orderBy('name')->orderBy('item_code')->get();
             $groups = $this->itemGroupService->buildGroups($allItems, false)['groups'];
             $matched = $this->itemGroupService->findGroup($groups, $returnGroup);
             if ($matched !== null) {
-                $preselectedCategory = $matched['label'];
+                if ($preselectedCategory === null) {
+                    $preselectedCategory = $matched['label'];
+                }
+                $preselectedType = $matched['type'] ?? 'aset';
             }
         }
 
@@ -158,6 +251,7 @@ class MasterController extends Controller
         return view('items.create', compact(
             'categorySuggestions',
             'preselectedCategory',
+            'preselectedType',
             'returnGroup',
             'isLockedGroup'
         ));
@@ -175,7 +269,7 @@ class MasterController extends Controller
             'category' => 'nullable|string|max:80',
             'type' => 'required|in:aset,bahan_habis_pakai',
             'stock' => 'nullable|integer|min:0',
-            'status' => 'required|in:tersedia,dipinjam,under_maintenance',
+            'status' => 'nullable|in:tersedia,dipinjam,under_maintenance',
             'location' => 'required|string|max:100',
             'preventive_interval_months' => 'nullable|integer|min:1|max:60',
             'preventive_last_serviced_at' => 'nullable|date',
@@ -185,14 +279,15 @@ class MasterController extends Controller
             'epc_tag.unique' => 'Tag EPC RFID ini sudah terdaftar pada barang lain.',
             'name.required' => 'Nama barang wajib diisi.',
             'type.required' => 'Tipe barang wajib dipilih.',
-            'status.required' => 'Status barang wajib dipilih.',
             'location.required' => 'Lokasi penempatan barang wajib diisi.',
         ]);
+
+        $validated['status'] = $validated['status'] ?? 'tersedia';
 
         if ($validated['type'] === 'aset') {
             $validated['stock'] = 1;
         } else {
-            $validated['stock'] = (int) ($validated['stock'] ?? 0);
+            $validated['stock'] = max(1, (int) ($validated['stock'] ?? 1));
         }
 
         $validated['category'] = $this->itemGroupService->cleanCategory($validated['category'] ?? null);
@@ -268,9 +363,9 @@ class MasterController extends Controller
                     ]);
                 }
             });
-        } catch (UniqueConstraintViolationException $e) {
+        } catch (UniqueConstraintViolationException|\Illuminate\Database\QueryException $e) {
             $msg = $e->getMessage();
-            if (str_contains($msg, 'items_item_code_unique')) {
+            if (str_contains($msg, 'items_item_code_unique') || str_contains($msg, '1062 Duplicate entry')) {
                 throw ValidationException::withMessages([
                     'item_code' => "Kode barang \"{$itemAttributes['item_code']}\" sudah terdaftar di sistem. Silakan gunakan kode unik lain.",
                 ]);
@@ -396,9 +491,9 @@ class MasterController extends Controller
                     ]);
                 }
             });
-        } catch (UniqueConstraintViolationException $e) {
+        } catch (UniqueConstraintViolationException|\Illuminate\Database\QueryException $e) {
             $msg = $e->getMessage();
-            if (str_contains($msg, 'items_item_code_unique')) {
+            if (str_contains($msg, 'items_item_code_unique') || str_contains($msg, '1062 Duplicate entry')) {
                 throw ValidationException::withMessages([
                     'item_code' => "Kode barang \"{$validated['item_code']}\" sudah terdaftar di sistem. Gunakan kode unik lain.",
                 ]);

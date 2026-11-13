@@ -14,6 +14,7 @@ class ItemGroup extends Model
     protected $fillable = [
         'name',
         'slug',
+        'type',
         'created_by',
     ];
 

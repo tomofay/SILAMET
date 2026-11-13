@@ -1,20 +1,20 @@
 <x-app-layout>
-    <x-slot name="heading">Katalog Master Aset</x-slot>
+    <x-slot name="heading"></x-slot>
     <x-slot name="title">Master Aset — SILAMET</x-slot>
 
     @php
         $canManageMaintenance = in_array(auth()->user()?->role?->value, ['teknisi', 'kabeng'], true);
-        $activeGroupBarcodeIds = ($activeGroup && !empty($activeGroup['item_ids']))
-            ? implode(',', $activeGroup['item_ids'])
-            : null;
-        $showGroupBarcodeButton = $viewMode === 'groups'
-            || ($activeGroup !== null && $activeGroupBarcodeIds !== null)
-            || ($activeGroup === null && $totalItemCount > 0);
     @endphp
 
     <div class="space-y-6 max-w-7xl mx-auto"
-         x-data="{ groupModalOpen: @js($errors->has('name') && old('_form') === 'create_group') }"
-         @keydown.escape.window="groupModalOpen = false">
+         x-data="{
+             groupModalOpen: @js($errors->has('name') && old('_form') === 'create_group'),
+             editGroupModalOpen: false,
+             editGroupSlug: '',
+             editGroupName: '',
+             editGroupType: 'aset'
+         }"
+         @keydown.escape.window="groupModalOpen = false; editGroupModalOpen = false">
 
         @if($errors->any())
             <div class="bg-rose-50 border border-rose-200 text-rose-800 px-4 py-3 rounded-2xl text-xs space-y-1">
@@ -32,104 +32,93 @@
             </div>
         @endif
 
-        <!-- Top Action Bar (Dribbble Orbix Studio Header Style) -->
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-neutral-200">
-            <div>
-                <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-neutral-900 font-heading">
-                    Katalog Master Aset
-                </h1>
-                <p class="text-xs text-neutral-500 mt-0.5">
-                    Kelola data master perangkat lab SIJA, pemetaan UHF RFID tag, dan pengelompokan unit praktikum.
-                </p>
-            </div>
-
-            <!-- Top Right Action Buttons (Pill-shaped ala Dribbble) -->
+        <!-- Top Action Bar: High-Visibility Segmented Switcher & Actions (No Title Fluff) -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-3 border-b border-neutral-200">
+            <!-- Left Side: Prominent High-Visibility Switcher & Back Button -->
             <div class="flex items-center gap-2.5 flex-wrap">
-                @if($showGroupBarcodeButton)
-                    <a href="{{ $activeGroupBarcodeIds ? route('items.barcodes', ['ids' => $activeGroupBarcodeIds]) : route('items.barcodes') }}"
-                       target="_blank"
-                       class="px-4 py-2 rounded-full border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-700 text-xs font-semibold transition-colors shadow-sm inline-flex items-center gap-2">
-                        <svg class="w-4 h-4 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                @if($activeGroup)
+                    <a href="{{ route('items.index') }}"
+                       class="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-bold shadow-sm transition-all"
+                       title="Kembali ke Semua Kelompok">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                         </svg>
-                        <span>{{ $activeGroup ? 'Cetak Barcode ' . $activeGroup['label'] : 'Cetak Semua Barcode' }}</span>
+                        <span>Semua Kelompok</span>
                     </a>
                 @endif
+
+                <a href="{{ route('items.index') }}"
+                   class="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full text-xs font-bold transition-all duration-150 {{ $viewMode === 'groups' ? 'bg-neutral-900 text-white shadow-md ring-2 ring-neutral-900' : 'bg-white text-neutral-800 hover:bg-neutral-100 border border-neutral-300 shadow-sm' }}">
+                    <svg class="w-4 h-4 {{ $viewMode === 'groups' ? 'text-white' : 'text-neutral-500' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                    </svg>
+                    <span>Daftar Kelompok Barang</span>
+                    <span class="px-2.5 py-0.5 rounded-full font-mono text-[11px] font-extrabold {{ $viewMode === 'groups' ? 'bg-neutral-800 text-white border border-neutral-700' : 'bg-neutral-100 text-neutral-900 border border-neutral-200' }}">
+                        {{ count($groups) }}
+                    </span>
+                </a>
+
+                <a href="{{ route('items.index', ['view' => 'all']) }}"
+                   class="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full text-xs font-bold transition-all duration-150 {{ $viewMode === 'all' && $search === '' ? 'bg-neutral-900 text-white shadow-md ring-2 ring-neutral-900' : 'bg-white text-neutral-800 hover:bg-neutral-100 border border-neutral-300 shadow-sm' }}">
+                    <svg class="w-4 h-4 {{ ($viewMode === 'all' && $search === '') ? 'text-white' : 'text-neutral-500' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                    </svg>
+                    <span>Semua Unit</span>
+                    <span class="px-2.5 py-0.5 rounded-full font-mono text-[11px] font-extrabold {{ ($viewMode === 'all' && $search === '') ? 'bg-neutral-800 text-white border border-neutral-700' : 'bg-neutral-100 text-neutral-900 border border-neutral-200' }}">
+                        {{ $totalItemCount }}
+                    </span>
+                </a>
+            </div>
+
+            <!-- Right Side: Search & Primary Action Button -->
+            <div class="flex items-center gap-2.5 flex-wrap">
+                <!-- Search Pill Form -->
+                <form method="GET" action="{{ route('items.index') }}" class="flex items-center gap-2 w-full sm:w-auto">
+                    @if($activeGroup)
+                        <input type="hidden" name="group" value="{{ $activeGroup['slug'] }}">
+                    @endif
+                    <div class="relative w-full sm:w-64">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-neutral-400">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </span>
+                        <input type="search"
+                               name="q"
+                               value="{{ $search }}"
+                               placeholder="Cari kelompok, nama, kode, EPC..."
+                               class="w-full pl-9 pr-4 py-2 rounded-full border border-neutral-300 bg-white text-xs font-medium text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary shadow-sm transition-all" />
+                    </div>
+                    <button type="submit" class="px-4 py-2 rounded-full bg-white hover:bg-neutral-50 text-neutral-800 text-xs font-bold border border-neutral-300 shadow-sm transition-colors shrink-0">
+                        Cari
+                    </button>
+                    @if($search !== '')
+                        <a href="{{ $activeGroup ? route('items.index', ['group' => $activeGroup['slug']]) : route('items.index', $viewMode === 'all' ? ['view' => 'all'] : []) }}"
+                           class="px-2 py-2 text-xs font-semibold text-neutral-500 hover:text-neutral-900 shrink-0">
+                            Reset
+                        </a>
+                    @endif
+                </form>
 
                 @if($viewMode === 'groups')
                     <button type="button"
                             @click="groupModalOpen = true"
-                            class="px-5 py-2 rounded-full bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-semibold transition-colors shadow-sm inline-flex items-center gap-1.5">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            class="px-5 py-2.5 rounded-full bg-primary hover:bg-primary-600 text-white text-xs font-bold transition-colors shadow-sm inline-flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
                         </svg>
                         <span>Tambah Kelompok Barang</span>
                     </button>
                 @else
                     <a href="{{ route('items.create', $activeGroup ? ['category' => $activeGroup['label'], 'return_group' => $activeGroup['slug']] : []) }}"
-                       class="px-5 py-2 rounded-full bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-semibold transition-colors shadow-sm inline-flex items-center gap-1.5">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                       class="px-5 py-2.5 rounded-full bg-primary hover:bg-primary-600 text-white text-xs font-bold transition-colors shadow-sm inline-flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
                         </svg>
                         <span>Tambah Barang</span>
                     </a>
                 @endif
             </div>
-        </div>
-
-        <!-- Filter & Search Toolbar (Dribbble Pill Navigation) -->
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
-            <div class="flex items-center gap-2 flex-wrap">
-                <a href="{{ route('items.index') }}"
-                   class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold border transition-all duration-150 {{ $viewMode === 'groups' ? 'bg-neutral-900 text-white border-neutral-900 shadow-sm' : 'bg-white text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 border-neutral-200' }}">
-                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
-                    </svg>
-                    <span>Daftar Kelompok Barang</span>
-                    <span class="px-2 py-0.5 rounded-full font-mono text-[10px] font-bold {{ $viewMode === 'groups' ? 'bg-neutral-800 text-neutral-200' : 'bg-neutral-100 text-neutral-600' }}">
-                        {{ count($groups) }}
-                    </span>
-                </a>
-
-                <a href="{{ route('items.index', ['view' => 'all']) }}"
-                   class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold border transition-all duration-150 {{ $viewMode === 'all' && $search === '' ? 'bg-neutral-900 text-white border-neutral-900 shadow-sm' : 'bg-white text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900 border-neutral-200' }}">
-                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-                    </svg>
-                    <span>Semua Unit</span>
-                    <span class="px-2 py-0.5 rounded-full font-mono text-[10px] font-bold {{ $viewMode === 'all' && $search === '' ? 'bg-neutral-800 text-neutral-200' : 'bg-neutral-100 text-neutral-600' }}">
-                        {{ $totalItemCount }}
-                    </span>
-                </a>
-            </div>
-
-            <!-- Search Pill Form -->
-            <form method="GET" action="{{ route('items.index') }}" class="flex items-center gap-2 w-full md:w-auto">
-                @if($activeGroup)
-                    <input type="hidden" name="group" value="{{ $activeGroup['slug'] }}">
-                @endif
-                <div class="relative w-full md:w-72">
-                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-neutral-400">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                    </span>
-                    <input type="search"
-                           name="q"
-                           value="{{ $search }}"
-                           placeholder="Cari kelompok, nama, kode, EPC..."
-                           class="w-full pl-9 pr-4 py-2 rounded-full border border-neutral-200 bg-white text-xs text-neutral-800 placeholder-neutral-400 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary shadow-sm transition-all" />
-                </div>
-                <button type="submit" class="px-4 py-2 rounded-full bg-white hover:bg-neutral-50 text-neutral-700 text-xs font-semibold border border-neutral-200 shadow-sm transition-colors shrink-0">
-                    Cari
-                </button>
-                @if($search !== '')
-                    <a href="{{ $activeGroup ? route('items.index', ['group' => $activeGroup['slug']]) : route('items.index', $viewMode === 'all' ? ['view' => 'all'] : []) }}"
-                       class="px-3 py-2 text-xs font-semibold text-neutral-500 hover:text-neutral-800 shrink-0">
-                        Reset
-                    </a>
-                @endif
-            </form>
         </div>
 
         @if($viewMode === 'groups')
@@ -242,6 +231,17 @@
                                     </td>
                                     <td class="px-5 py-4 text-right whitespace-nowrap">
                                         <div class="inline-flex items-center justify-end gap-1.5 flex-wrap">
+                                            <button type="button"
+                                                    @click="editGroupModalOpen = true; editGroupSlug = '{{ $grp['slug'] }}'; editGroupName = '{{ addslashes($grp['label']) }}'; editGroupType = '{{ $grp['type'] ?? 'aset' }}'"
+                                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-700 text-xs font-semibold shadow-sm transition-colors"
+                                                    title="Ubah Nama Kelompok"
+                                                    aria-label="Edit Kelompok {{ $grp['label'] }}">
+                                                <svg class="w-3.5 h-3.5 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                </svg>
+                                                <span>Edit</span>
+                                            </button>
+
                                             <a href="{{ route('items.index', ['group' => $grp['slug']]) }}"
                                                class="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-full bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-semibold shadow-sm transition-colors">
                                                 <span>Buka Daftar</span>
@@ -298,34 +298,21 @@
             <!-- Header Kelompok Aktif (ketika membuka salah satu kelompok misal TPLINK) -->
             @if($activeGroup)
                 <div class="bg-white rounded-2xl border border-indigo-200 p-4 shadow-sm">
-                    <div class="flex items-start sm:items-center gap-3 flex-wrap justify-between">
-                        <div class="flex items-center gap-3">
-                            <a href="{{ route('items.index') }}"
-                               class="p-2 rounded-full border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-600 hover:text-neutral-900 transition-colors shadow-sm inline-flex items-center gap-1.5"
-                               title="Kembali ke Semua Kelompok">
-                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                                </svg>
-                                <span class="text-xs font-semibold pr-1">Semua Kelompok</span>
-                            </a>
-                            <div>
-                                <div class="flex items-center gap-2 flex-wrap">
-                                    <h3 class="text-sm font-bold text-neutral-900 font-heading">Kelompok: {{ $activeGroup['label'] }}</h3>
-                                    <span class="px-2.5 py-0.5 rounded-full font-mono text-[11px] font-bold bg-primary-50 text-primary-700 border border-indigo-200">
-                                        {{ $activeGroup['item_count'] }} barang ({{ $activeGroup['total_units'] }} unit)
-                                    </span>
-                                </div>
-                                <p class="text-[11px] text-neutral-500 mt-0.5">Menampilkan seluruh unit {{ $activeGroup['label'] }} beserta kode aset, tag RFID, barcode, dan status maintenance.</p>
-                            </div>
-                        </div>
-
-                        <a href="{{ route('items.create', ['category' => $activeGroup['label'], 'return_group' => $activeGroup['slug']]) }}"
-                           class="px-4 py-2 rounded-full bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-semibold transition-colors shadow-sm inline-flex items-center gap-1.5">
-                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-primary shrink-0">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
                             </svg>
-                            <span>Tambah Unit ke {{ $activeGroup['label'] }}</span>
-                        </a>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <h3 class="text-sm font-bold text-neutral-900 font-heading">Kelompok: {{ $activeGroup['label'] }}</h3>
+                                <span class="px-2.5 py-0.5 rounded-full font-mono text-[11px] font-bold bg-primary-50 text-primary-700 border border-indigo-200">
+                                    {{ $activeGroup['item_count'] }} barang ({{ $activeGroup['total_units'] }} unit)
+                                </span>
+                            </div>
+                            <p class="text-[11px] text-neutral-500 mt-0.5">Menampilkan seluruh unit {{ $activeGroup['label'] }} beserta kode aset, tag RFID, barcode, dan status maintenance.</p>
+                        </div>
                     </div>
                 </div>
             @endif
@@ -585,6 +572,17 @@
                             <x-input-error :messages="$errors->get('name')" class="mt-1.5" />
                         </div>
 
+                        <div>
+                            <x-input-label for="new-group-type" value="Tipe Kelompok *" />
+                            <select id="new-group-type"
+                                    name="type"
+                                    class="mt-1.5 w-full text-xs rounded-xl border-neutral-200 focus:border-primary focus:ring-primary">
+                                <option value="aset" {{ old('type') === 'aset' ? 'selected' : '' }}>Barang Praktikum (Aset / Dipakai Berulang)</option>
+                                <option value="bahan_habis_pakai" {{ old('type') === 'bahan_habis_pakai' ? 'selected' : '' }}>Bahan Habis Pakai (Sekali Pakai / BHP)</option>
+                            </select>
+                            <x-input-error :messages="$errors->get('type')" class="mt-1.5" />
+                        </div>
+
                         <div class="pt-3 border-t border-neutral-100 flex items-center justify-end gap-2.5">
                             <button type="button"
                                     @click="groupModalOpen = false"
@@ -594,6 +592,73 @@
                             <button type="submit"
                                     class="px-5 py-2 rounded-full bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-semibold transition-colors shadow-sm">
                                 Simpan Kelompok Barang
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </template>
+
+        <!-- Modal Ubah Nama Kelompok Barang -->
+        <template x-if="editGroupModalOpen">
+            <div class="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="edit-group-modal-title">
+                <div class="absolute inset-0 bg-neutral-950/60" @click="editGroupModalOpen = false"></div>
+                <div class="relative bg-white border border-neutral-200 rounded-2xl max-w-md w-full p-6 overflow-hidden shadow-xl">
+                    <div class="flex items-start justify-between gap-3 pb-3 border-b border-neutral-100">
+                        <div>
+                            <h3 id="edit-group-modal-title" class="font-bold text-neutral-900 text-sm font-heading">Ubah Nama Kelompok Barang</h3>
+                            <p class="text-[11px] text-neutral-500 mt-0.5">Perbarui nama atau tipe kelompok. Seluruh unit di dalam kelompok ini akan ikut terupdate otomatis.</p>
+                        </div>
+                        <button type="button"
+                                @click="editGroupModalOpen = false"
+                                class="p-1.5 text-neutral-400 hover:text-neutral-700 rounded-lg hover:bg-neutral-100 transition-colors"
+                                aria-label="Tutup modal">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <form method="POST" action="{{ route('items.groups.update') }}" class="mt-4 space-y-4">
+                        @csrf
+                        @method('PUT')
+                        <input type="hidden" name="old_slug" :value="editGroupSlug">
+
+                        <div>
+                            <x-input-label for="edit-group-name" value="Nama Kelompok Barang *" />
+                            <x-text-input id="edit-group-name"
+                                          name="name"
+                                          type="text"
+                                          maxlength="80"
+                                          required
+                                          autofocus
+                                          x-model="editGroupName"
+                                          placeholder="Contoh: MIKROTIK, TPLINK, PC"
+                                          class="mt-1.5 w-full text-xs rounded-xl border-neutral-200 focus:border-primary focus:ring-primary uppercase" />
+                            <x-input-error :messages="$errors->get('name')" class="mt-1.5" />
+                        </div>
+
+                        <div>
+                            <x-input-label for="edit-group-type" value="Tipe Kelompok *" />
+                            <select id="edit-group-type"
+                                    name="type"
+                                    x-model="editGroupType"
+                                    class="mt-1.5 w-full text-xs rounded-xl border-neutral-200 focus:border-primary focus:ring-primary">
+                                <option value="aset">Barang Praktikum (Aset / Dipakai Berulang)</option>
+                                <option value="bahan_habis_pakai">Bahan Habis Pakai (Sekali Pakai / BHP)</option>
+                            </select>
+                            <x-input-error :messages="$errors->get('type')" class="mt-1.5" />
+                        </div>
+
+                        <div class="pt-3 border-t border-neutral-100 flex items-center justify-end gap-2.5">
+                            <button type="button"
+                                    @click="editGroupModalOpen = false"
+                                    class="px-4 py-2 rounded-full border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-700 text-xs font-semibold transition-colors shadow-sm">
+                                Batal
+                            </button>
+                            <button type="submit"
+                                    class="px-5 py-2 rounded-full bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-semibold transition-colors shadow-sm">
+                                Simpan Perubahan
                             </button>
                         </div>
                     </form>

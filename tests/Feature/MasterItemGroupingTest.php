@@ -80,7 +80,9 @@ class MasterItemGroupingTest extends TestCase
             ->assertSee('MIKROTIK')
             ->assertSee('PC')
             ->assertSee('2 item')
-            ->assertSee('Cetak Semua Barcode')
+            ->assertSee('Daftar Kelompok Barang')
+            ->assertSee('Semua Unit')
+            ->assertSee('Tambah Kelompok Barang')
             ->assertSee(route('items.index', ['group' => 'tplink']))
             ->assertDontSee('Buku Stok (BHP)')
             ->assertDontSee('Tambah Barang')
@@ -90,12 +92,13 @@ class MasterItemGroupingTest extends TestCase
             ->assertDontSee('E200TP0014')
             ->assertDontSee('E200TPSW08');
 
-        // Klik kelompok TPLINK -> masuk ke halaman isi penuh semua unit TPLINK (hanya tombol cetak & tambah barang di atas)
+        // Klik kelompok TPLINK -> masuk ke halaman isi penuh semua unit TPLINK (hanya tombol tambah barang di atas)
         $groupResponse = $this->actingAs($teknisi)->get(route('items.index', ['group' => 'tplink']));
         $groupResponse->assertOk()
             ->assertViewHas('viewMode', 'group_detail')
             ->assertSee('Kelompok: TPLINK')
             ->assertSee('3 barang (3 unit)')
+            ->assertSee('Semua Kelompok')
             ->assertSee('TL844_14')
             ->assertSee('E200TP0014')
             ->assertSee('TL840_17')
@@ -103,7 +106,6 @@ class MasterItemGroupingTest extends TestCase
             ->assertSee('TL_SW_08')
             ->assertSee('E200TPSW08')
             ->assertSee('Tambah Barang')
-            ->assertSee('Cetak Barcode TPLINK')
             ->assertDontSee('Buku Stok (BHP)')
             ->assertDontSee('Pindah Kelompok:')
             ->assertDontSee('Maintenance Semua TPLINK')
@@ -416,18 +418,101 @@ class MasterItemGroupingTest extends TestCase
 
         $this->assertSame(0, PreventiveSchedule::count());
 
-        // Kelompok MIKROTIK sekarang menampilkan unitnya & Cetak Barcode MIKROTIK, dan muncul di Maintenance Page 1
+        // Kelompok MIKROTIK sekarang menampilkan unitnya dan muncul di Maintenance Page 1
         $this->actingAs($teknisi)
             ->get(route('items.index', ['group' => 'mikrotik']))
             ->assertOk()
             ->assertSee('1 barang (1 unit)')
             ->assertSee('MKT-RB750-01')
-            ->assertSee('Cetak Barcode MIKROTIK')
             ->assertDontSee('TL_99');
 
         $this->actingAs($teknisi)
             ->get(route('maintenance.schedules.index'))
             ->assertOk()
             ->assertSee('MIKROTIK — 1 barang (1 unit)');
+    }
+
+    public function test_group_can_be_renamed_and_cascades_to_item_category(): void
+    {
+        $teknisi = User::factory()->teknisi()->create();
+
+        ItemGroup::create([
+            'name' => 'TPLINK WIFI ROUTER',
+            'slug' => 'tplink-wifi-router',
+            'type' => 'aset',
+        ]);
+
+        $item1 = Item::factory()->create([
+            'item_code' => 'TL_01',
+            'name' => 'Router TL 01',
+            'category' => 'TPLINK WIFI ROUTER',
+            'type' => ItemType::ASET,
+        ]);
+
+        $response = $this->actingAs($teknisi)
+            ->put(route('items.groups.update'), [
+                'old_slug' => 'tplink-wifi-router',
+                'name' => 'TPLINK WIRELESS ROUTER',
+                'type' => 'aset',
+            ]);
+
+        $response->assertRedirect(route('items.index'))
+            ->assertSessionHas('success');
+
+        $this->assertDatabaseHas('item_groups', [
+            'slug' => 'tplinkwirelessrouter',
+            'name' => 'TPLINK WIRELESS ROUTER',
+        ]);
+
+        $this->assertDatabaseMissing('item_groups', [
+            'slug' => 'tplink-wifi-router',
+        ]);
+
+        $this->assertEquals('TPLINK WIRELESS ROUTER', $item1->fresh()->category);
+    }
+
+    public function test_item_creation_defaults_status_to_tersedia_and_sets_stock_one_for_aset(): void
+    {
+        $teknisi = User::factory()->teknisi()->create();
+
+        $response = $this->actingAs($teknisi)
+            ->post(route('items.store'), [
+                'item_code' => 'SW-CISCO-01',
+                'name' => 'Cisco Catalyst Switch',
+                'category' => 'CISCO',
+                'type' => 'aset',
+                'location' => 'Lab 1',
+            ]);
+
+        $response->assertRedirect();
+
+        $this->assertDatabaseHas('items', [
+            'item_code' => 'SW-CISCO-01',
+            'name' => 'Cisco Catalyst Switch',
+            'status' => 'tersedia',
+            'stock' => 1,
+            'location' => 'Lab 1',
+        ]);
+    }
+
+    public function test_duplicate_item_code_is_caught_gracefully_with_validation_error(): void
+    {
+        $teknisi = User::factory()->teknisi()->create();
+
+        Item::factory()->create([
+            'item_code' => 'TL840_17',
+            'name' => 'Existing Router',
+        ]);
+
+        $response = $this->actingAs($teknisi)
+            ->post(route('items.store'), [
+                'item_code' => 'TL840_17',
+                'name' => 'Duplicate Router Attempt',
+                'category' => 'TPLINK',
+                'type' => 'aset',
+                'location' => 'Ruang Alat',
+            ]);
+
+        $response->assertSessionHasErrors(['item_code']);
     }
 }

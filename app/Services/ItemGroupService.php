@@ -39,6 +39,7 @@ class ItemGroupService
                 $primaryBuckets[$bucketKey] = [
                     'explicit' => true,
                     'proposed_label' => $cleanName,
+                    'type' => $registeredGroup->type ?? 'aset',
                     'items' => collect(),
                 ];
             }
@@ -114,7 +115,8 @@ class ItemGroupService
                 kind: 'name',
                 label: $label,
                 isExplicitCategory: (bool) $bucketData['explicit'],
-                bucket: $bucket
+                bucket: $bucket,
+                defaultType: $bucketData['type'] ?? null
             );
         }
 
@@ -284,7 +286,8 @@ class ItemGroupService
         string $kind,
         string $label,
         bool $isExplicitCategory,
-        Collection $bucket
+        Collection $bucket,
+        ?string $defaultType = null
     ): array {
         $availableCount = $bucket->where('status', ItemStatus::TERSEDIA)->count();
         $borrowedCount = $bucket->where('status', ItemStatus::DIPINJAM)->count();
@@ -305,11 +308,14 @@ class ItemGroupService
             ->filter(fn (Item $i) => $i->relationLoaded('preventiveSchedules') && $i->preventiveSchedules->isEmpty())
             ->count();
 
+        $groupType = $defaultType ?? ($bhpCount > $asetCount ? 'bahan_habis_pakai' : 'aset');
+
         return [
             'key' => $key,
             'slug' => $slug,
             'kind' => $kind,
             'label' => $label,
+            'type' => $groupType,
             'is_explicit_category' => $isExplicitCategory,
             'item_ids' => $bucket->pluck('id')->values()->all(),
             'item_count' => $bucket->count(),

@@ -140,15 +140,15 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <x-input-label for="type" value="Tipe Barang *" />
-                                <select id="type" name="type" class="mt-1.5 w-full rounded-xl border-neutral-200 text-sm focus:border-primary focus:ring-primary" required>
-                                    <option value="aset" @selected(old('type', $item->type->value) === 'aset')>Aset (Unit Tunggal / Ber-EPC)</option>
-                                    <option value="bahan_habis_pakai" @selected(old('type', $item->type->value) === 'bahan_habis_pakai')>Bahan Habis Pakai (BHP)</option>
+                                <select id="type" name="type" class="mt-1.5 w-full rounded-xl border-neutral-200 text-sm font-semibold focus:border-primary focus:ring-primary" required>
+                                    <option value="aset" @selected(old('type', $item->type->value) === 'aset')>Barang Praktikum (Aset / Dipakai Berulang)</option>
+                                    <option value="bahan_habis_pakai" @selected(old('type', $item->type->value) === 'bahan_habis_pakai')>Bahan Habis Pakai (Sekali Pakai / BHP)</option>
                                 </select>
                                 <x-input-error :messages="$errors->get('type')" class="mt-2" />
                             </div>
 
                             <div>
-                                <x-input-label for="stock" value="Jumlah Stok Unit *" />
+                                <x-input-label for="stock" value="Jumlah Kuantitas Stok *" />
                                 <x-text-input id="stock" name="stock" type="number" min="0" class="mt-1.5 w-full font-mono text-sm rounded-xl border-neutral-200 focus:border-primary focus:ring-primary" value="{{ old('stock', $item->stock) }}" required />
                                 <x-input-error :messages="$errors->get('stock')" class="mt-2" />
                             </div>
@@ -219,8 +219,19 @@
                         </div>
 
                         <div>
-                            <x-input-label for="location" value="Ruang / Rak Penyimpanan *" />
-                            <x-text-input id="location" name="location" class="mt-1.5 w-full font-mono text-xs rounded-xl border-neutral-200 focus:border-primary focus:ring-primary uppercase" value="{{ old('location', $item->location) }}" required />
+                            <x-input-label for="location" value="Ruang / Laboratorium *" />
+                            <select id="location" name="location" class="mt-1.5 w-full rounded-xl border-neutral-200 text-xs font-semibold focus:border-primary focus:ring-primary" required>
+                                @php
+                                    $stdLocations = ['Ruang Alat', 'Lab 1', 'Lab 2', 'Lab 3', 'Lab 4', 'Lab 5'];
+                                    $currentLoc = old('location', $item->location);
+                                @endphp
+                                @if(!in_array($currentLoc, $stdLocations, true) && filled($currentLoc))
+                                    <option value="{{ $currentLoc }}" selected>{{ $currentLoc }}</option>
+                                @endif
+                                @foreach($stdLocations as $loc)
+                                    <option value="{{ $loc }}" @selected($currentLoc === $loc)>{{ $loc }}</option>
+                                @endforeach
+                            </select>
                             <x-input-error :messages="$errors->get('location')" class="mt-1.5" />
                         </div>
                     </div>

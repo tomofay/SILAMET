@@ -28,6 +28,7 @@ Route::middleware(['auth', 'role:teknisi|kabeng|kaprog'])->group(function () {
     // Master Aset / Items
     Route::get('items/barcodes', [MasterController::class, 'printBarcodes'])->name('items.barcodes');
     Route::post('items/groups', [MasterController::class, 'storeGroup'])->name('items.groups.store');
+    Route::put('items/groups', [MasterController::class, 'updateGroup'])->name('items.groups.update');
     Route::post('items/bulk-category', [MasterController::class, 'bulkUpdateCategory'])->name('items.bulk-category');
     Route::resource('items', MasterController::class)->names([
         '' => 'items.index',

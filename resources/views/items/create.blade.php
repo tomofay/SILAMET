@@ -5,12 +5,17 @@
         $backUrl = filled($returnGroup ?? null)
             ? route('items.index', ['group' => $returnGroup])
             : route('items.index');
+        $initialType = old('type', $preselectedType ?? 'aset');
     @endphp
 
     <x-slot name="heading">{{ $locked ? 'Tambah Barang — ' . $groupLabel : 'Tambah Barang Baru' }}</x-slot>
     <x-slot name="title">Tambah Barang Baru — SILAMET</x-slot>
 
-    <div class="space-y-6 max-w-7xl mx-auto" x-data="{ category: @js(old('category', $groupLabel ?? '')) }">
+    <div class="space-y-6 max-w-7xl mx-auto"
+         x-data="{
+             category: @js(old('category', $groupLabel ?? '')),
+             itemType: @js($initialType)
+         }">
 
         <!-- Top Action Bar (Discard & Add Buttons ala Dribbble Template) -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-neutral-200">
@@ -25,7 +30,7 @@
                     <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-neutral-900 font-heading">
                         {{ $locked ? 'Formulir Tambah Barang — Kelompok ' . $groupLabel : 'Formulir Registrasi Barang' }}
                     </h1>
-                    <p class="text-xs text-neutral-500 mt-0.5">Daftarkan unit alat praktikum atau bahan habis pakai baru ke dalam katalog master lab.</p>
+                    <p class="text-xs text-neutral-500 mt-0.5">Daftarkan unit alat praktikum atau bahan habis pakai baru ke dalam katalog lab.</p>
                 </div>
             </div>
 
@@ -61,6 +66,9 @@
 
         <form id="create-item-form" method="POST" action="{{ route('items.store') }}">
             @csrf
+            <!-- Default status barang baru adalah selalu tersedia -->
+            <input type="hidden" name="status" value="tersedia">
+
             @if(filled($returnGroup ?? null))
                 <input type="hidden" name="return_group" value="{{ $returnGroup }}">
             @endif
@@ -68,7 +76,7 @@
             <!-- 2-Column Layout (Split 65% / 35% ala Dribbble E-commerce Flow) -->
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-                <!-- Left Column (Product Details, Media & RFID, Inventory) -->
+                <!-- Left Column (Product Details, Media & RFID, Tipe Barang) -->
                 <div class="lg:col-span-8 space-y-6">
 
                     <!-- Card 1: Detail Barang (Product Information) -->
@@ -86,7 +94,7 @@
 
                         <div>
                             <x-input-label for="notes" value="Deskripsi / Catatan Tambahan (Opsional)" />
-                            <textarea id="notes" name="notes" rows="4" class="mt-1.5 w-full rounded-xl border-neutral-200 text-sm focus:border-primary focus:ring-primary" placeholder="Tuliskan spesifikasi teknis, kelengkapan adaptor, atau nomor seri pabrik...">{{ old('notes') }}</textarea>
+                            <textarea id="notes" name="notes" rows="3" class="mt-1.5 w-full rounded-xl border-neutral-200 text-sm focus:border-primary focus:ring-primary" placeholder="Tuliskan spesifikasi teknis, kelengkapan adaptor, atau nomor seri pabrik...">{{ old('notes') }}</textarea>
                             <p class="text-[11px] text-neutral-400 mt-1">Catatan ini membantu teknisi dan siswa saat pemeriksaan alat di Kiosk.</p>
                         </div>
                     </div>
@@ -132,67 +140,55 @@
                         </div>
                     </div>
 
-                    <!-- Card 3: Tipe & Kuantitas Unit (Pricing & Inventory ala Dribbble) -->
+                    <!-- Card 3: Tipe Penggunaan Barang (Barang Praktikum vs Bahan Habis Pakai) -->
                     <div class="bg-white rounded-2xl border border-neutral-200 p-5 sm:p-6 shadow-sm space-y-4">
                         <div class="border-b border-neutral-100 pb-3">
-                            <h2 class="text-sm font-bold uppercase tracking-wider text-neutral-900 font-heading">Tipe &amp; Kuantitas Stok</h2>
-                            <p class="text-xs text-neutral-500 mt-0.5">Tentukan perlakuan sirkulasi barang (unit tunggal berseri atau bahan habis pakai).</p>
+                            <h2 class="text-sm font-bold uppercase tracking-wider text-neutral-900 font-heading">Tipe Barang &amp; Penggunaan</h2>
+                            <p class="text-xs text-neutral-500 mt-0.5">Pilih apakah barang ini digunakan berulang kali atau bahan sekali pakai.</p>
                         </div>
 
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <x-input-label for="type" value="Tipe Barang *" />
-                                <select id="type" name="type" class="mt-1.5 w-full rounded-xl border-neutral-200 text-sm focus:border-primary focus:ring-primary" required>
-                                    <option value="aset" @selected(old('type', 'aset') === 'aset')>Aset (Unit Tunggal / Ber-EPC)</option>
-                                    <option value="bahan_habis_pakai" @selected(old('type') === 'bahan_habis_pakai')>Bahan Habis Pakai (BHP)</option>
-                                </select>
-                                <x-input-error :messages="$errors->get('type')" class="mt-2" />
-                            </div>
+                        <div>
+                            <x-input-label for="type" value="Pilihan Tipe Barang *" />
+                            <select id="type" name="type" x-model="itemType" class="mt-1.5 w-full rounded-xl border-neutral-200 text-sm font-semibold focus:border-primary focus:ring-primary" required>
+                                <option value="aset">Barang Praktikum (Aset / Dipakai Berulang)</option>
+                                <option value="bahan_habis_pakai">Bahan Habis Pakai (Sekali Pakai / BHP)</option>
+                            </select>
+                            <x-input-error :messages="$errors->get('type')" class="mt-2" />
+                        </div>
 
-                            <div>
-                                <x-input-label for="stock" value="Jumlah Stok Unit *" />
-                                <x-text-input id="stock" name="stock" type="number" min="0" class="mt-1.5 w-full font-mono text-sm rounded-xl border-neutral-200 focus:border-primary focus:ring-primary" value="{{ old('stock', 1) }}" required />
-                                <x-input-error :messages="$errors->get('stock')" class="mt-2" />
-                            </div>
+                        <!-- Kondisi jika Barang Praktikum (Aset): Kuantitas stok otomatis 1 unit -->
+                        <div x-show="itemType === 'aset'" x-transition class="p-3.5 rounded-xl bg-neutral-50 border border-neutral-200 flex items-center gap-2.5 text-xs text-neutral-600">
+                            <input type="hidden" name="stock" value="1">
+                            <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                            <span>Barang praktikum dicatat sebagai <strong>1 unit individual</strong> berseri unik dan siap dipantau sirkulasinya.</span>
+                        </div>
+
+                        <!-- Kondisi jika Bahan Habis Pakai (BHP): Kuantitas stok dapat diisi -->
+                        <div x-show="itemType === 'bahan_habis_pakai'" x-transition class="space-y-2">
+                            <x-input-label for="stock" value="Jumlah Kuantitas Stok Awal (Pcs / Roll / Pack) *" />
+                            <x-text-input id="stock" name="stock" type="number" min="1" class="w-full font-mono text-sm rounded-xl border-neutral-200 focus:border-primary focus:ring-primary" value="{{ old('stock', 1) }}" />
+                            <p class="text-[11px] text-neutral-400">Setiap pemakaian bahan habis pakai akan otomatis tercatat di Buku Stok Bahan.</p>
+                            <x-input-error :messages="$errors->get('stock')" class="mt-1.5" />
                         </div>
                     </div>
 
                 </div>
 
-                <!-- Right Column (Sidebar Cards: Status, Organization, Location) -->
+                <!-- Right Column (Sidebar Cards: Organisasi, Lokasi Penempatan) -->
                 <div class="lg:col-span-4 space-y-6">
 
-                    <!-- Card 1: Status Aset (Product Status ala Dribbble) -->
+                    <!-- Card 1: Pengelompokan & Organisasi (Organization ala Dribbble) -->
                     <div class="bg-white rounded-2xl border border-neutral-200 p-5 shadow-sm space-y-3.5">
                         <div class="border-b border-neutral-100 pb-2.5">
-                            <h3 class="text-xs font-bold uppercase tracking-wider text-neutral-900 font-heading">Status Awal Barang</h3>
-                            <p class="text-[11px] text-neutral-500 mt-0.5">Kondisi operasional unit saat didaftarkan.</p>
-                        </div>
-
-                        <div>
-                            <select id="status" name="status" class="w-full rounded-xl border-neutral-200 text-xs font-semibold focus:border-primary focus:ring-primary" required>
-                                <option value="tersedia" @selected(old('status', 'tersedia') === 'tersedia')>Tersedia (Siap Dipinjam)</option>
-                                <option value="under_maintenance" @selected(old('status') === 'under_maintenance')>Dalam Perbaikan (M&amp;R)</option>
-                                <option value="dipinjam" @selected(old('status') === 'dipinjam')>Sedang Dipinjam</option>
-                            </select>
-                            <x-input-error :messages="$errors->get('status')" class="mt-2" />
-                        </div>
-
-                        <p class="text-[11px] text-neutral-500 leading-relaxed">
-                            Barang dengan status <span class="font-semibold text-emerald-700">Tersedia</span> akan langsung muncul di katalog Kiosk Siswa.
-                        </p>
-                    </div>
-
-                    <!-- Card 2: Pengelompokan & Organisasi (Organization ala Dribbble) -->
-                    <div class="bg-white rounded-2xl border border-neutral-200 p-5 shadow-sm space-y-3.5">
-                        <div class="border-b border-neutral-100 pb-2.5">
-                            <h3 class="text-xs font-bold uppercase tracking-wider text-neutral-900 font-heading">Organisasi &amp; Kategori</h3>
-                            <p class="text-[11px] text-neutral-500 mt-0.5">Pengelompokan perangkat dan kode aset unik.</p>
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-neutral-900 font-heading">Identitas &amp; Kelompok</h3>
+                            <p class="text-[11px] text-neutral-500 mt-0.5">Penetapan kode unik dan kategori kelompok master.</p>
                         </div>
 
                         <div>
                             <x-input-label for="item_code" value="Kode Barang Unik *" />
-                            <x-text-input id="item_code" name="item_code" class="mt-1.5 w-full font-mono text-xs rounded-xl border-neutral-200 focus:border-primary focus:ring-primary uppercase" value="{{ old('item_code') }}" required placeholder="SLM-001" />
+                            <x-text-input id="item_code" name="item_code" class="mt-1.5 w-full font-mono text-xs rounded-xl border-neutral-200 focus:border-primary focus:ring-primary uppercase" value="{{ old('item_code') }}" required placeholder="Contoh: TL840_18" />
                             <x-input-error :messages="$errors->get('item_code')" class="mt-1.5" />
                         </div>
 
@@ -208,7 +204,7 @@
                                 </div>
                             @else
                                 <x-input-label for="category" value="Kelompok / Kategori Barang" />
-                                <x-text-input id="category" name="category" x-model="category" list="item-category-suggestions" class="mt-1.5 w-full text-xs rounded-xl border-neutral-200 focus:border-primary focus:ring-primary" placeholder="Ketik: TPLINK, PC, MIKROTIK" />
+                                <x-text-input id="category" name="category" x-model="category" list="item-category-suggestions" class="mt-1.5 w-full text-xs rounded-xl border-neutral-200 focus:border-primary focus:ring-primary" placeholder="Pilih atau ketik kelompok (misal: TPLINK N ROUTER)" />
                                 <datalist id="item-category-suggestions">
                                     @foreach(($categorySuggestions ?? []) as $cat)
                                         <option value="{{ $cat }}"></option>
@@ -228,16 +224,23 @@
                         </div>
                     </div>
 
-                    <!-- Card 3: Lokasi Penempatan (Shipping / Placement ala Dribbble) -->
+                    <!-- Card 2: Lokasi Penempatan (Dropdown Ruang Alat / Lab 1 - Lab 5) -->
                     <div class="bg-white rounded-2xl border border-neutral-200 p-5 shadow-sm space-y-3.5">
                         <div class="border-b border-neutral-100 pb-2.5">
                             <h3 class="text-xs font-bold uppercase tracking-wider text-neutral-900 font-heading">Lokasi Penempatan</h3>
-                            <p class="text-[11px] text-neutral-500 mt-0.5">Presisi rak atau ruang lab penyimpanan.</p>
+                            <p class="text-[11px] text-neutral-500 mt-0.5">Pilih ruangan atau laboratorium penyimpanan.</p>
                         </div>
 
                         <div>
-                            <x-input-label for="location" value="Ruang / Rak Penyimpanan *" />
-                            <x-text-input id="location" name="location" class="mt-1.5 w-full font-mono text-xs rounded-xl border-neutral-200 focus:border-primary focus:ring-primary uppercase" value="{{ old('location') }}" required placeholder="LAB1-RAK02" />
+                            <x-input-label for="location" value="Ruang / Laboratorium *" />
+                            <select id="location" name="location" class="mt-1.5 w-full rounded-xl border-neutral-200 text-xs font-semibold focus:border-primary focus:ring-primary" required>
+                                <option value="Ruang Alat" @selected(old('location', 'Ruang Alat') === 'Ruang Alat')>Ruang Alat</option>
+                                <option value="Lab 1" @selected(old('location') === 'Lab 1')>Lab 1</option>
+                                <option value="Lab 2" @selected(old('location') === 'Lab 2')>Lab 2</option>
+                                <option value="Lab 3" @selected(old('location') === 'Lab 3')>Lab 3</option>
+                                <option value="Lab 4" @selected(old('location') === 'Lab 4')>Lab 4</option>
+                                <option value="Lab 5" @selected(old('location') === 'Lab 5')>Lab 5</option>
+                            </select>
                             <x-input-error :messages="$errors->get('location')" class="mt-1.5" />
                         </div>
                     </div>

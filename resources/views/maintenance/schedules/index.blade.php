@@ -82,19 +82,19 @@
         ])
 
         <!-- Form Sederhana Penjadwalan Paket Barang (Synced Master Aset) -->
-        <div class="bg-white rounded-xl border border-neutral-200 p-5 sm:p-6">
+        <div class="bg-white rounded-2xl border border-neutral-200 p-6 shadow-sm">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 mb-5 border-b border-neutral-100">
                 <div>
-                    <h3 class="text-sm font-bold text-neutral-900 tracking-tight">Jadwalkan Maintenance Paket Barang</h3>
-                    <p class="text-[11px] text-neutral-500 mt-0.5">Pilih paket nama barang dari Master Aset (misal TPLINK, PC, MIKROTIK), tentukan tanggal, siklus bulanan ke depan, serta daftar hal yang harus diperiksa.</p>
+                    <h3 class="text-base font-bold text-neutral-900 tracking-tight font-heading">Jadwalkan Maintenance Paket Barang</h3>
+                    <p class="text-xs text-neutral-500 mt-0.5">Pilih paket nama barang dari Master Aset (misal TPLINK, PC, MIKROTIK), tentukan tanggal, siklus bulanan ke depan, serta daftar hal yang harus diperiksa.</p>
                 </div>
-                <span class="px-2.5 py-1 rounded-md font-mono text-[11px] font-semibold bg-neutral-100 text-neutral-700 border border-neutral-200 self-start sm:self-auto shrink-0">
+                <span class="px-3 py-1 rounded-full font-mono text-xs font-semibold bg-neutral-100 text-neutral-700 border border-neutral-200 self-start sm:self-auto shrink-0">
                     {{ $nameGroups->count() }} Paket · {{ $masterItems->count() }} Unit
                 </span>
             </div>
 
             @if($errors->any())
-                <div class="mb-4 bg-rose-50 border border-rose-200 text-rose-800 px-3.5 py-2.5 rounded-lg text-xs space-y-1">
+                <div class="mb-4 bg-rose-50 border border-rose-200 text-rose-800 px-4 py-3 rounded-2xl text-xs space-y-1">
                     <div class="font-bold">Gagal menyimpan jadwal maintenance:</div>
                     <ul class="list-disc list-inside space-y-0.5">
                         @foreach($errors->all() as $error)
@@ -105,9 +105,9 @@
             @endif
 
             @if($masterItems->isEmpty())
-                <div class="rounded-lg border border-neutral-200 bg-neutral-50 p-4 text-xs text-neutral-600 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="rounded-2xl border border-neutral-200 bg-neutral-50 p-5 text-xs text-neutral-600 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <span>Belum ada barang atau paket kelompok di Master Aset. Tambahkan terlebih dahulu melalui menu Master Aset.</span>
-                    <a href="{{ route('items.create') }}" class="inline-flex items-center justify-center px-3 py-1.5 bg-primary text-white font-semibold rounded-lg whitespace-nowrap">
+                    <a href="{{ route('items.create') }}" class="inline-flex items-center justify-center px-4 py-2 bg-neutral-900 text-white font-semibold rounded-full hover:bg-neutral-800 transition-colors whitespace-nowrap shadow-sm">
                         Tambah Barang Master Aset
                     </a>
                 </div>
@@ -136,7 +136,7 @@
                                     name="selected_group"
                                     x-model="selectedGroup"
                                     required
-                                    class="mt-1.5 w-full rounded-lg border-neutral-300 text-sm focus:border-primary focus:ring-primary">
+                                    class="mt-1.5 w-full rounded-xl border-neutral-200 text-xs focus:border-primary focus:ring-primary">
                                 <option value="">— Pilih paket barang (misal: TPLINK, PC, MIKROTIK) —</option>
                                 @if($nameGroups->isNotEmpty())
                                     <optgroup label="Paket Kelompok Barang (Master Aset)">
@@ -162,7 +162,7 @@
 
                         <!-- Info Paket Terpilih (ringkas tanpa daftar centang yang penuh) -->
                         <template x-if="activeGroup !== null">
-                            <div class="rounded-lg border border-indigo-200 bg-primary-50/50 px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                            <div class="rounded-xl border border-indigo-200 bg-primary-50/50 px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                                 <div class="space-y-1 min-w-0">
                                     <div class="text-xs font-semibold text-neutral-900">
                                         Paket <span class="text-primary-700" x-text="activeGroup?.label"></span>:
@@ -171,7 +171,7 @@
                                     </div>
                                     <div class="flex items-center gap-1.5 flex-wrap">
                                         <template x-for="unit in activeItems.slice(0, 8)" :key="'badge-' + unit.id">
-                                            <span class="px-1.5 py-0.5 rounded bg-white border border-indigo-200/80 font-mono text-[10px] font-semibold text-neutral-700"
+                                            <span class="px-2 py-0.5 rounded-full bg-white border border-indigo-200/80 font-mono text-[10px] font-semibold text-neutral-700"
                                                   x-text="unit.item_code"></span>
                                         </template>
                                         <template x-if="activeItems.length > 8">
@@ -201,7 +201,7 @@
                                           name="maintenance_date"
                                           type="date"
                                           x-model="maintenanceDate"
-                                          class="mt-1.5 w-full font-mono text-sm"
+                                          class="mt-1.5 w-full font-mono text-xs rounded-xl border-neutral-200 focus:border-primary focus:ring-primary"
                                           required />
                             <p class="text-[11px] text-neutral-500 mt-1.5">Tanggal pelaksanaan maintenance paket barang ini.</p>
                             <x-input-error :messages="$errors->get('maintenance_date')" class="mt-1.5" />
@@ -216,15 +216,15 @@
                                               min="1"
                                               max="60"
                                               x-model="intervalMonths"
-                                              class="w-28 font-mono text-sm text-center"
+                                              class="w-28 font-mono text-xs text-center rounded-xl border-neutral-200 focus:border-primary focus:ring-primary"
                                               required />
                                 <span class="text-xs font-semibold text-neutral-600">Bulan sekali</span>
-                                <div class="flex items-center gap-1 flex-wrap ml-auto">
+                                <div class="flex items-center gap-1.5 flex-wrap ml-auto">
                                     @foreach([1, 3, 6, 12] as $preset)
                                         <button type="button"
                                                 @click="intervalMonths = {{ $preset }}"
-                                                class="px-2.5 py-1.5 rounded-lg font-mono text-[11px] font-semibold border transition-colors"
-                                                :class="Number(intervalMonths) === {{ $preset }} ? 'bg-neutral-900 text-white border-neutral-900' : 'border-neutral-200 bg-neutral-50 hover:bg-neutral-100 text-neutral-700'">
+                                                class="px-3 py-1 rounded-full font-mono text-[11px] font-semibold border transition-colors shadow-sm"
+                                                :class="Number(intervalMonths) === {{ $preset }} ? 'bg-neutral-900 text-white border-neutral-900' : 'border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-700'">
                                             {{ $preset }} bln
                                         </button>
                                     @endforeach
@@ -247,7 +247,7 @@
                                   name="notes"
                                   rows="5"
                                   placeholder="Contoh:&#10;1. Bersihkan debu body, kipas pendingin, dan ventilasi&#10;2. Periksa kabel power, adaptor daya, dan indikator LED&#10;3. Uji fungsi port LAN/WAN serta kelayakan pakai praktikum&#10;4. Cek pembaruan firmware dan catatan suhu perangkat"
-                                  class="w-full rounded-lg border-neutral-300 text-sm focus:border-primary focus:ring-primary">{{ old('notes') }}</textarea>
+                                  class="w-full rounded-xl border-neutral-200 text-xs focus:border-primary focus:ring-primary">{{ old('notes') }}</textarea>
                         <x-input-error :messages="$errors->get('notes')" class="mt-1.5" />
                     </div>
 
@@ -258,7 +258,7 @@
                         </span>
                         <button type="submit"
                                 :disabled="!activeGroup"
-                                class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary-700 disabled:bg-neutral-200 disabled:text-neutral-500 disabled:border-neutral-200 disabled:cursor-not-allowed text-white text-xs font-semibold rounded-lg border border-primary/40 transition-colors whitespace-nowrap shrink-0">
+                                class="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-neutral-900 hover:bg-neutral-800 disabled:bg-neutral-200 disabled:text-neutral-500 disabled:border-neutral-200 disabled:cursor-not-allowed text-white text-xs font-semibold rounded-full transition-colors whitespace-nowrap shrink-0 shadow-sm">
                             <span>
                                 Jadwalkan &amp; Mulai Maintenance (<span class="font-mono" x-text="activeGroup ? activeGroup.item_count : 0"></span> Barang)
                             </span>

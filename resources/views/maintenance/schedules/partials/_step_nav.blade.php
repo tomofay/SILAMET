@@ -47,10 +47,16 @@
     ];
 @endphp
 
-<!-- Header Overview -->
-<div class="bg-white rounded-xl p-4 sm:p-5 border border-neutral-200">
-    <h2 class="text-base font-bold text-neutral-900 tracking-tight font-heading">Penjadwalan Perawatan Preventif Berkala</h2>
-    <p class="text-xs text-neutral-500 mt-0.5">Alur maintenance terstruktur: jadwalkan paket barang Master Aset, pilah kondisi saat dicek, lalu ajukan kerusakan ke tiket.</p>
+<!-- Header Overview (Dribbble Orbix Studio Header) -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-neutral-200">
+    <div>
+        <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-neutral-900 font-heading">
+            Penjadwalan Perawatan Preventif Berkala
+        </h1>
+        <p class="text-xs text-neutral-500 mt-0.5">
+            Alur maintenance terstruktur: jadwalkan paket barang Master Aset, pilah kondisi saat dicek, lalu ajukan kerusakan ke tiket.
+        </p>
+    </div>
 </div>
 
 <!-- Module Top Sub-Navigation -->
@@ -59,29 +65,28 @@
     'workflowCounts' => $wf,
 ])
 
-<!-- 4-Step Pipeline Navigation -->
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+<!-- 4-Step Pipeline Navigation (Orbix Studio Guided Stepper) -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
     @foreach($steps as $step)
         @php $isCurrent = $currentStep === $step['key']; @endphp
         <a href="{{ $step['href'] }}"
-           class="group rounded-xl p-3.5 border transition-colors flex items-start justify-between gap-2.5 {{ $isCurrent ? 'bg-primary-50/70 border-indigo-300' : 'bg-white border-neutral-200 hover:bg-neutral-50' }}">
-            <div class="flex items-start gap-2.5 min-w-0">
-                <span class="w-6 h-6 rounded-lg font-mono text-xs font-bold flex items-center justify-center shrink-0 {{ $isCurrent ? 'bg-primary text-white' : 'bg-neutral-100 text-neutral-700 border border-neutral-200' }}">
+           class="group rounded-2xl p-4 border transition-all duration-150 flex items-start justify-between gap-3 shadow-sm {{ $isCurrent ? 'bg-white border-neutral-900 ring-1 ring-neutral-900' : 'bg-white border-neutral-200 hover:border-neutral-300 hover:bg-neutral-50/50' }}">
+            <div class="flex items-start gap-3 min-w-0">
+                <span class="w-7 h-7 rounded-xl font-mono text-xs font-bold flex items-center justify-center shrink-0 {{ $isCurrent ? 'bg-neutral-900 text-white' : 'bg-neutral-100 text-neutral-700 border border-neutral-200' }}">
                     {{ $step['number'] }}
                 </span>
                 <div class="min-w-0">
-                    <div class="text-xs font-bold truncate {{ $isCurrent ? 'text-primary-700' : 'text-neutral-900' }}">
+                    <div class="text-xs font-bold truncate font-heading {{ $isCurrent ? 'text-neutral-900' : 'text-neutral-700' }}">
                         {{ $step['label'] }}
                     </div>
                     <div class="text-[11px] text-neutral-500 mt-0.5 truncate">{{ $step['desc'] }}</div>
                 </div>
             </div>
             @if($step['badge'] !== null)
-                <span class="px-2 py-0.5 rounded-md font-mono text-[11px] font-bold border shrink-0 {{ $step['badgeClass'] }}">
+                <span class="px-2 py-0.5 rounded-full font-mono text-[10px] font-bold border shrink-0 {{ $step['badgeClass'] }}">
                     {{ $step['badge'] }}
                 </span>
             @endif
         </a>
     @endforeach
 </div>
-

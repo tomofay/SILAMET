@@ -35,39 +35,61 @@
         };
     @endphp
 
-    <div class="{{ $isOpen ? 'max-w-2xl' : 'max-w-4xl' }} space-y-4">
-        <!-- Top Bar -->
-        <div class="flex items-center justify-between gap-3 flex-wrap">
-            <a href="{{ route('maintenance.index', ['status' => $ticket->status->value]) }}" class="inline-flex items-center gap-1.5 text-xs font-semibold text-neutral-600 hover:text-neutral-900 px-3 py-1.5 rounded-lg border border-neutral-200 bg-white hover:bg-neutral-50 transition-colors">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-                <span>Kembali ke Daftar Tiket</span>
-            </a>
+    <div class="{{ $isOpen ? 'max-w-3xl' : 'max-w-5xl' }} space-y-6">
+        <!-- Action Header Bar (Orbix Studio style) -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-neutral-200/80">
+            <div class="flex items-center gap-3">
+                <a href="{{ route('maintenance.index', ['status' => $ticket->status->value]) }}" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-neutral-200 bg-white text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50 shadow-sm transition-colors">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                </a>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h1 class="text-xl font-bold tracking-tight text-neutral-900 font-heading">
+                            Tiket <span class="font-mono">#{{ $ticket->id }}</span> — {{ $ticket->item->name ?? '-' }}
+                        </h1>
+                        <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold border {{ $badge }}">
+                            {{ $ticket->status->label() }}
+                        </span>
+                    </div>
+                    <p class="text-xs text-neutral-500 mt-0.5">
+                        Dilaporkan oleh <span class="font-semibold text-neutral-800">{{ $ticket->reportedBy->name ?? 'Siswa Kiosk' }}</span> · <span class="font-mono">{{ optional($ticket->created_at)->format('d/m/Y H:i') }}</span>
+                    </p>
+                </div>
+            </div>
 
-            @if($isInProgress)
-                <button type="button"
-                        class="open-complete-repair-modal inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-semibold rounded-lg border border-emerald-700 transition-colors"
-                        data-action="{{ route('maintenance.complete', $ticket->id) }}"
-                        data-ticket-id="{{ $ticket->id }}"
-                        data-item-name="{{ $ticket->item->name ?? '-' }}"
-                        data-item-code="{{ $ticket->item->item_code ?? '—' }}"
-                        data-item-stock="{{ max(1, (int) ($ticket->item->stock ?? 1)) }}"
-                        data-broken-qty="{{ max(1, min(max(1, (int) ($ticket->item->stock ?? 1)), (int) ($ticket->preventiveSchedule?->damaged_quantity ?: 1))) }}"
-                        data-issue="{{ $ticket->issue_description }}"
-                        data-service-type="{{ $latestLog?->service_type?->value ?? 'internal' }}"
-                        data-vendor-name="{{ $latestLog?->vendor_name ?? '' }}"
-                        data-existing-cost="{{ $totalCost }}">
+            <div class="flex items-center gap-2">
+                @if($isInProgress)
+                    <button type="button"
+                            class="open-complete-repair-modal inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-full shadow-sm transition-colors"
+                            data-action="{{ route('maintenance.complete', $ticket->id) }}"
+                            data-ticket-id="{{ $ticket->id }}"
+                            data-item-name="{{ $ticket->item->name ?? '-' }}"
+                            data-item-code="{{ $ticket->item->item_code ?? '—' }}"
+                            data-item-stock="{{ max(1, (int) ($ticket->item->stock ?? 1)) }}"
+                            data-broken-qty="{{ max(1, min(max(1, (int) ($ticket->item->stock ?? 1)), (int) ($ticket->preventiveSchedule?->damaged_quantity ?: 1))) }}"
+                            data-issue="{{ $ticket->issue_description }}"
+                            data-service-type="{{ $latestLog?->service_type?->value ?? 'internal' }}"
+                            data-vendor-name="{{ $latestLog?->vendor_name ?? '' }}"
+                            data-existing-cost="{{ $totalCost }}">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span>Selesai &amp; Uji Layak</span>
+                    </button>
+                @endif
+                <button type="submit" form="edit-ticket-form" class="inline-flex items-center gap-1.5 px-4 py-2 bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-semibold rounded-full shadow-sm transition-colors">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
-                    <span>Selesai &amp; Uji Layak</span>
+                    <span>Simpan Perubahan</span>
                 </button>
-            @endif
+            </div>
         </div>
 
         @if($errors->any() && !in_array(old('_modal_mode'), ['start', 'complete'], true))
-            <div class="bg-rose-50 border border-rose-200 text-rose-800 px-4 py-3 rounded-lg text-xs space-y-1">
+            <div class="bg-rose-50 border border-rose-200 text-rose-800 px-4 py-3 rounded-2xl text-xs space-y-1">
                 <div class="font-bold">Gagal menyimpan perubahan:</div>
                 <ul class="list-disc list-inside space-y-0.5">
                     @foreach($errors->all() as $error)
@@ -78,71 +100,50 @@
         @endif
 
         @if(! $isOpen)
-            <!-- Ringkasan Detail Tiket (Tampil di halaman Edit saat Sedang Dikerjakan) -->
-            <div class="bg-white rounded-xl border border-neutral-200 p-5 space-y-4">
-                <div class="flex items-start justify-between flex-wrap gap-3 pb-4 border-b border-neutral-100">
-                    <div>
-                        <div class="flex items-center gap-2 flex-wrap">
-                            <h2 class="text-lg font-bold text-neutral-900 tracking-tight font-heading">
-                                Tiket <span class="font-mono">#{{ $ticket->id }}</span> — {{ $ticket->item->name ?? '-' }}
-                            </h2>
-                            @if(filled($ticket->item?->item_code))
-                                <span class="font-mono text-[11px] px-2 py-0.5 rounded bg-neutral-100 text-neutral-700 border border-neutral-200">{{ $ticket->item->item_code }}</span>
+            <!-- Metric Cards (Orbix Studio 3 Cards) -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm">
+                    <div class="text-[11px] font-semibold uppercase tracking-wider text-neutral-500">Penanganan Saat Ini</div>
+                    <div class="mt-1.5">
+                        @if($latestLog)
+                            <span class="text-sm font-bold {{ $latestLog->service_type->value === 'vendor_luar' ? 'text-amber-700' : 'text-primary' }}">
+                                {{ $latestLog->service_type->value === 'vendor_luar' ? 'Vendor Luar' : 'Internal Sekolah' }}
+                            </span>
+                            @if($latestLog->service_type->value === 'vendor_luar' && filled($latestLog->vendor_name))
+                                <div class="text-xs text-neutral-600 mt-0.5">{{ $latestLog->vendor_name }}</div>
                             @endif
-                        </div>
-                        <p class="text-xs text-neutral-500 mt-1">
-                            Dilaporkan oleh <span class="font-semibold text-neutral-800">{{ $ticket->reportedBy->name ?? 'Siswa Kiosk' }}</span>
-                            <span class="mx-1 text-neutral-300">|</span>
-                            <span class="font-mono">{{ optional($ticket->created_at)->format('d/m/Y H:i') }}</span>
-                        </p>
+                        @else
+                            <span class="text-xs text-neutral-400">Belum dicatat</span>
+                        @endif
                     </div>
-                    <span class="text-xs font-semibold px-2.5 py-1 rounded-md border {{ $badge }}">{{ $ticket->status->label() }}</span>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div class="p-3 rounded-lg border border-neutral-200 bg-neutral-50/70">
-                        <div class="text-[10px] font-semibold uppercase tracking-wider text-neutral-500">Penanganan Saat Ini</div>
-                        <div class="mt-1">
-                            @if($latestLog)
-                                <span class="text-xs font-bold {{ $latestLog->service_type->value === 'vendor_luar' ? 'text-amber-700' : 'text-primary-700' }}">
-                                    {{ $latestLog->service_type->value === 'vendor_luar' ? 'Vendor Luar' : 'Internal Sekolah' }}
-                                </span>
-                                @if($latestLog->service_type->value === 'vendor_luar' && filled($latestLog->vendor_name))
-                                    <div class="text-xs text-neutral-600 mt-0.5">{{ $latestLog->vendor_name }}</div>
-                                @endif
-                            @else
-                                <span class="text-xs text-neutral-400">Belum dicatat</span>
-                            @endif
-                        </div>
+                <div class="rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm">
+                    <div class="text-[11px] font-semibold uppercase tracking-wider text-neutral-500">Estimasi / Progres</div>
+                    <div class="mt-1.5 text-xs font-mono text-neutral-800">
+                        @if($estimatedDate && $isInProgress)
+                            Est. Selesai: {{ $estimatedDate->format('d/m/Y') }}
+                        @else
+                            {{ $ticket->logs->count() }} catatan log tindakan
+                        @endif
                     </div>
+                </div>
 
-                    <div class="p-3 rounded-lg border border-neutral-200 bg-neutral-50/70">
-                        <div class="text-[10px] font-semibold uppercase tracking-wider text-neutral-500">Estimasi / Progres</div>
-                        <div class="mt-1 text-xs font-mono text-neutral-800">
-                            @if($estimatedDate && $isInProgress)
-                                Est. Selesai: {{ $estimatedDate->format('d/m/Y') }}
-                            @else
-                                {{ $ticket->logs->count() }} catatan log
-                            @endif
-                        </div>
-                    </div>
-
-                    <div class="p-3 rounded-lg border border-neutral-200 bg-neutral-50/70">
-                        <div class="text-[10px] font-semibold uppercase tracking-wider text-neutral-500">Total Biaya Tercatat</div>
-                        <div class="mt-1 font-mono text-sm font-bold text-neutral-900">
-                            {{ $totalCost > 0 ? 'Rp ' . number_format($totalCost, 0, ',', '.') : 'Rp 0 (Tanpa biaya)' }}
-                        </div>
+                <div class="rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm">
+                    <div class="text-[11px] font-semibold uppercase tracking-wider text-neutral-500">Total Biaya Tercatat</div>
+                    <div class="mt-1.5 font-mono text-base font-bold text-neutral-900">
+                        {{ $totalCost > 0 ? 'Rp ' . number_format($totalCost, 0, ',', '.') : 'Rp 0' }}
                     </div>
                 </div>
             </div>
         @endif
 
         <!-- Form Utama Edit Tiket -->
-        <div class="bg-white rounded-xl border border-neutral-200 p-5 sm:p-6">
-            <div class="flex items-start justify-between flex-wrap gap-2 mb-5 pb-3 border-b border-neutral-100">
+        <div class="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm space-y-5">
+            <div class="flex items-start justify-between flex-wrap gap-2 pb-3 border-b border-neutral-100">
                 <div>
-                    <h2 class="text-base font-bold text-neutral-900 tracking-tight font-heading">
-                        Edit Tiket <span class="font-mono">#{{ $ticket->id }}</span>
+                    <h2 class="text-sm font-bold text-neutral-900 tracking-tight font-heading">
+                        Parameter Tiket & Deskripsi Kendala
                     </h2>
                     @if($isOpen)
                         <p class="text-xs text-neutral-500 mt-0.5">
@@ -152,12 +153,12 @@
                             @endif
                         </p>
                     @else
-                        <p class="text-xs text-neutral-500 mt-0.5">Perbarui deskripsi kendala, status, lokasi penanganan, atau tambah catatan.</p>
+                        <p class="text-xs text-neutral-500 mt-0.5">Perbarui deskripsi kendala, status penanganan, tempat servis, atau catatan teknis.</p>
                     @endif
                 </div>
             </div>
 
-            <form method="POST" action="{{ route('maintenance.update', $ticket->id) }}" class="space-y-4">
+            <form id="edit-ticket-form" method="POST" action="{{ route('maintenance.update', $ticket->id) }}" class="space-y-4">
                 @csrf
                 @method('PUT')
                 <input type="hidden" name="return_to" value="tab">
@@ -165,7 +166,7 @@
                 <div>
                     <x-input-label for="issue_description" value="Deskripsi Kendala *" />
                     <textarea id="issue_description" name="issue_description" rows="3" required
-                              class="mt-1 w-full rounded-lg border-neutral-300 text-sm focus:border-primary focus:ring-primary">{{ old('_form_mode') !== 'progress' ? old('issue_description', $ticket->issue_description) : $ticket->issue_description }}</textarea>
+                              class="mt-1.5 w-full rounded-xl border-neutral-200 text-sm focus:border-neutral-900 focus:ring-neutral-900">{{ old('_form_mode') !== 'progress' ? old('issue_description', $ticket->issue_description) : $ticket->issue_description }}</textarea>
                     <x-input-error :messages="$errors->get('issue_description')" class="mt-2" />
                 </div>
 
@@ -177,7 +178,7 @@
                                 ? old('status', $ticket->status->value)
                                 : $ticket->status->value;
                         @endphp
-                        <select id="status" name="status" class="mt-1 w-full rounded-lg border-neutral-300 text-sm focus:border-primary focus:ring-primary">
+                        <select id="status" name="status" class="mt-1.5 w-full rounded-xl border-neutral-200 text-sm focus:border-neutral-900 focus:ring-neutral-900">
                             <option value="open" @selected($selectedStatus === 'open')>Open (Perlu Tindakan)</option>
                             <option value="in_progress" @selected($selectedStatus === 'in_progress')>In Progress (Sedang Dikerjakan)</option>
                             <option value="resolved" @selected($selectedStatus === 'resolved')>Resolved (Selesai)</option>
@@ -187,7 +188,7 @@
 
                     <div>
                         <x-input-label for="edit-service-type" value="Tempat Perbaikan" />
-                        <select id="edit-service-type" name="service_type" class="mt-1 w-full rounded-lg border-neutral-300 text-sm focus:border-primary focus:ring-primary">
+                        <select id="edit-service-type" name="service_type" class="mt-1.5 w-full rounded-xl border-neutral-200 text-sm focus:border-neutral-900 focus:ring-neutral-900">
                             @if($isOpen)
                                 <option value="" @selected($selectedServiceType === '')>— Belum ditentukan —</option>
                             @endif
@@ -199,20 +200,20 @@
                 </div>
 
                 <!-- Detail Vendor (Muncul dinamis bila memilih Vendor Luar) -->
-                <div id="edit-vendor-fields" class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3.5 rounded-lg bg-amber-50/60 border border-amber-200 {{ $selectedServiceType === 'vendor_luar' ? '' : 'hidden' }}">
+                <div id="edit-vendor-fields" class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 rounded-xl bg-amber-50/60 border border-amber-200 {{ $selectedServiceType === 'vendor_luar' ? '' : 'hidden' }}">
                     <div>
                         <label for="edit-vendor-name" class="block text-xs font-semibold text-neutral-800">Nama Vendor / Bengkel <span class="text-rose-600">*</span></label>
                         <input type="text" id="edit-vendor-name" name="vendor_name"
                                value="{{ $selectedVendorName }}"
                                placeholder="Misal: Toko Servis Jaringan Depok"
-                               class="mt-1 w-full rounded-lg border-neutral-300 text-xs focus:border-primary focus:ring-primary">
+                               class="mt-1.5 w-full rounded-xl border-neutral-200 text-xs focus:border-neutral-900 focus:ring-neutral-900">
                         <x-input-error :messages="$errors->get('vendor_name')" class="mt-1" />
                     </div>
                     <div>
                         <label for="edit-estimated-finish" class="block text-xs font-semibold text-neutral-800">Estimasi Selesai <span class="text-neutral-400 font-normal">(Opsional)</span></label>
                         <input type="date" id="edit-estimated-finish" name="estimated_finish_at"
                                value="{{ $selectedEstimatedFinish }}"
-                               class="mt-1 w-full rounded-lg border-neutral-300 text-xs font-mono focus:border-primary focus:ring-primary">
+                               class="mt-1.5 w-full rounded-xl border-neutral-200 text-xs font-mono focus:border-neutral-900 focus:ring-neutral-900">
                         <x-input-error :messages="$errors->get('estimated_finish_at')" class="mt-1" />
                     </div>
                 </div>
@@ -225,20 +226,20 @@
                         ? old('outcome', $ticket->outcome ?? 'repaired')
                         : ($ticket->outcome ?? 'repaired');
                 @endphp
-                <div id="edit-outcome-fields" class="{{ $selectedStatus === 'resolved' ? '' : 'hidden' }} p-3.5 rounded-lg bg-neutral-50 border border-neutral-200 space-y-3">
+                <div id="edit-outcome-fields" class="{{ $selectedStatus === 'resolved' ? '' : 'hidden' }} p-4 rounded-xl bg-neutral-50 border border-neutral-200 space-y-3">
                     <div>
                         <label class="block text-xs font-semibold text-neutral-800 mb-2">Hasil Kondisi Barang (Saat Diselesaikan)</label>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <label class="cursor-pointer">
                                 <input type="radio" name="outcome" value="repaired" class="peer sr-only edit-outcome-radio" {{ $editSelectedOutcome !== 'broken' ? 'checked' : '' }}>
-                                <div class="p-2.5 rounded-lg border border-neutral-200 bg-white hover:bg-neutral-50 peer-checked:border-emerald-500 peer-checked:bg-emerald-50/70 transition-colors">
+                                <div class="p-3 rounded-xl border border-neutral-200 bg-white hover:bg-neutral-50 peer-checked:border-emerald-500 peer-checked:bg-emerald-50/70 transition-colors">
                                     <div class="text-xs font-bold text-neutral-900">Bener / Layak Pakai</div>
                                     <p class="text-[11px] text-neutral-500 mt-0.5">Barang normal &amp; berstatus TERSEDIA kembali.</p>
                                 </div>
                             </label>
                             <label class="cursor-pointer">
                                 <input type="radio" name="outcome" value="broken" class="peer sr-only edit-outcome-radio" {{ $editSelectedOutcome === 'broken' ? 'checked' : '' }}>
-                                <div class="p-2.5 rounded-lg border border-neutral-200 bg-white hover:bg-neutral-50 peer-checked:border-rose-500 peer-checked:bg-rose-50/70 transition-colors">
+                                <div class="p-3 rounded-xl border border-neutral-200 bg-white hover:bg-neutral-50 peer-checked:border-rose-500 peer-checked:bg-rose-50/70 transition-colors">
                                     <div class="text-xs font-bold text-neutral-900">Rusak Permanen</div>
                                     <p class="text-[11px] text-neutral-500 mt-0.5">Masuk daftar Barang Rusak &amp; kurangi Master Aset.</p>
                                 </div>
@@ -253,7 +254,7 @@
                             </label>
                             <input type="number" id="edit-broken-qty" name="broken_quantity" min="1" max="{{ $editItemStock }}"
                                    value="{{ old('_form_mode') !== 'progress' ? old('broken_quantity', $editDefaultBrokenQty) : $editDefaultBrokenQty }}"
-                                   class="mt-1 w-full sm:w-48 rounded-lg border-rose-300 bg-white text-xs font-mono focus:border-rose-500 focus:ring-rose-500">
+                                   class="mt-1.5 w-full sm:w-48 rounded-xl border-rose-300 bg-white text-xs font-mono focus:border-rose-500 focus:ring-rose-500">
                             <x-input-error :messages="$errors->get('broken_quantity')" class="mt-1" />
                         </div>
                     @endif
@@ -263,13 +264,8 @@
                     <x-input-label for="notes" value="Catatan (Opsional)" />
                     <textarea id="notes" name="notes" rows="3"
                               placeholder="{{ $isOpen ? 'Catatan awal diagnosa atau rencana penanganan...' : 'Catatan progres terbaru atau alasan pemindahan tempat servis...' }}"
-                              class="mt-1 w-full rounded-lg border-neutral-300 text-sm focus:border-primary focus:ring-primary">{{ old('_form_mode') !== 'progress' ? old('notes') : '' }}</textarea>
+                              class="mt-1.5 w-full rounded-xl border-neutral-200 text-sm focus:border-neutral-900 focus:ring-neutral-900">{{ old('_form_mode') !== 'progress' ? old('notes') : '' }}</textarea>
                     <x-input-error :messages="$errors->get('notes')" class="mt-2" />
-                </div>
-
-                <div class="flex items-center justify-end gap-2.5 pt-4 border-t border-neutral-100">
-                    <a href="{{ route('maintenance.index', ['status' => $ticket->status->value]) }}" class="px-4 py-2 text-xs font-semibold text-neutral-600 hover:text-neutral-900 border border-neutral-200 rounded-lg hover:bg-neutral-50 transition-colors">Batal</a>
-                    <button type="submit" class="px-4 py-2 bg-primary hover:bg-primary-700 text-white text-xs font-semibold rounded-lg border border-primary/40 transition-colors">Simpan Perubahan</button>
                 </div>
             </form>
         </div>
@@ -285,18 +281,18 @@
                     : ($latestLog?->vendor_name ?? '');
             @endphp
 
-            <!-- Form Nota / Progres Bertahap (Opsional & Collapsible) -->
+            <!-- Form Nota / Progres Bertahap -->
             @if($isInProgress)
-                <div class="bg-white rounded-xl border border-neutral-200 overflow-hidden">
-                    <div class="px-4 py-3.5 bg-neutral-50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="rounded-2xl border border-neutral-200 bg-white shadow-sm overflow-hidden">
+                    <div class="px-5 py-4 bg-neutral-50/70 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-neutral-200/80">
                         <div>
                             <h3 class="font-bold text-neutral-900 text-sm tracking-tight">Catat Nota Pembelian / Biaya Bertahap <span class="text-neutral-400 font-normal">(Opsional)</span></h3>
                             <p class="text-[11px] text-neutral-500 mt-0.5">
-                                Biaya akhir dan struk normalnya cukup diisi sekali saat menekan tombol <span class="font-semibold text-neutral-700">Selesai &amp; Uji Layak</span>. Gunakan formulir ini hanya bila ada pembelian sparepart atau DP vendor di tengah pengerjaan.
+                                Gunakan ini hanya bila ada pembelian sparepart atau DP bengkel di tengah proses servis.
                             </p>
                         </div>
                         <button type="button" id="toggle-progress-expense-btn"
-                                class="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border border-neutral-200 bg-white hover:bg-neutral-100 text-neutral-700 transition-colors">
+                                class="shrink-0 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-700 shadow-2xs transition-colors">
                             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
                             </svg>
@@ -304,7 +300,7 @@
                         </button>
                     </div>
 
-                    <div id="progress-expense-panel" class="{{ $progressHasError ? '' : 'hidden' }} border-t border-neutral-200 p-4 sm:p-5">
+                    <div id="progress-expense-panel" class="{{ $progressHasError ? '' : 'hidden' }} p-5 space-y-4">
                         <form method="POST" action="{{ route('maintenance.logs.store', $ticket->id) }}" enctype="multipart/form-data" class="space-y-4">
                             @csrf
                             <input type="hidden" name="_form_mode" value="progress">
@@ -313,7 +309,7 @@
                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                 <div>
                                     <label for="progress-service-type" class="block text-xs font-semibold text-neutral-700">Tempat Penanganan <span class="text-rose-600">*</span></label>
-                                    <select id="progress-service-type" name="service_type" class="mt-1 w-full rounded-lg border-neutral-300 text-xs focus:border-primary focus:ring-primary">
+                                    <select id="progress-service-type" name="service_type" class="mt-1.5 w-full rounded-xl border-neutral-200 text-xs focus:border-neutral-900 focus:ring-neutral-900">
                                         <option value="internal" @selected($progressServiceValue === 'internal')>Internal Sekolah</option>
                                         <option value="vendor_luar" @selected($progressServiceValue === 'vendor_luar')>Vendor Luar</option>
                                     </select>
@@ -324,14 +320,14 @@
                                     <input type="text" id="progress-vendor-name" name="vendor_name"
                                            value="{{ $progressVendorValue }}"
                                            placeholder="Nama toko / vendor"
-                                           class="mt-1 w-full rounded-lg border-neutral-300 text-xs focus:border-primary focus:ring-primary">
+                                           class="mt-1.5 w-full rounded-xl border-neutral-200 text-xs focus:border-neutral-900 focus:ring-neutral-900">
                                 </div>
 
                                 <div id="progress-est-wrap" class="{{ $progressServiceValue === 'vendor_luar' ? '' : 'hidden' }}">
                                     <label for="progress-estimated-finish" class="block text-xs font-semibold text-neutral-700">Estimasi Selesai <span class="text-neutral-400 font-normal">(Opsional)</span></label>
                                     <input type="date" id="progress-estimated-finish" name="estimated_finish_at"
                                            value="{{ old('_form_mode') === 'progress' ? old('estimated_finish_at') : optional($estimatedDate)->format('Y-m-d') }}"
-                                           class="mt-1 w-full rounded-lg border-neutral-300 text-xs font-mono focus:border-primary focus:ring-primary">
+                                           class="mt-1.5 w-full rounded-xl border-neutral-200 text-xs font-mono focus:border-neutral-900 focus:ring-neutral-900">
                                 </div>
                             </div>
 
@@ -339,7 +335,7 @@
                                 <label for="progress-action-taken" class="block text-xs font-semibold text-neutral-700">Keterangan Transaksi / Tindakan Progres <span class="text-rose-600">*</span></label>
                                 <textarea id="progress-action-taken" name="action_taken" rows="2" required
                                           placeholder="Misal: Pembelian modul SFP baru / pembayaran DP servis vendor..."
-                                          class="mt-1 w-full rounded-lg border-neutral-300 text-xs focus:border-primary focus:ring-primary">{{ old('_form_mode') === 'progress' ? old('action_taken') : '' }}</textarea>
+                                          class="mt-1.5 w-full rounded-xl border-neutral-200 text-xs focus:border-neutral-900 focus:ring-neutral-900">{{ old('_form_mode') === 'progress' ? old('action_taken') : '' }}</textarea>
                             </div>
 
                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -348,17 +344,17 @@
                                     <input type="text" id="progress-spareparts" name="spareparts_used"
                                            value="{{ old('_form_mode') === 'progress' ? old('spareparts_used') : '' }}"
                                            placeholder="Misal: IC Regulator 5V"
-                                           class="mt-1 w-full rounded-lg border-neutral-300 text-xs focus:border-primary focus:ring-primary">
+                                           class="mt-1.5 w-full rounded-xl border-neutral-200 text-xs focus:border-neutral-900 focus:ring-neutral-900">
                                 </div>
 
                                 <div>
                                     <label for="progress-cost" class="block text-xs font-semibold text-neutral-700">Biaya / Harga <span class="text-neutral-400 font-normal">(Opsional)</span></label>
-                                    <div class="relative mt-1">
+                                    <div class="relative mt-1.5">
                                         <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-xs font-mono text-neutral-500 pointer-events-none">Rp</span>
                                         <input type="number" id="progress-cost" name="cost" min="0" step="100"
                                                value="{{ old('_form_mode') === 'progress' ? old('cost') : '' }}"
                                                placeholder="0"
-                                               class="w-full pl-9 rounded-lg border-neutral-300 text-xs font-mono focus:border-primary focus:ring-primary">
+                                               class="w-full pl-9 rounded-xl border-neutral-200 text-xs font-mono focus:border-neutral-900 focus:ring-neutral-900">
                                     </div>
                                 </div>
 
@@ -366,14 +362,14 @@
                                     <label for="progress-receipt" class="block text-xs font-semibold text-neutral-700">Foto / PDF Struk <span class="text-neutral-400 font-normal">(Opsional)</span></label>
                                     <input type="file" id="progress-receipt" name="receipt" accept=".jpg,.jpeg,.png,.webp,.pdf"
                                            data-feedback-id="progress-receipt-feedback"
-                                           class="mt-1 block w-full text-xs text-neutral-600 file:mr-2 file:py-1.5 file:px-2.5 file:rounded-lg file:border file:border-neutral-300 file:text-xs file:font-semibold file:bg-white file:text-neutral-700 hover:file:bg-neutral-50">
-                                    <p class="text-[10px] text-neutral-400 mt-1">Foto otomatis diperkecil sebelum diunggah; PDF/berkas lain maks. {{ $phpMaxMbLabel }} MB (batas server PHP).</p>
+                                           class="mt-1.5 block w-full text-xs text-neutral-600 file:mr-2 file:py-1.5 file:px-3 file:rounded-full file:border file:border-neutral-200 file:text-xs file:font-semibold file:bg-white file:text-neutral-700 hover:file:bg-neutral-50">
+                                    <p class="text-[10px] text-neutral-400 mt-1">PDF/berkas maks. {{ $phpMaxMbLabel }} MB.</p>
                                     <p id="progress-receipt-feedback" class="hidden text-[11px] mt-1 font-medium"></p>
                                 </div>
                             </div>
 
-                            <div class="flex items-center justify-end pt-2 border-t border-neutral-100">
-                                <button type="submit" class="inline-flex items-center gap-1.5 px-4 py-2 bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-semibold rounded-lg transition-colors">
+                            <div class="flex items-center justify-end pt-3 border-t border-neutral-100">
+                                <button type="submit" class="inline-flex items-center gap-1.5 px-4 py-2 bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-semibold rounded-full transition-colors">
                                     <span>Simpan Log Nota Bertahap</span>
                                 </button>
                             </div>
@@ -382,19 +378,19 @@
                 </div>
             @endif
 
-            <!-- Riwayat Tindakan & Bukti Struk (Terpadu dari Detail Tiket) -->
-            <div class="bg-white rounded-xl border border-neutral-200 overflow-hidden">
-                <div class="px-4 py-3.5 border-b border-neutral-200 bg-neutral-50 flex items-center justify-between gap-2">
+            <!-- Riwayat Tindakan & Bukti Struk -->
+            <div class="rounded-2xl border border-neutral-200 bg-white shadow-sm overflow-hidden">
+                <div class="px-5 py-4 border-b border-neutral-200/80 bg-neutral-50/70 flex items-center justify-between gap-2">
                     <h3 class="font-bold text-neutral-900 text-sm tracking-tight">Riwayat Tindakan &amp; Struk Sejauh Ini</h3>
                     @if($totalCost > 0)
-                        <span class="font-mono text-xs font-semibold px-2.5 py-1 rounded-md bg-white border border-neutral-200 text-neutral-800">
+                        <span class="font-mono text-xs font-semibold px-3 py-1 rounded-full bg-white border border-neutral-200 text-neutral-800 shadow-2xs">
                             Total: Rp {{ number_format($totalCost, 0, ',', '.') }}
                         </span>
                     @endif
                 </div>
-                <div class="divide-y divide-neutral-200/70">
+                <div class="divide-y divide-neutral-100">
                     @forelse($ticket->logs as $log)
-                        <div class="p-4 space-y-2">
+                        <div class="p-5 space-y-2.5">
                             <div class="flex items-center justify-between flex-wrap gap-2">
                                 <p class="text-xs font-semibold text-neutral-900">{{ $log->handledBy->name ?? 'Teknisi' }}</p>
                                 <span class="font-mono text-xs text-neutral-500">{{ optional($log->repaired_at)->format('d/m/Y H:i') }}</span>
@@ -403,25 +399,25 @@
                             <p class="text-xs text-neutral-700 leading-relaxed">{{ $log->action_taken }}</p>
 
                             @if(filled($log->spareparts_used))
-                                <div class="text-[11px] text-neutral-600 bg-neutral-50 border border-neutral-200/80 rounded-md px-2.5 py-1.5">
+                                <div class="text-[11px] text-neutral-600 bg-neutral-50 border border-neutral-200/80 rounded-xl px-3 py-2">
                                     <span class="font-semibold text-neutral-800">Sparepart diganti:</span> {{ $log->spareparts_used }}
                                 </div>
                             @endif
 
                             <div class="pt-1 flex items-center justify-between flex-wrap gap-2">
                                 <div class="flex items-center flex-wrap gap-2 text-xs">
-                                    <span class="text-[11px] font-semibold px-2 py-0.5 rounded-md border {{ $log->service_type->value === 'internal' ? 'bg-primary-50 text-primary-700 border-primary-100' : 'bg-amber-50 text-amber-800 border-amber-200' }}">
+                                    <span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full border {{ $log->service_type->value === 'internal' ? 'bg-primary-50 text-primary-700 border-primary-100' : 'bg-amber-50 text-amber-800 border-amber-200' }}">
                                         {{ $log->service_type->value === 'internal' ? 'Internal Sekolah' : 'Vendor Luar' }}
                                     </span>
 
                                     @if($log->service_type->value === 'vendor_luar' && filled($log->vendor_name))
-                                        <span class="text-[11px] font-medium px-2 py-0.5 rounded-md border border-neutral-200 bg-neutral-50 text-neutral-700">
+                                        <span class="text-[11px] font-medium px-2.5 py-0.5 rounded-full border border-neutral-200 bg-neutral-50 text-neutral-700">
                                             Vendor: {{ $log->vendor_name }}
                                         </span>
                                     @endif
 
                                     @if($log->estimated_finish_at)
-                                        <span class="text-[11px] font-mono px-2 py-0.5 rounded-md border border-neutral-200 bg-white text-neutral-600">
+                                        <span class="text-[11px] font-mono px-2.5 py-0.5 rounded-full border border-neutral-200 bg-white text-neutral-600">
                                             Est. Selesai: {{ $log->estimated_finish_at->format('d/m/Y') }}
                                         </span>
                                     @endif
@@ -437,7 +433,7 @@
                                     @php $isPdfReceipt = str_ends_with(strtolower((string) $log->receipt_path), '.pdf'); @endphp
                                     @if($isPdfReceipt)
                                         <a href="{{ route('maintenance.receipt', $log->id) }}" target="_blank"
-                                           class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-neutral-200 bg-neutral-50 hover:bg-neutral-100 text-[11px] font-semibold text-neutral-700 transition-colors">
+                                           class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-neutral-200 bg-neutral-50 hover:bg-neutral-100 text-[11px] font-semibold text-neutral-700 transition-colors">
                                             <svg class="w-3.5 h-3.5 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                             </svg>
@@ -445,7 +441,7 @@
                                         </a>
                                     @else
                                         <button type="button"
-                                                class="open-receipt-modal inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-primary-200 bg-primary-50/70 hover:bg-primary-100 text-[11px] font-semibold text-primary-700 transition-colors"
+                                                class="open-receipt-modal inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-primary-200 bg-primary-50/70 hover:bg-primary-100 text-[11px] font-semibold text-primary transition-colors"
                                                 data-receipt-url="{{ route('maintenance.receipt', $log->id) }}"
                                                 data-receipt-title="Struk Tiket #{{ $ticket->id }} — {{ $ticket->item->name ?? '-' }}"
                                                 data-receipt-meta="{{ $log->service_type->label() }}{{ filled($log->vendor_name) ? ' · ' . $log->vendor_name : '' }}{{ (float) $log->cost > 0 ? ' · Rp ' . number_format($log->cost, 0, ',', '.') : '' }}">
@@ -459,7 +455,7 @@
                             </div>
                         </div>
                     @empty
-                        <p class="px-4 py-8 text-center text-neutral-500 text-xs">Belum ada catatan tindakan perbaikan.</p>
+                        <p class="px-5 py-8 text-center text-neutral-500 text-xs">Belum ada catatan tindakan perbaikan.</p>
                     @endforelse
                 </div>
             </div>

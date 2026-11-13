@@ -19,19 +19,25 @@
     <body class="h-full font-sans antialiased bg-neutral-50 text-neutral-800 flex overflow-hidden">
 
         <!-- Mobile Sidebar Backdrop -->
-        <div id="sidebar-overlay" class="fixed inset-0 z-40 bg-neutral-950/50 hidden lg:hidden transition-opacity"></div>
+        <div id="sidebar-overlay" class="fixed inset-0 z-40 bg-neutral-950/60 hidden lg:hidden transition-opacity"></div>
 
-        <!-- Sidebar Navigation -->
-        <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-neutral-900 border-r border-neutral-800 flex flex-col justify-between transform -translate-x-full lg:translate-x-0 transition-transform duration-200 ease-in-out lg:static lg:inset-auto shrink-0">
+        <!-- Sidebar Navigation (Orbix Studio Dark Surface) -->
+        <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-neutral-900 border-r border-neutral-800/80 flex flex-col justify-between transform -translate-x-full lg:translate-x-0 transition-transform duration-200 ease-in-out lg:static lg:inset-auto shrink-0 shadow-lg lg:shadow-none">
             
             <!-- Brand Wordmark Header -->
             <div>
-                <div class="px-5 h-14 border-b border-neutral-800 flex items-center">
-                    <a href="{{ route('dashboard') }}" class="focus:outline-none">
-                        <span class="font-heading font-extrabold text-xl tracking-[0.14em] text-white leading-none uppercase">
+                <div class="px-5 h-14 border-b border-neutral-800 flex items-center justify-between">
+                    <a href="{{ route('dashboard') }}" class="focus:outline-none flex items-center gap-2.5">
+                        <div class="w-7 h-7 rounded-lg bg-white/10 border border-white/15 flex items-center justify-center text-white font-mono font-bold text-xs tracking-wider">
+                            S
+                        </div>
+                        <span class="font-heading font-extrabold text-lg tracking-[0.14em] text-white leading-none uppercase">
                             SILAMET
                         </span>
                     </a>
+                    <span class="font-mono text-[9px] font-bold px-1.5 py-0.5 rounded bg-neutral-800 text-neutral-400 border border-neutral-700/60 uppercase">
+                        LAB SIJA
+                    </span>
                 </div>
 
                 <!-- Navigation Links Categorized -->
@@ -94,7 +100,7 @@
                                     </svg>
                                     <span>Maintenance &amp; Repair</span>
                                     @if($openTicketCountBadge > 0)
-                                        <span class="ml-auto px-1.5 py-0.5 rounded font-mono text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                                        <span class="ml-auto px-1.5 py-0.5 rounded-full font-mono text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30">
                                             {{ $openTicketCountBadge }}
                                         </span>
                                     @endif
@@ -145,11 +151,11 @@
                 </nav>
             </div>
 
-            <!-- Bottom Section: Kiosk Switcher & User Profile -->
-            <div class="p-3 border-t border-neutral-800 bg-neutral-950 space-y-2">
-                <a href="{{ route('kiosk.home') }}" target="_blank" class="flex items-center justify-between w-full px-3 py-2 rounded-lg text-xs font-semibold text-neutral-200 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 transition-colors">
+            <!-- Bottom Section: Kiosk Switcher & User Profile (Pill Style) -->
+            <div class="p-3 border-t border-neutral-800 bg-neutral-950/70 space-y-2">
+                <a href="{{ route('kiosk.home') }}" target="_blank" class="flex items-center justify-between w-full px-3 py-2 rounded-xl text-xs font-semibold text-neutral-200 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 transition-colors shadow-sm">
                     <span class="flex items-center gap-2">
-                        <svg class="w-4 h-4 text-primary-light" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                        <svg class="w-4 h-4 text-sky-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                         </svg>
                         <span>Buka Kiosk Siswa</span>
@@ -160,9 +166,9 @@
                 </a>
 
                 <!-- User Card & Logout -->
-                <div class="flex items-center justify-between p-2 rounded-lg bg-neutral-900 border border-neutral-800">
+                <div class="flex items-center justify-between p-2 rounded-xl bg-neutral-900 border border-neutral-800">
                     <div class="flex items-center gap-2.5 min-w-0">
-                        <div class="w-8 h-8 rounded-lg bg-primary text-white font-bold flex items-center justify-center text-xs shrink-0">
+                        <div class="w-8 h-8 rounded-lg bg-neutral-800 border border-neutral-700 text-white font-bold flex items-center justify-center text-xs shrink-0 font-heading">
                             {{ strtoupper(substr(auth()->user()?->name ?? 'A', 0, 1)) }}
                         </div>
                         <div class="min-w-0 truncate">
@@ -186,10 +192,10 @@
         <!-- Main Workspace -->
         <div class="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
             
-            <!-- Solid Border-First Topbar -->
+            <!-- Solid Border-First Topbar (Clean Dribbble SaaS Style) -->
             <header class="bg-white border-b border-neutral-200 h-14 flex items-center justify-between px-4 lg:px-6 shrink-0 z-30">
                 <div class="flex items-center gap-3">
-                    <button id="sidebar-toggle" class="lg:hidden text-neutral-600 hover:text-neutral-900 flex items-center justify-center p-2 rounded-lg border border-neutral-200 bg-white hover:bg-neutral-50 transition-colors" aria-label="Toggle sidebar" title="Menu Navigasi">
+                    <button id="sidebar-toggle" class="lg:hidden text-neutral-600 hover:text-neutral-900 flex items-center justify-center p-2 rounded-xl border border-neutral-200 bg-white hover:bg-neutral-50 transition-colors" aria-label="Toggle sidebar" title="Menu Navigasi">
                         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
                         </svg>
@@ -202,8 +208,8 @@
                 </div>
 
                 <div class="flex items-center gap-3">
-                    <a href="{{ route('kiosk.home') }}" target="_blank" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-neutral-700 bg-neutral-100 hover:bg-neutral-200/70 border border-neutral-200 transition-colors">
-                        <svg class="w-3.5 h-3.5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                    <a href="{{ route('kiosk.home') }}" target="_blank" class="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold text-neutral-700 bg-neutral-100 hover:bg-neutral-200/70 border border-neutral-200 transition-colors shadow-sm">
+                        <svg class="w-3.5 h-3.5 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                         </svg>
                         <span>Layar Kiosk</span>
@@ -216,7 +222,7 @@
                                 {{ auth()->user()?->role?->label() ?? 'Petugas' }}
                             </span>
                         </div>
-                        <div class="w-8 h-8 rounded-lg bg-neutral-900 text-white font-bold flex items-center justify-center text-xs">
+                        <div class="w-8 h-8 rounded-full bg-neutral-900 text-white font-bold flex items-center justify-center text-xs font-heading shadow-sm">
                             {{ strtoupper(substr(auth()->user()?->name ?? 'A', 0, 1)) }}
                         </div>
                     </div>
@@ -224,17 +230,17 @@
             </header>
 
             <!-- Scrollable Content Area -->
-            <main class="flex-1 overflow-y-auto p-4 lg:p-6 space-y-4">
-                <!-- Flash Messages -->
+            <main class="flex-1 overflow-y-auto p-4 lg:p-6 space-y-5">
+                <!-- Flash Messages (Rounded-2xl Pill Alert) -->
                 @if(session('success'))
-                    <div class="bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3 rounded-lg text-xs flex items-center justify-between">
+                    <div class="bg-emerald-50/90 border border-emerald-200 text-emerald-800 px-4 py-3 rounded-2xl text-xs flex items-center justify-between shadow-sm">
                         <div class="flex items-center gap-2.5">
                             <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                             <span class="font-medium">{{ session('success') }}</span>
                         </div>
-                        <button onclick="this.parentElement.remove()" class="text-emerald-600 hover:text-emerald-900 p-1 rounded" aria-label="Tutup notifikasi">
+                        <button onclick="this.parentElement.remove()" class="text-emerald-600 hover:text-emerald-900 p-1 rounded-full hover:bg-emerald-100 transition-colors" aria-label="Tutup notifikasi">
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                             </svg>
@@ -242,14 +248,14 @@
                     </div>
                 @endif
                 @if(session('error'))
-                    <div class="bg-rose-50 border border-rose-200 text-rose-800 px-4 py-3 rounded-lg text-xs flex items-center justify-between">
+                    <div class="bg-rose-50/90 border border-rose-200 text-rose-800 px-4 py-3 rounded-2xl text-xs flex items-center justify-between shadow-sm">
                         <div class="flex items-center gap-2.5">
                             <svg class="w-4 h-4 text-rose-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                             <span class="font-medium">{{ session('error') }}</span>
                         </div>
-                        <button onclick="this.parentElement.remove()" class="text-rose-600 hover:text-rose-900 p-1 rounded" aria-label="Tutup notifikasi">
+                        <button onclick="this.parentElement.remove()" class="text-rose-600 hover:text-rose-900 p-1 rounded-full hover:bg-rose-100 transition-colors" aria-label="Tutup notifikasi">
                             <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                             </svg>

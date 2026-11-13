@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="heading">Edit Barang — {{ $item->item_code }}</x-slot>
-    <x-slot name="title">Edit Barang</x-slot>
+    <x-slot name="title">Edit Barang — SILAMET</x-slot>
 
     @php
         $backUrl = filled($returnGroup ?? null)
@@ -8,108 +8,227 @@
             : route('items.index');
     @endphp
 
-    <div class="max-w-2xl space-y-4">
-        <div>
-            <a href="{{ $backUrl }}" class="inline-flex items-center gap-1.5 text-xs font-semibold text-neutral-600 hover:text-neutral-900 px-3 py-1.5 rounded-lg border border-neutral-200 bg-white hover:bg-neutral-50 transition-colors">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-                <span>Kembali ke Daftar Aset</span>
-            </a>
+    <div class="space-y-6 max-w-7xl mx-auto" x-data="{ category: @js(old('category', $item->category ?? '')) }">
+
+        <!-- Top Action Bar (Discard & Save Buttons ala Dribbble Template) -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-neutral-200">
+            <div class="flex items-center gap-3">
+                <a href="{{ $backUrl }}" class="p-2 rounded-full border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-600 hover:text-neutral-900 transition-colors shadow-sm inline-flex items-center gap-1.5" title="Kembali ke Daftar Aset">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                    <span class="text-xs font-semibold pr-1">Kembali ke Daftar Aset</span>
+                </a>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-neutral-900 font-heading">
+                            Edit Barang: {{ $item->name }}
+                        </h1>
+                        <span class="font-mono text-xs font-semibold px-2 py-0.5 rounded-full bg-neutral-100 text-neutral-700 border border-neutral-200">
+                            {{ $item->item_code }}
+                        </span>
+                    </div>
+                    <p class="text-xs text-neutral-500 mt-0.5">Perbarui spesifikasi unit, pemetaan tag RFID, atau penempatan rak lab.</p>
+                </div>
+            </div>
+
+            <!-- Top Right Action Buttons (Discard & Save ala Dribbble) -->
+            <div class="flex items-center gap-2.5">
+                <a href="{{ $backUrl }}" class="px-4 py-2 rounded-full border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-700 text-xs font-semibold transition-colors shadow-sm">
+                    Batal
+                </a>
+                <button type="submit" form="edit-item-form" class="px-5 py-2 rounded-full bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-semibold transition-colors shadow-sm inline-flex items-center gap-1.5">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span>Simpan Perubahan</span>
+                </button>
+            </div>
         </div>
 
-        <div class="bg-white rounded-xl border border-neutral-200 p-5 sm:p-6">
-            <h2 class="text-base font-bold text-neutral-900 tracking-tight mb-5 pb-3 border-b border-neutral-100">Edit Barang: {{ $item->name }}</h2>
-
-            <form method="POST" action="{{ route('items.update', $item->id) }}" class="space-y-4" x-data="{ category: @js(old('category', $item->category ?? '')) }">
-                @csrf
-                @method('PUT')
-                @if(filled($returnGroup ?? null))
-                    <input type="hidden" name="return_group" value="{{ $returnGroup }}">
-                @endif
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <x-input-label for="item_code" value="Kode Barang *" />
-                        <x-text-input id="item_code" name="item_code" class="mt-1 w-full font-mono text-sm" value="{{ old('item_code', $item->item_code) }}" required />
-                        <x-input-error :messages="$errors->get('item_code')" class="mt-2" />
-                    </div>
-
-                    <div>
-                        <x-input-label for="epc_tag" value="EPC UHF RFID Tag (opsional)" />
-                        <x-text-input id="epc_tag" name="epc_tag" class="mt-1 w-full font-mono text-sm" value="{{ old('epc_tag', $item->epc_tag) }}" />
-                        <x-input-error :messages="$errors->get('epc_tag')" class="mt-2" />
-                    </div>
+        @if($errors->any())
+            <div class="bg-rose-50 border border-rose-200 text-rose-800 px-4 py-3 rounded-xl text-xs space-y-1">
+                <div class="font-semibold flex items-center gap-2">
+                    <svg class="w-4 h-4 text-rose-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>Terdapat data yang belum sesuai validasi:</span>
                 </div>
+                <ul class="list-disc pl-6 space-y-0.5">
+                    @foreach($errors->all() as $err)
+                        <li>{{ $err }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <x-input-label for="category" value="Kelompok / Kategori Barang" />
-                        <x-text-input id="category" name="category" x-model="category" list="item-category-suggestions" class="mt-1 w-full text-sm" placeholder="Contoh: TPLINK, PC, MIKROTIK" />
-                        <datalist id="item-category-suggestions">
-                            @foreach(($categorySuggestions ?? []) as $cat)
-                                <option value="{{ $cat }}"></option>
-                            @endforeach
-                        </datalist>
-                        @if(!empty($categorySuggestions))
-                            <div class="flex items-center gap-1.5 flex-wrap mt-1.5">
-                                @foreach($categorySuggestions as $cat)
-                                    <button type="button" @click="category = @js($cat)" class="px-2 py-0.5 rounded border border-neutral-200 bg-neutral-50 hover:bg-neutral-100 text-[11px] font-semibold text-neutral-700 transition-colors">
-                                        {{ $cat }}
-                                    </button>
-                                @endforeach
+        <form id="edit-item-form" method="POST" action="{{ route('items.update', $item->id) }}">
+            @csrf
+            @method('PUT')
+            @if(filled($returnGroup ?? null))
+                <input type="hidden" name="return_group" value="{{ $returnGroup }}">
+            @endif
+
+            <!-- 2-Column Layout (Split 65% / 35% ala Dribbble E-commerce Flow) -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+                <!-- Left Column (Product Details, Media & RFID, Inventory) -->
+                <div class="lg:col-span-8 space-y-6">
+
+                    <!-- Card 1: Detail Barang (Product Information) -->
+                    <div class="bg-white rounded-2xl border border-neutral-200 p-5 sm:p-6 shadow-sm space-y-4">
+                        <div class="border-b border-neutral-100 pb-3">
+                            <h2 class="text-sm font-bold uppercase tracking-wider text-neutral-900 font-heading">Detail Barang</h2>
+                            <p class="text-xs text-neutral-500 mt-0.5">Informasi nama perangkat, merek, dan spesifikasi unit praktikum.</p>
+                        </div>
+
+                        <div>
+                            <x-input-label for="name" value="Nama Barang *" />
+                            <x-text-input id="name" name="name" class="mt-1.5 w-full text-sm rounded-xl border-neutral-200 focus:border-primary focus:ring-primary" value="{{ old('name', $item->name) }}" required />
+                            <x-input-error :messages="$errors->get('name')" class="mt-2" />
+                        </div>
+                    </div>
+
+                    <!-- Card 2: Identifikasi & Tag RFID (Media / Identification Area ala Dribbble) -->
+                    <div class="bg-white rounded-2xl border border-neutral-200 p-5 sm:p-6 shadow-sm space-y-4">
+                        <div class="border-b border-neutral-100 pb-3 flex items-center justify-between">
+                            <div>
+                                <h2 class="text-sm font-bold uppercase tracking-wider text-neutral-900 font-heading">Identifikasi &amp; Keamanan RFID</h2>
+                                <p class="text-xs text-neutral-500 mt-0.5">Pindai tag UHF RFID agar barang terlindungi sensor Gate Security otomatis.</p>
                             </div>
-                        @endif
-                        <x-input-error :messages="$errors->get('category')" class="mt-2" />
+                            <span class="px-2 py-0.5 rounded font-mono text-[10px] font-semibold bg-primary-50 text-primary-700 border border-indigo-200">
+                                HW-VX6330
+                            </span>
+                        </div>
+
+                        <!-- Dashed Box ala Dribbble Media Upload -->
+                        <div class="border-2 border-dashed border-neutral-200 rounded-xl p-5 text-center bg-neutral-50/50">
+                            <div class="w-10 h-10 rounded-full bg-primary-50 text-primary mx-auto flex items-center justify-center mb-2.5">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                </svg>
+                            </div>
+                            <p class="text-xs font-semibold text-neutral-800">Pemetaan Stiker EPC UHF RFID Gen2</p>
+                            <p class="text-[11px] text-neutral-500 mt-0.5 max-w-md mx-auto">Dekatkan stiker RFID ke pembaca USB reader atau ketikkan kode hexa EPC unik alat.</p>
+                            
+                            <div class="mt-4 max-w-md mx-auto">
+                                <x-text-input id="epc_tag" name="epc_tag" class="w-full font-mono text-center text-xs rounded-xl border-neutral-300 focus:border-primary focus:ring-primary tracking-wider" value="{{ old('epc_tag', $item->epc_tag) }}" placeholder="Contoh EPC: E280689400004001" />
+                                <x-input-error :messages="$errors->get('epc_tag')" class="mt-1.5" />
+                            </div>
+                        </div>
+
+                        <div class="p-3 rounded-xl bg-neutral-50 border border-neutral-200 flex items-center justify-between text-xs">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                                </svg>
+                                <span class="font-medium text-neutral-700">QR Code / Barcode Token</span>
+                            </div>
+                            <span class="font-mono text-[11px] font-bold text-neutral-800 bg-white px-2 py-0.5 rounded border border-neutral-200">
+                                {{ $item->barcode_token ?? 'Token Terdaftar' }}
+                            </span>
+                        </div>
                     </div>
 
-                    <div>
-                        <x-input-label for="name" value="Nama Unit Barang *" />
-                        <x-text-input id="name" name="name" class="mt-1 w-full text-sm" value="{{ old('name', $item->name) }}" required />
-                        <x-input-error :messages="$errors->get('name')" class="mt-2" />
+                    <!-- Card 3: Tipe & Kuantitas Unit (Pricing & Inventory ala Dribbble) -->
+                    <div class="bg-white rounded-2xl border border-neutral-200 p-5 sm:p-6 shadow-sm space-y-4">
+                        <div class="border-b border-neutral-100 pb-3">
+                            <h2 class="text-sm font-bold uppercase tracking-wider text-neutral-900 font-heading">Tipe &amp; Kuantitas Stok</h2>
+                            <p class="text-xs text-neutral-500 mt-0.5">Tentukan perlakuan sirkulasi barang (unit tunggal berseri atau bahan habis pakai).</p>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <x-input-label for="type" value="Tipe Barang *" />
+                                <select id="type" name="type" class="mt-1.5 w-full rounded-xl border-neutral-200 text-sm focus:border-primary focus:ring-primary" required>
+                                    <option value="aset" @selected(old('type', $item->type->value) === 'aset')>Aset (Unit Tunggal / Ber-EPC)</option>
+                                    <option value="bahan_habis_pakai" @selected(old('type', $item->type->value) === 'bahan_habis_pakai')>Bahan Habis Pakai (BHP)</option>
+                                </select>
+                                <x-input-error :messages="$errors->get('type')" class="mt-2" />
+                            </div>
+
+                            <div>
+                                <x-input-label for="stock" value="Jumlah Stok Unit *" />
+                                <x-text-input id="stock" name="stock" type="number" min="0" class="mt-1.5 w-full font-mono text-sm rounded-xl border-neutral-200 focus:border-primary focus:ring-primary" value="{{ old('stock', $item->stock) }}" required />
+                                <x-input-error :messages="$errors->get('stock')" class="mt-2" />
+                            </div>
+                        </div>
                     </div>
+
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <x-input-label for="type" value="Tipe *" />
-                        <select id="type" name="type" class="mt-1 w-full rounded-lg border-neutral-300 text-sm focus:border-primary focus:ring-primary" required>
-                            <option value="aset" @selected(old('type', $item->type->value) === 'aset')>Aset (Unit Tunggal)</option>
-                            <option value="bahan_habis_pakai" @selected(old('type', $item->type->value) === 'bahan_habis_pakai')>Bahan Habis Pakai</option>
-                        </select>
-                        <x-input-error :messages="$errors->get('type')" class="mt-2" />
+                <!-- Right Column (Sidebar Cards: Status, Organization, Location) -->
+                <div class="lg:col-span-4 space-y-6">
+
+                    <!-- Card 1: Status Aset (Product Status ala Dribbble) -->
+                    <div class="bg-white rounded-2xl border border-neutral-200 p-5 shadow-sm space-y-3.5">
+                        <div class="border-b border-neutral-100 pb-2.5">
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-neutral-900 font-heading">Status Barang</h3>
+                            <p class="text-[11px] text-neutral-500 mt-0.5">Kondisi operasional unit saat ini.</p>
+                        </div>
+
+                        <div>
+                            <select id="status" name="status" class="w-full rounded-xl border-neutral-200 text-xs font-semibold focus:border-primary focus:ring-primary" required>
+                                <option value="tersedia" @selected(old('status', $item->status->value) === 'tersedia')>Tersedia (Siap Dipinjam)</option>
+                                <option value="under_maintenance" @selected(old('status', $item->status->value) === 'under_maintenance')>Dalam Perbaikan (M&amp;R)</option>
+                                <option value="dipinjam" @selected(old('status', $item->status->value) === 'dipinjam')>Sedang Dipinjam</option>
+                            </select>
+                            <x-input-error :messages="$errors->get('status')" class="mt-2" />
+                        </div>
                     </div>
 
-                    <div>
-                        <x-input-label for="stock" value="Stok" />
-                        <x-text-input id="stock" name="stock" type="number" min="0" class="mt-1 w-full font-mono text-sm" value="{{ old('stock', $item->stock) }}" />
-                        <x-input-error :messages="$errors->get('stock')" class="mt-2" />
+                    <!-- Card 2: Pengelompokan & Organisasi (Organization ala Dribbble) -->
+                    <div class="bg-white rounded-2xl border border-neutral-200 p-5 shadow-sm space-y-3.5">
+                        <div class="border-b border-neutral-100 pb-2.5">
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-neutral-900 font-heading">Organisasi &amp; Kategori</h3>
+                            <p class="text-[11px] text-neutral-500 mt-0.5">Pengelompokan perangkat dan kode aset unik.</p>
+                        </div>
+
+                        <div>
+                            <x-input-label for="item_code" value="Kode Barang Unik *" />
+                            <x-text-input id="item_code" name="item_code" class="mt-1.5 w-full font-mono text-xs rounded-xl border-neutral-200 focus:border-primary focus:ring-primary uppercase" value="{{ old('item_code', $item->item_code) }}" required />
+                            <x-input-error :messages="$errors->get('item_code')" class="mt-1.5" />
+                        </div>
+
+                        <div>
+                            <x-input-label for="category" value="Kelompok / Kategori Barang" />
+                            <x-text-input id="category" name="category" x-model="category" list="item-category-suggestions" class="mt-1.5 w-full text-xs rounded-xl border-neutral-200 focus:border-primary focus:ring-primary" placeholder="Ketik: TPLINK, PC, MIKROTIK" />
+                            <datalist id="item-category-suggestions">
+                                @foreach(($categorySuggestions ?? []) as $cat)
+                                    <option value="{{ $cat }}"></option>
+                                @endforeach
+                            </datalist>
+                            @if(!empty($categorySuggestions))
+                                <div class="flex items-center gap-1.5 flex-wrap mt-2">
+                                    @foreach(array_slice($categorySuggestions, 0, 4) as $cat)
+                                        <button type="button" @click="category = @js($cat)" class="px-2 py-0.5 rounded-full border border-neutral-200 bg-neutral-50 hover:bg-neutral-100 text-[10px] font-semibold text-neutral-700 transition-colors">
+                                            {{ $cat }}
+                                        </button>
+                                    @endforeach
+                                </div>
+                            @endif
+                            <x-input-error :messages="$errors->get('category')" class="mt-1.5" />
+                        </div>
                     </div>
+
+                    <!-- Card 3: Lokasi Penempatan (Shipping / Placement ala Dribbble) -->
+                    <div class="bg-white rounded-2xl border border-neutral-200 p-5 shadow-sm space-y-3.5">
+                        <div class="border-b border-neutral-100 pb-2.5">
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-neutral-900 font-heading">Lokasi Penempatan</h3>
+                            <p class="text-[11px] text-neutral-500 mt-0.5">Presisi rak atau ruang lab penyimpanan.</p>
+                        </div>
+
+                        <div>
+                            <x-input-label for="location" value="Ruang / Rak Penyimpanan *" />
+                            <x-text-input id="location" name="location" class="mt-1.5 w-full font-mono text-xs rounded-xl border-neutral-200 focus:border-primary focus:ring-primary uppercase" value="{{ old('location', $item->location) }}" required />
+                            <x-input-error :messages="$errors->get('location')" class="mt-1.5" />
+                        </div>
+                    </div>
+
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <x-input-label for="location" value="Lokasi / Rak Penyimpanan *" />
-                        <x-text-input id="location" name="location" class="mt-1 w-full font-mono text-sm" value="{{ old('location', $item->location) }}" required />
-                        <x-input-error :messages="$errors->get('location')" class="mt-2" />
-                    </div>
+            </div>
+        </form>
 
-                    <div>
-                        <x-input-label for="status" value="Status *" />
-                        <select id="status" name="status" class="mt-1 w-full rounded-lg border-neutral-300 text-sm focus:border-primary focus:ring-primary" required>
-                            <option value="tersedia" @selected(old('status', $item->status->value) === 'tersedia')>Tersedia</option>
-                            <option value="dipinjam" @selected(old('status', $item->status->value) === 'dipinjam')>Dipinjam</option>
-                            <option value="under_maintenance" @selected(old('status', $item->status->value) === 'under_maintenance')>Under Maintenance</option>
-                        </select>
-                        <x-input-error :messages="$errors->get('status')" class="mt-2" />
-                    </div>
-                </div>
-
-                <div class="flex items-center justify-end gap-2.5 pt-4 border-t border-neutral-100">
-                    <a href="{{ $backUrl }}" class="px-4 py-2 text-xs font-semibold text-neutral-600 hover:text-neutral-900 border border-neutral-200 rounded-lg hover:bg-neutral-50 transition-colors">Batal</a>
-                    <button type="submit" class="px-4 py-2 bg-primary hover:bg-primary-700 text-white text-xs font-semibold rounded-lg border border-primary/40 transition-colors">Simpan Perubahan</button>
-                </div>
-            </form>
-        </div>
     </div>
 </x-app-layout>

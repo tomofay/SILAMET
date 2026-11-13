@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="heading">Detail Aset — {{ $item->item_code }}</x-slot>
-    <x-slot name="title">Detail {{ $item->name }}</x-slot>
+    <x-slot name="title">Detail {{ $item->name }} — SILAMET</x-slot>
 
     @php
         $itemGroupService = app(\App\Services\ItemGroupService::class);
@@ -8,22 +8,42 @@
         $itemGroupSlug = $itemGroupService->canonicalKey($itemGroupLabel);
     @endphp
 
-    <div class="space-y-4">
-        <div class="flex items-center justify-between gap-4">
-            <a href="{{ route('items.index', ['group' => $itemGroupSlug]) }}" class="inline-flex items-center gap-1.5 text-xs font-semibold text-neutral-600 hover:text-neutral-900 px-3 py-1.5 rounded-lg border border-neutral-200 bg-white hover:bg-neutral-50 transition-colors">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-                <span>Kembali ke Kelompok {{ $itemGroupLabel }}</span>
-            </a>
-            <div class="flex items-center gap-2">
-                <a href="{{ route('items.barcodes') }}?ids={{ $item->id }}" target="_blank" class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white hover:bg-neutral-50 text-neutral-700 border border-neutral-200 text-xs font-semibold rounded-lg transition-colors">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+    <div class="space-y-6 max-w-7xl mx-auto">
+        <!-- Top Action Bar (Dribbble Orbix Studio Header) -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-neutral-200">
+            <div class="flex items-center gap-3">
+                <a href="{{ route('items.index', ['group' => $itemGroupSlug]) }}"
+                   class="p-2 rounded-full border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-600 hover:text-neutral-900 transition-colors shadow-sm inline-flex items-center gap-1.5"
+                   title="Kembali ke Kelompok {{ $itemGroupLabel }}">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                    <span class="text-xs font-semibold pr-1">Kembali ke Kelompok {{ $itemGroupLabel }}</span>
+                </a>
+                <div>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-neutral-900 font-heading">
+                            {{ $item->name }}
+                        </h1>
+                        <span class="font-mono text-xs font-semibold px-2.5 py-0.5 rounded-full bg-neutral-100 text-neutral-800 border border-neutral-200">
+                            {{ $item->item_code }}
+                        </span>
+                    </div>
+                    <p class="text-xs text-neutral-500 mt-0.5">Spesifikasi teknis, pemetaan RFID, histori peminjaman &amp; pemeliharaan alat.</p>
+                </div>
+            </div>
+
+            <!-- Top Right Action Buttons (Pill-shaped ala Dribbble) -->
+            <div class="flex items-center gap-2.5">
+                <a href="{{ route('items.barcodes') }}?ids={{ $item->id }}" target="_blank"
+                   class="px-4 py-2 rounded-full border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-700 text-xs font-semibold transition-colors shadow-sm inline-flex items-center gap-2">
+                    <svg class="w-4 h-4 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
                     </svg>
                     <span>Cetak Barcode</span>
                 </a>
-                <a href="{{ route('items.edit', $item->id) }}" class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-primary hover:bg-primary-700 text-white text-xs font-semibold rounded-lg border border-primary/40 transition-colors">
+                <a href="{{ route('items.edit', $item->id) }}"
+                   class="px-5 py-2 rounded-full bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-semibold transition-colors shadow-sm inline-flex items-center gap-1.5">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                     </svg>
@@ -32,70 +52,78 @@
             </div>
         </div>
 
-        <!-- Info Barang -->
-        <div class="bg-white rounded-xl border border-neutral-200 p-5">
-            <div class="flex items-start justify-between flex-wrap gap-4 pb-4 border-b border-neutral-100">
-                <div>
-                    <h2 class="text-lg font-bold text-neutral-900 tracking-tight">{{ $item->name }}</h2>
-                    <div class="flex items-center gap-2 flex-wrap mt-1">
-                        <span class="font-mono text-xs font-semibold px-2 py-0.5 rounded bg-neutral-100 text-neutral-800 border border-neutral-200">{{ $item->item_code }}</span>
-                        @if(filled($item->category))
-                            <a href="{{ route('items.index', ['group' => $itemGroupSlug]) }}" class="text-xs font-semibold px-2 py-0.5 rounded bg-primary-50 text-primary-700 border border-indigo-200 hover:bg-primary-100 transition-colors">
-                                Kelompok: {{ $item->category }}
-                            </a>
-                        @endif
-                        @if($item->barcode_token)
-                            <span class="font-mono text-xs text-neutral-500">Token: {{ $item->barcode_token }}</span>
-                        @endif
+        <!-- Info Barang (Rounded-2xl Container) -->
+        <div class="bg-white rounded-2xl border border-neutral-200 p-6 shadow-sm">
+            <div class="flex items-start justify-between flex-wrap gap-4 pb-5 border-b border-neutral-100">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-neutral-100 border border-neutral-200 flex items-center justify-center shrink-0 text-neutral-700 shadow-inner">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-bold text-neutral-900 tracking-tight font-heading">{{ $item->name }}</h2>
+                        <div class="flex items-center gap-2 flex-wrap mt-1">
+                            <span class="font-mono text-xs font-semibold px-2 py-0.5 rounded-full bg-neutral-100 text-neutral-800 border border-neutral-200">{{ $item->item_code }}</span>
+                            @if(filled($item->category))
+                                <a href="{{ route('items.index', ['group' => $itemGroupSlug]) }}" class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-primary-50 text-primary-700 border border-indigo-200 hover:bg-primary-100 transition-colors">
+                                    Kelompok: {{ $item->category }}
+                                </a>
+                            @endif
+                            @if($item->barcode_token)
+                                <span class="font-mono text-xs text-neutral-500">Token: {{ $item->barcode_token }}</span>
+                            @endif
+                        </div>
                     </div>
                 </div>
+
                 @php
                     $badge = match($item->status->value) {
                         'tersedia' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
-                        'dipinjam' => 'bg-brand-50 text-brand-700 border-brand-100',
+                        'dipinjam' => 'bg-sky-50 text-sky-700 border-sky-200',
                         'under_maintenance' => 'bg-amber-50 text-amber-800 border-amber-200',
                         default => 'bg-neutral-100 text-neutral-600 border-neutral-200',
                     };
                 @endphp
-                <span class="text-xs font-semibold px-2.5 py-1 rounded-md border {{ $badge }}">{{ $item->status->label() }}</span>
+                <span class="text-xs font-semibold px-3 py-1 rounded-full border {{ $badge }}">{{ $item->status->label() }}</span>
             </div>
 
-            <dl class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4 text-sm">
-                <div class="p-3 rounded-lg bg-neutral-50 border border-neutral-200/70">
-                    <dt class="text-neutral-500 text-[11px] font-semibold uppercase tracking-wider">EPC Tag UHF RFID</dt>
-                    <dd class="font-semibold text-neutral-900 font-mono text-xs mt-1 break-all">{{ $item->epc_tag ?? '—' }}</dd>
+            <dl class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-5 text-sm">
+                <div class="p-3.5 rounded-xl bg-neutral-50/70 border border-neutral-200/80">
+                    <dt class="text-neutral-500 text-[11px] font-bold uppercase tracking-wider">EPC Tag UHF RFID</dt>
+                    <dd class="font-semibold text-neutral-900 font-mono text-xs mt-1.5 break-all">{{ $item->epc_tag ?? '—' }}</dd>
                 </div>
-                <div class="p-3 rounded-lg bg-neutral-50 border border-neutral-200/70">
-                    <dt class="text-neutral-500 text-[11px] font-semibold uppercase tracking-wider">Tipe Barang</dt>
-                    <dd class="font-semibold text-neutral-900 text-xs mt-1">{{ $item->type->label() }}</dd>
+                <div class="p-3.5 rounded-xl bg-neutral-50/70 border border-neutral-200/80">
+                    <dt class="text-neutral-500 text-[11px] font-bold uppercase tracking-wider">Tipe Barang</dt>
+                    <dd class="font-semibold text-neutral-900 text-xs mt-1.5">{{ $item->type->label() }}</dd>
                 </div>
-                <div class="p-3 rounded-lg bg-neutral-50 border border-neutral-200/70">
-                    <dt class="text-neutral-500 text-[11px] font-semibold uppercase tracking-wider">Stok Tersedia</dt>
-                    <dd class="font-semibold text-neutral-900 font-mono text-xs mt-1">{{ $item->stock }}</dd>
+                <div class="p-3.5 rounded-xl bg-neutral-50/70 border border-neutral-200/80">
+                    <dt class="text-neutral-500 text-[11px] font-bold uppercase tracking-wider">Stok Tersedia</dt>
+                    <dd class="font-semibold text-neutral-900 font-mono text-xs mt-1.5">{{ $item->stock }} unit</dd>
                 </div>
-                <div class="p-3 rounded-lg bg-neutral-50 border border-neutral-200/70">
-                    <dt class="text-neutral-500 text-[11px] font-semibold uppercase tracking-wider">Lokasi / Rak</dt>
-                    <dd class="font-semibold text-neutral-900 font-mono text-xs mt-1">{{ $item->location ?? '—' }}</dd>
+                <div class="p-3.5 rounded-xl bg-neutral-50/70 border border-neutral-200/80">
+                    <dt class="text-neutral-500 text-[11px] font-bold uppercase tracking-wider">Lokasi / Rak</dt>
+                    <dd class="font-semibold text-neutral-900 font-mono text-xs mt-1.5">{{ $item->location ?? '—' }}</dd>
                 </div>
             </dl>
         </div>
 
         @if($item->type === \App\Enums\ItemType::BAHAN_HABIS_PAKAI)
-            <!-- Buku Stok Bahan Habis Pakai -->
-            <div class="bg-white rounded-xl border border-neutral-200 overflow-hidden">
-                <div class="px-4 py-3.5 border-b border-neutral-200 bg-neutral-50 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <!-- Buku Stok Bahan Habis Pakai (Rounded-2xl Card) -->
+            <div class="bg-white rounded-2xl border border-neutral-200 overflow-hidden shadow-sm">
+                <div class="px-5 py-4 border-b border-neutral-200 bg-neutral-50/70 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <div>
-                        <h3 class="font-bold text-neutral-900 text-sm tracking-tight">Buku Stok &amp; Mutasi Bahan (Stock Ledger)</h3>
+                        <h3 class="font-bold text-neutral-900 text-sm tracking-tight font-heading">Buku Stok &amp; Mutasi Bahan (Stock Ledger)</h3>
                         <p class="text-[11px] text-neutral-500">Catat penambahan stok masuk atau pengambilan bahan praktikum secara tercatat.</p>
                     </div>
                     <a href="{{ route('stock-movements.index', ['item_id' => $item->id]) }}" class="text-xs font-semibold text-primary-600 hover:text-primary-700">
-                        Buka Buku Stok Penuh
+                        Buka Buku Stok Penuh &rarr;
                     </a>
                 </div>
 
-                <div class="p-4 border-b border-neutral-100 bg-white">
+                <div class="p-5 border-b border-neutral-100 bg-white">
                     @if($errors->any())
-                        <div class="mb-3 bg-rose-50 border border-rose-200 text-rose-800 px-3 py-2 rounded-lg text-xs">
+                        <div class="mb-3 bg-rose-50 border border-rose-200 text-rose-800 px-3 py-2 rounded-xl text-xs">
                             <ul class="list-disc pl-4 space-y-0.5">
                                 @foreach($errors->all() as $err)
                                     <li>{{ $err }}</li>
@@ -108,25 +136,25 @@
                         <input type="hidden" name="item_id" value="{{ $item->id }}">
                         <div class="md:col-span-2">
                             <x-input-label for="item-stock-type" value="Jenis *" />
-                            <select id="item-stock-type" name="type" class="mt-1 w-full rounded-lg border-neutral-300 text-xs focus:border-primary focus:ring-primary">
+                            <select id="item-stock-type" name="type" class="mt-1.5 w-full rounded-xl border-neutral-200 text-xs focus:border-primary focus:ring-primary">
                                 <option value="out">Keluar (Pakai)</option>
                                 <option value="in">Masuk (Tambah)</option>
                             </select>
                         </div>
                         <div class="md:col-span-2">
                             <x-input-label for="item-stock-qty" value="Jumlah *" />
-                            <x-text-input id="item-stock-qty" name="quantity" type="number" min="1" value="1" required class="mt-1 w-full font-mono text-xs" />
+                            <x-text-input id="item-stock-qty" name="quantity" type="number" min="1" value="1" required class="mt-1.5 w-full font-mono text-xs rounded-xl border-neutral-200 focus:border-primary focus:ring-primary" />
                         </div>
                         <div class="md:col-span-3">
                             <x-input-label for="item-stock-recipient" value="Pengambil / Kelas" />
-                            <x-text-input id="item-stock-recipient" name="recipient_name" type="text" placeholder="Contoh: XI SIJA 1" class="mt-1 w-full text-xs" />
+                            <x-text-input id="item-stock-recipient" name="recipient_name" type="text" placeholder="Contoh: XI SIJA 1" class="mt-1.5 w-full text-xs rounded-xl border-neutral-200 focus:border-primary focus:ring-primary" />
                         </div>
                         <div class="md:col-span-3">
                             <x-input-label for="item-stock-desc" value="Keterangan *" />
-                            <x-text-input id="item-stock-desc" name="description" type="text" required placeholder="Praktikum / pengadaan" class="mt-1 w-full text-xs" />
+                            <x-text-input id="item-stock-desc" name="description" type="text" required placeholder="Praktikum / pengadaan" class="mt-1.5 w-full text-xs rounded-xl border-neutral-200 focus:border-primary focus:ring-primary" />
                         </div>
                         <div class="md:col-span-2">
-                            <button type="submit" class="w-full px-3.5 py-2 bg-primary hover:bg-primary-700 text-white text-xs font-semibold rounded-lg border border-primary/40 transition-colors">
+                            <button type="submit" class="w-full px-4 py-2 bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-semibold rounded-full transition-colors shadow-sm">
                                 Catat Mutasi
                             </button>
                         </div>
@@ -135,43 +163,47 @@
 
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-neutral-200 text-sm">
-                        <thead class="bg-neutral-50">
+                        <thead class="bg-neutral-50/70 border-b border-neutral-200/80">
                             <tr>
-                                <th class="px-4 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">Waktu</th>
-                                <th class="px-4 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">Tipe</th>
-                                <th class="px-4 py-3 text-center text-xs font-semibold text-neutral-500 uppercase tracking-wider">Jumlah</th>
-                                <th class="px-4 py-3 text-center text-xs font-semibold text-neutral-500 uppercase tracking-wider">Saldo Stok</th>
-                                <th class="px-4 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">Pengambil &amp; Keterangan</th>
-                                <th class="px-4 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">Pencatat</th>
+                                <th class="px-5 py-3.5 text-left text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Waktu</th>
+                                <th class="px-5 py-3.5 text-left text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Tipe</th>
+                                <th class="px-5 py-3.5 text-center text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Jumlah</th>
+                                <th class="px-5 py-3.5 text-center text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Saldo Stok</th>
+                                <th class="px-5 py-3.5 text-left text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Pengambil &amp; Keterangan</th>
+                                <th class="px-5 py-3.5 text-left text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Pencatat</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-neutral-200/70">
+                        <tbody class="divide-y divide-neutral-100">
                             @forelse($item->stockMovements as $mv)
-                                <tr class="table-row-clean">
-                                    <td class="px-4 py-3 font-mono text-xs text-neutral-600 whitespace-nowrap">{{ optional($mv->created_at)->format('d/m/Y H:i') }}</td>
-                                    <td class="px-4 py-3 whitespace-nowrap">
-                                        @if($mv->type->value === 'in')
-                                            <span class="font-mono text-[11px] font-bold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">MASUK</span>
-                                        @else
-                                            <span class="font-mono text-[11px] font-bold px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-200">KELUAR</span>
-                                        @endif
+                                <tr class="hover:bg-neutral-50/70 transition-colors">
+                                    <td class="px-5 py-3.5 font-mono text-xs text-neutral-600 whitespace-nowrap">
+                                        {{ $mv->created_at->format('d/m/Y H:i') }}
                                     </td>
-                                    <td class="px-4 py-3 text-center font-mono font-bold text-xs {{ $mv->type->value === 'in' ? 'text-emerald-700' : 'text-rose-700' }}">
-                                        {{ $mv->type->value === 'in' ? '+' : '-' }}{{ $mv->quantity }}
+                                    <td class="px-5 py-3.5 whitespace-nowrap">
+                                        <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold border {{ $mv->type === 'in' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200' }}">
+                                            {{ $mv->type === 'in' ? 'Masuk (+)' : 'Keluar (-)' }}
+                                        </span>
                                     </td>
-                                    <td class="px-4 py-3 text-center font-mono text-xs text-neutral-600 whitespace-nowrap">
-                                        {{ $mv->stock_before }} &rarr; <span class="font-bold text-neutral-900">{{ $mv->stock_after }}</span>
+                                    <td class="px-5 py-3.5 text-center font-mono font-bold text-xs">
+                                        {{ $mv->type === 'in' ? '+' : '-' }}{{ $mv->quantity }}
                                     </td>
-                                    <td class="px-4 py-3 text-xs text-neutral-700">
-                                        @if($mv->recipient_name)
-                                            <span class="font-semibold text-neutral-900">{{ $mv->recipient_name }}:</span>
-                                        @endif
-                                        {{ $mv->description }}
+                                    <td class="px-5 py-3.5 text-center font-mono text-xs text-neutral-600">
+                                        {{ $mv->stock_after ?? '—' }}
                                     </td>
-                                    <td class="px-4 py-3 text-xs text-neutral-600 whitespace-nowrap">{{ $mv->user->name ?? '-' }}</td>
+                                    <td class="px-5 py-3.5 text-xs text-neutral-700">
+                                        <div class="font-medium text-neutral-900">{{ $mv->recipient_name ?? '—' }}</div>
+                                        <div class="text-[11px] text-neutral-500">{{ $mv->description }}</div>
+                                    </td>
+                                    <td class="px-5 py-3.5 text-xs text-neutral-600 whitespace-nowrap">
+                                        {{ $mv->user->name ?? 'Sistem' }}
+                                    </td>
                                 </tr>
                             @empty
-                                <tr><td colspan="6" class="px-4 py-8 text-center text-xs text-neutral-500">Belum ada riwayat mutasi stok untuk bahan ini.</td></tr>
+                                <tr>
+                                    <td colspan="6" class="px-5 py-8 text-center text-xs text-neutral-400">
+                                        Belum ada riwayat mutasi stok untuk bahan ini.
+                                    </td>
+                                </tr>
                             @endforelse
                         </tbody>
                     </table>
@@ -179,107 +211,72 @@
             </div>
         @endif
 
-        <!-- Riwayat Peminjaman -->
-        <div class="bg-white rounded-xl border border-neutral-200 overflow-hidden">
-            <div class="px-4 py-3.5 border-b border-neutral-200 bg-neutral-50">
-                <h3 class="font-bold text-neutral-900 text-sm tracking-tight">Riwayat Peminjaman</h3>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-neutral-200 text-sm">
-                    <thead class="bg-neutral-50">
-                        <tr>
-                            <th class="px-4 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">Peminjam</th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">Dipinjam</th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">Batas</th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">Dikembalikan</th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-neutral-200/70">
-                        @forelse($item->loans as $loan)
-                            <tr class="table-row-clean">
-                                <td class="px-4 py-3 text-xs font-medium text-neutral-900">{{ $loan->user->name ?? '-' }}</td>
-                                <td class="px-4 py-3 font-mono text-xs text-neutral-600">{{ optional($loan->borrowed_at)->format('d/m/Y H:i') }}</td>
-                                <td class="px-4 py-3 font-mono text-xs text-neutral-600">{{ optional($loan->due_at)->format('d/m/Y H:i') ?? '—' }}</td>
-                                <td class="px-4 py-3 font-mono text-xs text-neutral-600">{{ optional($loan->returned_at)->format('d/m/Y H:i') ?? '—' }}</td>
-                                <td class="px-4 py-3">
-                                    <span class="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-700 border border-neutral-200">{{ $loan->status->label() }}</span>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr><td colspan="5" class="px-4 py-8 text-center text-xs text-neutral-500">Belum ada riwayat peminjaman.</td></tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Jadwal Maintenance Berkala (Preventif) -->
-        <div class="bg-white rounded-xl border border-neutral-200 overflow-hidden">
-            <div class="px-4 py-3.5 border-b border-neutral-200 bg-neutral-50 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <!-- Jadwal Pemeliharaan Preventif (Rounded-2xl Card) -->
+        <div class="bg-white rounded-2xl border border-neutral-200 overflow-hidden shadow-sm">
+            <div class="px-5 py-4 border-b border-neutral-200 bg-neutral-50/70 flex items-center justify-between gap-2">
                 <div>
-                    <h3 class="font-bold text-neutral-900 text-sm tracking-tight">Jadwal Maintenance Berkala (Preventif)</h3>
-                    <p class="text-[11px] text-neutral-500">Perawatan rutin terjadwal untuk menjaga keandalan barang ini.</p>
+                    <h3 class="font-bold text-neutral-900 text-sm tracking-tight font-heading">Jadwal Pemeliharaan Preventif</h3>
+                    <p class="text-[11px] text-neutral-500">Siklus perawatan rutin berkala untuk menjaga keandalan operasional perangkat.</p>
                 </div>
                 @if(in_array(auth()->user()?->role?->value, ['teknisi', 'kabeng'], true))
-                    <a href="{{ route('maintenance.schedules.index', ['item_id' => $item->id]) }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-neutral-100 text-neutral-800 border border-neutral-200 rounded-lg text-xs font-semibold transition-colors self-start sm:self-auto">
+                    <a href="{{ route('maintenance.schedules.index', ['item_id' => $item->id]) }}" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full border border-neutral-200 bg-white hover:bg-neutral-50 text-xs font-semibold text-neutral-700 shadow-2xs transition-colors">
                         <span>Atur Jadwal Maintenance</span>
                     </a>
                 @endif
             </div>
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-neutral-200 text-sm">
-                    <thead class="bg-neutral-50">
+                    <thead class="bg-neutral-50/70">
                         <tr>
-                            <th class="px-4 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">Kegiatan</th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">Siklus</th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">Servis Terakhir</th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">Jadwal Berikutnya</th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">Status</th>
+                            <th class="px-5 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">Kegiatan</th>
+                            <th class="px-5 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">Siklus</th>
+                            <th class="px-5 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">Servis Terakhir</th>
+                            <th class="px-5 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">Jadwal Berikutnya</th>
+                            <th class="px-5 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">Status</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-neutral-200/70">
+                    <tbody class="divide-y divide-neutral-100">
                         @forelse($item->preventiveSchedules as $schedule)
-                            <tr class="table-row-clean">
-                                <td class="px-4 py-3 text-xs font-semibold text-neutral-900">{{ $schedule->title }}</td>
-                                <td class="px-4 py-3 font-mono text-xs text-neutral-600">Setiap {{ $schedule->interval_months }} bln</td>
-                                <td class="px-4 py-3 font-mono text-xs text-neutral-600">{{ optional($schedule->last_serviced_at)->format('d/m/Y') }}</td>
-                                <td class="px-4 py-3 font-mono text-xs font-semibold text-neutral-900">{{ optional($schedule->next_due_date)->format('d/m/Y') }}</td>
-                                <td class="px-4 py-3">
-                                    <span class="font-mono text-[11px] font-semibold px-2 py-0.5 rounded-md border {{ $schedule->status === 'paused' ? 'bg-neutral-100 text-neutral-600 border-neutral-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200' }}">
+                            <tr class="hover:bg-neutral-50/70 transition-colors">
+                                <td class="px-5 py-3 text-xs font-semibold text-neutral-900">{{ $schedule->title }}</td>
+                                <td class="px-5 py-3 font-mono text-xs text-neutral-600">Setiap {{ $schedule->interval_months }} bln</td>
+                                <td class="px-5 py-3 font-mono text-xs text-neutral-600">{{ optional($schedule->last_serviced_at)->format('d/m/Y') }}</td>
+                                <td class="px-5 py-3 font-mono text-xs font-semibold text-neutral-900">{{ optional($schedule->next_due_date)->format('d/m/Y') }}</td>
+                                <td class="px-5 py-3">
+                                    <span class="font-mono text-[11px] font-semibold px-2.5 py-0.5 rounded-full border {{ $schedule->status === 'paused' ? 'bg-neutral-100 text-neutral-600 border-neutral-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200' }}">
                                         {{ $schedule->countdownLabel() }}
                                     </span>
                                 </td>
                             </tr>
                         @empty
-                            <tr><td colspan="5" class="px-4 py-8 text-center text-xs text-neutral-500">Barang ini belum memiliki jadwal maintenance berkala.</td></tr>
+                            <tr><td colspan="5" class="px-5 py-8 text-center text-xs text-neutral-500">Barang ini belum memiliki jadwal maintenance berkala.</td></tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <!-- Riwayat Maintenance -->
-        <div class="bg-white rounded-xl border border-neutral-200 overflow-hidden">
-            <div class="px-4 py-3.5 border-b border-neutral-200 bg-neutral-50">
-                <h3 class="font-bold text-neutral-900 text-sm tracking-tight">Riwayat Maintenance</h3>
+        <!-- Riwayat Maintenance (Rounded-2xl Card) -->
+        <div class="bg-white rounded-2xl border border-neutral-200 overflow-hidden shadow-sm">
+            <div class="px-5 py-4 border-b border-neutral-200 bg-neutral-50/70">
+                <h3 class="font-bold text-neutral-900 text-sm tracking-tight font-heading">Riwayat Maintenance</h3>
             </div>
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-neutral-200 text-sm">
-                    <thead class="bg-neutral-50">
+                    <thead class="bg-neutral-50/70">
                         <tr>
-                            <th class="px-4 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">Deskripsi Kendala</th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">Pelapor</th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">Status</th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">Tanggal</th>
+                            <th class="px-5 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">Deskripsi Kendala</th>
+                            <th class="px-5 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">Pelapor</th>
+                            <th class="px-5 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">Status</th>
+                            <th class="px-5 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">Tanggal</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-neutral-200/70">
+                    <tbody class="divide-y divide-neutral-100">
                         @forelse($item->tickets as $ticket)
-                            <tr class="table-row-clean">
-                                <td class="px-4 py-3 text-xs text-neutral-800 max-w-md truncate">{{ $ticket->issue_description }}</td>
-                                <td class="px-4 py-3 text-xs text-neutral-700">{{ $ticket->reportedBy->name ?? '-' }}</td>
-                                <td class="px-4 py-3">
+                            <tr class="hover:bg-neutral-50/70 transition-colors">
+                                <td class="px-5 py-3 text-xs text-neutral-800 max-w-md truncate">{{ $ticket->issue_description }}</td>
+                                <td class="px-5 py-3 text-xs text-neutral-700">{{ $ticket->reportedBy->name ?? '-' }}</td>
+                                <td class="px-5 py-3">
                                     @php
                                         $tbadge = match($ticket->status->value) {
                                             'open' => 'bg-rose-50 text-rose-700 border-rose-200',
@@ -288,16 +285,17 @@
                                             default => 'bg-neutral-100 text-neutral-600 border-neutral-200',
                                         };
                                     @endphp
-                                    <span class="text-[11px] font-semibold px-2 py-0.5 rounded-md border {{ $tbadge }}">{{ $ticket->status->label() }}</span>
+                                    <span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full border {{ $tbadge }}">{{ $ticket->status->label() }}</span>
                                 </td>
-                                <td class="px-4 py-3 font-mono text-xs text-neutral-600">{{ optional($ticket->created_at)->format('d/m/Y H:i') }}</td>
+                                <td class="px-5 py-3 font-mono text-xs text-neutral-600">{{ optional($ticket->created_at)->format('d/m/Y H:i') }}</td>
                             </tr>
                         @empty
-                            <tr><td colspan="4" class="px-4 py-8 text-center text-xs text-neutral-500">Belum ada riwayat maintenance.</td></tr>
+                            <tr><td colspan="4" class="px-5 py-8 text-center text-xs text-neutral-500">Belum ada riwayat maintenance.</td></tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
         </div>
+
     </div>
 </x-app-layout>

@@ -1,15 +1,16 @@
 <?php
 
+use App\Http\Controllers\DamagedAssetController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\MasterController;
-use App\Http\Controllers\LoanController;
 use App\Http\Controllers\GateLogController;
+use App\Http\Controllers\KioskController;
+use App\Http\Controllers\LoanController;
 use App\Http\Controllers\MaintenanceController;
+use App\Http\Controllers\MasterController;
 use App\Http\Controllers\PreventiveScheduleController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\StockMovementController;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\KioskController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -26,6 +27,8 @@ Route::middleware(['auth', 'role:teknisi|kabeng|kaprog'])->group(function () {
 
     // Master Aset / Items
     Route::get('items/barcodes', [MasterController::class, 'printBarcodes'])->name('items.barcodes');
+    Route::post('items/groups', [MasterController::class, 'storeGroup'])->name('items.groups.store');
+    Route::post('items/bulk-category', [MasterController::class, 'bulkUpdateCategory'])->name('items.bulk-category');
     Route::resource('items', MasterController::class)->names([
         '' => 'items.index',
         'create' => 'items.create',
@@ -62,16 +65,38 @@ Route::middleware(['auth', 'role:teknisi|kabeng|kaprog'])->group(function () {
 
     // Maintenance & Repair — khusus teknisi & kabeng
     Route::middleware('role:teknisi|kabeng')->group(function () {
-        // Jadwal Perawatan Preventif (didaftarkan sebelum resource maintenance agar tidak tertangkap {maintenance})
+        // File struk perbaikan & daftar barang rusak permanen (didaftarkan sebelum resource maintenance agar tidak tertangkap {maintenance})
+        Route::get('maintenance/logs/{log}/receipt', [MaintenanceController::class, 'receipt'])
+            ->name('maintenance.receipt');
+        Route::get('maintenance/damaged', [DamagedAssetController::class, 'index'])
+            ->name('maintenance.damaged.index');
+
+        // Jadwal Perawatan Preventif & Alur Pemilahan Maintenance (didaftarkan sebelum resource maintenance agar tidak tertangkap {maintenance})
         Route::prefix('maintenance/schedules')->name('maintenance.schedules.')->group(function () {
             Route::get('/', [PreventiveScheduleController::class, 'index'])->name('index');
+            Route::get('/sedang-maintenance', [PreventiveScheduleController::class, 'inProgress'])->name('in-progress');
+            Route::get('/aman', [PreventiveScheduleController::class, 'safe'])->name('safe');
+            Route::get('/perlu-perbaikan', [PreventiveScheduleController::class, 'repairs'])->name('repairs');
             Route::get('/create', [PreventiveScheduleController::class, 'create'])->name('create');
             Route::post('/', [PreventiveScheduleController::class, 'store'])->name('store');
+            Route::post('/bulk-assign', [PreventiveScheduleController::class, 'bulkAssign'])->name('bulk-assign');
+            Route::post('/bulk-triage-safe', [PreventiveScheduleController::class, 'bulkTriageSafe'])->name('bulk-triage-safe');
+            Route::post('/{schedule}/triage', [PreventiveScheduleController::class, 'triage'])->name('triage');
+            Route::post('/{schedule}/submit-ticket', [PreventiveScheduleController::class, 'submitTicket'])->name('submit-ticket');
+            Route::post('/{schedule}/mark-broken', [PreventiveScheduleController::class, 'markBroken'])->name('mark-broken');
+            Route::post('/{schedule}/restart', [PreventiveScheduleController::class, 'restart'])->name('restart');
             Route::get('/{schedule}/edit', [PreventiveScheduleController::class, 'edit'])->name('edit');
             Route::put('/{schedule}', [PreventiveScheduleController::class, 'update'])->name('update');
             Route::post('/{schedule}/mark-serviced', [PreventiveScheduleController::class, 'markServiced'])->name('mark-serviced');
             Route::delete('/{schedule}', [PreventiveScheduleController::class, 'destroy'])->name('destroy');
         });
+
+        Route::post('maintenance/{maintenance}/start', [MaintenanceController::class, 'start'])
+            ->name('maintenance.start');
+        Route::post('maintenance/{maintenance}/logs', [MaintenanceController::class, 'storeLog'])
+            ->name('maintenance.logs.store');
+        Route::post('maintenance/{maintenance}/complete', [MaintenanceController::class, 'complete'])
+            ->name('maintenance.complete');
 
         Route::resource('maintenance', MaintenanceController::class)->names([
             '' => 'maintenance.index',
@@ -87,6 +112,7 @@ Route::middleware(['auth', 'role:teknisi|kabeng|kaprog'])->group(function () {
     // Reports — kaprog dapat akses penuh laporan
     Route::prefix('reports')->group(function () {
         Route::get('/', [ReportController::class, 'index'])->name('reports.index');
+        Route::get('/dashboard/{type?}', [ReportController::class, 'dashboard'])->name('reports.dashboard');
         Route::get('/pdf/{type}', [ReportController::class, 'downloadPdf'])->name('reports.pdf');
         Route::get('/excel/{type}', [ReportController::class, 'downloadExcel'])->name('reports.excel');
     });

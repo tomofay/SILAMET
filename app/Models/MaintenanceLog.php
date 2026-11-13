@@ -16,9 +16,13 @@ class MaintenanceLog extends Model
         'ticket_id',
         'handled_by',
         'action_taken',
+        'spareparts_used',
         'service_type',
+        'vendor_name',
         'cost',
+        'receipt_path',
         'repaired_at',
+        'estimated_finish_at',
     ];
 
     protected function casts(): array
@@ -27,6 +31,7 @@ class MaintenanceLog extends Model
             'service_type' => ServiceType::class,
             'cost' => 'decimal:2',
             'repaired_at' => 'datetime',
+            'estimated_finish_at' => 'date',
         ];
     }
 

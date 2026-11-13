@@ -60,8 +60,12 @@
                     <td>{{ $ticket->issue_description }}</td>
                     <td>
                         @forelse($ticket->logs as $log)
-                            <div style="margin-bottom: 2px;">
-                                <strong>[{{ $log->service_type?->label() ?? '-' }}]</strong> {{ $log->action_taken }}
+                            <div style="margin-bottom: 3px;">
+                                <strong>[{{ $log->service_type?->label() ?? '-' }}@if($log->service_type?->value === 'vendor_luar' && filled($log->vendor_name)): {{ $log->vendor_name }}@endif]</strong>
+                                {{ $log->action_taken }}
+                                @if(filled($log->spareparts_used))
+                                    <span style="color: #334155;">(Sparepart: {{ $log->spareparts_used }})</span>
+                                @endif
                                 @if($log->handledBy)
                                     <span style="color: #64748b;">({{ $log->handledBy->name }})</span>
                                 @endif

@@ -2,13 +2,19 @@
     <x-slot name="heading">Detail Aset — {{ $item->item_code }}</x-slot>
     <x-slot name="title">Detail {{ $item->name }}</x-slot>
 
+    @php
+        $itemGroupService = app(\App\Services\ItemGroupService::class);
+        $itemGroupLabel = filled($item->category) ? $item->category : $itemGroupService->normalizeItemBaseName($item->name);
+        $itemGroupSlug = $itemGroupService->canonicalKey($itemGroupLabel);
+    @endphp
+
     <div class="space-y-4">
         <div class="flex items-center justify-between gap-4">
-            <a href="{{ route('items.index') }}" class="inline-flex items-center gap-1.5 text-xs font-semibold text-neutral-600 hover:text-neutral-900 px-3 py-1.5 rounded-lg border border-neutral-200 bg-white hover:bg-neutral-50 transition-colors">
+            <a href="{{ route('items.index', ['group' => $itemGroupSlug]) }}" class="inline-flex items-center gap-1.5 text-xs font-semibold text-neutral-600 hover:text-neutral-900 px-3 py-1.5 rounded-lg border border-neutral-200 bg-white hover:bg-neutral-50 transition-colors">
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
-                <span>Kembali ke Daftar</span>
+                <span>Kembali ke Kelompok {{ $itemGroupLabel }}</span>
             </a>
             <div class="flex items-center gap-2">
                 <a href="{{ route('items.barcodes') }}?ids={{ $item->id }}" target="_blank" class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white hover:bg-neutral-50 text-neutral-700 border border-neutral-200 text-xs font-semibold rounded-lg transition-colors">
@@ -31,8 +37,13 @@
             <div class="flex items-start justify-between flex-wrap gap-4 pb-4 border-b border-neutral-100">
                 <div>
                     <h2 class="text-lg font-bold text-neutral-900 tracking-tight">{{ $item->name }}</h2>
-                    <div class="flex items-center gap-2 mt-1">
+                    <div class="flex items-center gap-2 flex-wrap mt-1">
                         <span class="font-mono text-xs font-semibold px-2 py-0.5 rounded bg-neutral-100 text-neutral-800 border border-neutral-200">{{ $item->item_code }}</span>
+                        @if(filled($item->category))
+                            <a href="{{ route('items.index', ['group' => $itemGroupSlug]) }}" class="text-xs font-semibold px-2 py-0.5 rounded bg-primary-50 text-primary-700 border border-indigo-200 hover:bg-primary-100 transition-colors">
+                                Kelompok: {{ $item->category }}
+                            </a>
+                        @endif
                         @if($item->barcode_token)
                             <span class="font-mono text-xs text-neutral-500">Token: {{ $item->barcode_token }}</span>
                         @endif
@@ -197,6 +208,51 @@
                             </tr>
                         @empty
                             <tr><td colspan="5" class="px-4 py-8 text-center text-xs text-neutral-500">Belum ada riwayat peminjaman.</td></tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Jadwal Maintenance Berkala (Preventif) -->
+        <div class="bg-white rounded-xl border border-neutral-200 overflow-hidden">
+            <div class="px-4 py-3.5 border-b border-neutral-200 bg-neutral-50 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                    <h3 class="font-bold text-neutral-900 text-sm tracking-tight">Jadwal Maintenance Berkala (Preventif)</h3>
+                    <p class="text-[11px] text-neutral-500">Perawatan rutin terjadwal untuk menjaga keandalan barang ini.</p>
+                </div>
+                @if(in_array(auth()->user()?->role?->value, ['teknisi', 'kabeng'], true))
+                    <a href="{{ route('maintenance.schedules.index', ['item_id' => $item->id]) }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-neutral-100 text-neutral-800 border border-neutral-200 rounded-lg text-xs font-semibold transition-colors self-start sm:self-auto">
+                        <span>Atur Jadwal Maintenance</span>
+                    </a>
+                @endif
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-neutral-200 text-sm">
+                    <thead class="bg-neutral-50">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">Kegiatan</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">Siklus</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">Servis Terakhir</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">Jadwal Berikutnya</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-neutral-200/70">
+                        @forelse($item->preventiveSchedules as $schedule)
+                            <tr class="table-row-clean">
+                                <td class="px-4 py-3 text-xs font-semibold text-neutral-900">{{ $schedule->title }}</td>
+                                <td class="px-4 py-3 font-mono text-xs text-neutral-600">Setiap {{ $schedule->interval_months }} bln</td>
+                                <td class="px-4 py-3 font-mono text-xs text-neutral-600">{{ optional($schedule->last_serviced_at)->format('d/m/Y') }}</td>
+                                <td class="px-4 py-3 font-mono text-xs font-semibold text-neutral-900">{{ optional($schedule->next_due_date)->format('d/m/Y') }}</td>
+                                <td class="px-4 py-3">
+                                    <span class="font-mono text-[11px] font-semibold px-2 py-0.5 rounded-md border {{ $schedule->status === 'paused' ? 'bg-neutral-100 text-neutral-600 border-neutral-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200' }}">
+                                        {{ $schedule->countdownLabel() }}
+                                    </span>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr><td colspan="5" class="px-4 py-8 text-center text-xs text-neutral-500">Barang ini belum memiliki jadwal maintenance berkala.</td></tr>
                         @endforelse
                     </tbody>
                 </table>

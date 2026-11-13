@@ -15,35 +15,65 @@ class PreventiveSchedule extends Model
 
     protected $fillable = [
         'item_id',
+        'parent_schedule_id',
         'title',
         'interval_months',
         'last_serviced_at',
+        'maintenance_date',
+        'quantity',
+        'safe_quantity',
+        'damaged_quantity',
         'next_due_date',
         'notes',
+        'damage_notes',
         'status',
+        'workflow_stage',
         'last_notified_stage',
         'last_notified_at',
         'created_by',
+        'maintenance_ticket_id',
+        'inspected_at',
+        'inspected_by',
     ];
 
     protected function casts(): array
     {
         return [
             'interval_months' => 'integer',
+            'quantity' => 'integer',
+            'safe_quantity' => 'integer',
+            'damaged_quantity' => 'integer',
             'last_serviced_at' => 'date',
+            'maintenance_date' => 'date',
             'next_due_date' => 'date',
             'last_notified_at' => 'datetime',
+            'inspected_at' => 'datetime',
         ];
     }
 
     public function item()
     {
-        return $this->belongsTo(Item::class);
+        return $this->belongsTo(Item::class)->withTrashed();
     }
 
     public function createdBy()
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function inspectedBy()
+    {
+        return $this->belongsTo(User::class, 'inspected_by');
+    }
+
+    public function maintenanceTicket()
+    {
+        return $this->belongsTo(MaintenanceTicket::class, 'maintenance_ticket_id');
+    }
+
+    public function parentSchedule()
+    {
+        return $this->belongsTo(self::class, 'parent_schedule_id');
     }
 
     /**
@@ -106,7 +136,7 @@ class PreventiveSchedule extends Model
         $days = $this->daysRemaining($today);
 
         if ($days < 0) {
-            return 'Terlambat ' . abs($days) . ' hari';
+            return 'Terlambat '.abs($days).' hari';
         }
 
         if ($days === 0) {
@@ -117,7 +147,6 @@ class PreventiveSchedule extends Model
             return 'Besok (1 hari lagi)';
         }
 
-        return $days . ' hari lagi';
+        return $days.' hari lagi';
     }
 }
-

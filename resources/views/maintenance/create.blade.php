@@ -19,12 +19,12 @@
                 @csrf
 
                 <div>
-                    <x-input-label for="item_id" value="Barang Rusak *" />
+                    <x-input-label for="item_id" value="Nama Barang Rusak (Master Aset) *" />
                     <select id="item_id" name="item_id" class="mt-1 w-full rounded-lg border-neutral-300 text-sm focus:border-primary focus:ring-primary" required>
-                        <option value="">— Pilih barang —</option>
-                        @foreach(\App\Models\Item::orderBy('name')->get() as $item)
-                            <option value="{{ $item->id }}" @selected(old('item_id') == $item->id)>
-                                {{ $item->name }} ({{ $item->item_code }})
+                        <option value="">— Pilih nama alat / barang dari Master Aset —</option>
+                        @foreach(($items ?? \App\Models\Item::orderBy('name')->orderBy('item_code')->get()) as $item)
+                            <option value="{{ $item->id }}" @selected(old('item_id', $preselectedItemId ?? null) == $item->id)>
+                                {{ $item->name }} ({{ $item->item_code }}) · {{ $item->type->label() }} — {{ $item->location }}
                             </option>
                         @endforeach
                     </select>

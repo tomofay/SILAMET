@@ -8,15 +8,6 @@
         <div class="bg-neutral-900 border border-neutral-800 rounded-xl p-5 sm:p-6 text-white">
             <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                 <div>
-                    <div class="flex items-center gap-2 mb-2">
-                        <span class="px-2 py-0.5 rounded-md text-[11px] font-mono font-semibold uppercase tracking-wider bg-neutral-800 text-neutral-300 border border-neutral-700">
-                            LAB SIJA // SMKN 1 CIBINONG
-                        </span>
-                        <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-mono font-semibold bg-emerald-950 text-emerald-400 border border-emerald-800/60">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                            SISTEM SIAGA
-                        </span>
-                    </div>
                     <h2 class="text-xl sm:text-2xl font-bold tracking-tight font-heading text-white">
                         Selamat Datang, {{ auth()->user()?->name }}
                     </h2>

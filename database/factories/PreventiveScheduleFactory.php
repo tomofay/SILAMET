@@ -24,9 +24,14 @@ class PreventiveScheduleFactory extends Factory
             'title' => 'Pembersihan & Kalibrasi Berkala',
             'interval_months' => $intervalMonths,
             'last_serviced_at' => $lastServiced,
+            'maintenance_date' => $lastServiced,
+            'quantity' => 1,
+            'safe_quantity' => 1,
+            'damaged_quantity' => 0,
             'next_due_date' => PreventiveSchedule::calculateNextDueDate($lastServiced, $intervalMonths),
             'notes' => 'Cek konektor, kipas pendingin, dan fungsi port.',
             'status' => 'scheduled',
+            'workflow_stage' => 'scheduled',
             'last_notified_stage' => null,
             'last_notified_at' => null,
             'created_by' => User::factory()->teknisi(),
@@ -47,4 +52,3 @@ class PreventiveScheduleFactory extends Factory
         ]);
     }
 }
-

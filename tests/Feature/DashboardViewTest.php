@@ -43,10 +43,18 @@ class DashboardViewTest extends TestCase
         $user = $this->actingAsStaff();
         Item::factory()->count(3)->create();
 
-        $response = $this->actingAs($user)->get('/items');
+        $this->actingAs($user)->get('/items')
+            ->assertOk()
+            ->assertSee('Daftar Kelompok Barang')
+            ->assertSee('Tambah Kelompok Barang')
+            ->assertSee('Cetak Semua Barcode')
+            ->assertDontSee('Buku Stok (BHP)')
+            ->assertDontSee('Tambah Barang');
 
-        $response->assertOk()
-            ->assertSee('Tambah Barang');
+        $this->actingAs($user)->get('/items?view=all')
+            ->assertOk()
+            ->assertSee('Tambah Barang')
+            ->assertDontSee('Buku Stok (BHP)');
     }
 
     public function test_loans_index_page_renders(): void

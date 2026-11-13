@@ -1,22 +1,35 @@
 <x-app-layout>
-    <x-slot name="heading">Tambah Barang Baru</x-slot>
+    @php
+        $locked = (bool) ($isLockedGroup ?? false);
+        $groupLabel = $preselectedCategory ?? null;
+        $backUrl = filled($returnGroup ?? null)
+            ? route('items.index', ['group' => $returnGroup])
+            : route('items.index');
+    @endphp
+
+    <x-slot name="heading">{{ $locked ? 'Tambah Barang — ' . $groupLabel : 'Tambah Barang Baru' }}</x-slot>
     <x-slot name="title">Tambah Barang</x-slot>
 
     <div class="max-w-2xl space-y-4">
         <div>
-            <a href="{{ route('items.index') }}" class="inline-flex items-center gap-1.5 text-xs font-semibold text-neutral-600 hover:text-neutral-900 px-3 py-1.5 rounded-lg border border-neutral-200 bg-white hover:bg-neutral-50 transition-colors">
+            <a href="{{ $backUrl }}" class="inline-flex items-center gap-1.5 text-xs font-semibold text-neutral-600 hover:text-neutral-900 px-3 py-1.5 rounded-lg border border-neutral-200 bg-white hover:bg-neutral-50 transition-colors">
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
-                <span>Kembali ke Daftar Aset</span>
+                <span>{{ $locked ? 'Kembali ke Kelompok ' . $groupLabel : 'Kembali ke Daftar Aset' }}</span>
             </a>
         </div>
 
         <div class="bg-white rounded-xl border border-neutral-200 p-5 sm:p-6">
-            <h2 class="text-base font-bold text-neutral-900 tracking-tight mb-5 pb-3 border-b border-neutral-100">Formulir Registrasi Barang</h2>
+            <h2 class="text-base font-bold text-neutral-900 tracking-tight mb-5 pb-3 border-b border-neutral-100">
+                {{ $locked ? 'Formulir Tambah Barang — Kelompok ' . $groupLabel : 'Formulir Registrasi Barang' }}
+            </h2>
 
-            <form method="POST" action="{{ route('items.store') }}" class="space-y-4">
+            <form method="POST" action="{{ route('items.store') }}" class="space-y-4" x-data="{ category: @js(old('category', $groupLabel ?? '')) }">
                 @csrf
+                @if(filled($returnGroup ?? null))
+                    <input type="hidden" name="return_group" value="{{ $returnGroup }}">
+                @endif
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
@@ -32,10 +45,35 @@
                     </div>
                 </div>
 
-                <div>
-                    <x-input-label for="name" value="Nama Barang *" />
-                    <x-text-input id="name" name="name" class="mt-1 w-full text-sm" value="{{ old('name') }}" required placeholder="Contoh: Router MikroTik RB951Ui-2HnD" />
-                    <x-input-error :messages="$errors->get('name')" class="mt-2" />
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        @if($locked)
+                            <x-input-label value="Kelompok Barang" />
+                            <input type="hidden" name="category" value="{{ $groupLabel }}">
+                            <div class="mt-1 flex items-center justify-between gap-2 rounded-lg border border-indigo-200 bg-primary-50 px-3 py-2 text-sm font-semibold text-primary-700">
+                                <span>{{ $groupLabel }}</span>
+                                <svg class="w-4 h-4 shrink-0 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
+                            </div>
+                            <p class="text-[11px] text-neutral-500 mt-1">Barang otomatis masuk ke kelompok {{ $groupLabel }}.</p>
+                        @else
+                            <x-input-label for="category" value="Kelompok / Kategori Barang" />
+                            <x-text-input id="category" name="category" x-model="category" list="item-category-suggestions" class="mt-1 w-full text-sm" placeholder="Contoh: TPLINK, PC, MIKROTIK" />
+                            <datalist id="item-category-suggestions">
+                                @foreach(($categorySuggestions ?? []) as $cat)
+                                    <option value="{{ $cat }}"></option>
+                                @endforeach
+                            </datalist>
+                        @endif
+                        <x-input-error :messages="$errors->get('category')" class="mt-2" />
+                    </div>
+
+                    <div>
+                        <x-input-label for="name" value="Nama Unit Barang *" />
+                        <x-text-input id="name" name="name" class="mt-1 w-full text-sm" value="{{ old('name') }}" required placeholder="{{ $locked ? 'Contoh: ' . $groupLabel . ' Unit 01' : 'Contoh: TPLINK Router 18' }}" />
+                        <x-input-error :messages="$errors->get('name')" class="mt-2" />
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -74,7 +112,7 @@
                 </div>
 
                 <div class="flex items-center justify-end gap-2.5 pt-4 border-t border-neutral-100">
-                    <a href="{{ route('items.index') }}" class="px-4 py-2 text-xs font-semibold text-neutral-600 hover:text-neutral-900 border border-neutral-200 rounded-lg hover:bg-neutral-50 transition-colors">Batal</a>
+                    <a href="{{ $backUrl }}" class="px-4 py-2 text-xs font-semibold text-neutral-600 hover:text-neutral-900 border border-neutral-200 rounded-lg hover:bg-neutral-50 transition-colors">Batal</a>
                     <button type="submit" class="px-4 py-2 bg-primary hover:bg-primary-700 text-white text-xs font-semibold rounded-lg border border-primary/40 transition-colors">Simpan Aset</button>
                 </div>
             </form>

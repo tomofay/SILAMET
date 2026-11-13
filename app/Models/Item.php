@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use App\Enums\ItemType;
 use App\Enums\ItemStatus;
+use App\Enums\ItemType;
 use App\Enums\LoanStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -19,6 +19,7 @@ class Item extends Model
         'item_code',
         'epc_tag',
         'name',
+        'category',
         'type',
         'stock',
         'status',
@@ -68,5 +69,10 @@ class Item extends Model
     public function stockMovements()
     {
         return $this->hasMany(StockMovement::class)->latest();
+    }
+
+    public function damagedAssets()
+    {
+        return $this->hasMany(DamagedAsset::class, 'item_id')->latest('damaged_at');
     }
 }

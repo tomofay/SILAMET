@@ -2,24 +2,99 @@
     <x-slot name="heading">Pusat Laporan &amp; Ekspor Data</x-slot>
     <x-slot name="title">Laporan &amp; Ekspor</x-slot>
 
+    @php
+        $activeStart = $filters['start_date'] ?? '';
+        $activeEnd = $filters['end_date'] ?? '';
+
+        $reports = [
+            [
+                'type' => 'inventaris',
+                'short_label' => 'Inventarisasi Aset',
+                'title' => 'Laporan Inventarisasi Aset',
+                'desc' => 'Daftar lengkap seluruh barang, kode barcode, tag EPC, lokasi rak, dan kondisi stok terkini.',
+                'count' => $counts['inventaris'] ?? 0,
+                'count_label' => 'Item',
+                'uses_dates' => false,
+                'statuses' => [
+                    '' => 'Semua Status Barang',
+                    'tersedia' => 'Tersedia',
+                    'dipinjam' => 'Sedang Dipinjam',
+                    'under_maintenance' => 'Under Maintenance',
+                ],
+                'icon' => 'box',
+            ],
+            [
+                'type' => 'loans',
+                'short_label' => 'Peminjaman Siswa',
+                'title' => 'Rekapitulasi Peminjaman Siswa',
+                'desc' => 'Riwayat transaksi peminjaman, durasi pakai, kondisi kembali, dan status kepatuhan jatuh tempo.',
+                'count' => $counts['loans'] ?? 0,
+                'count_label' => 'Transaksi',
+                'uses_dates' => true,
+                'statuses' => [
+                    '' => 'Semua Status Peminjaman',
+                    'aktif' => 'Aktif Dipinjam',
+                    'overdue' => 'Melewati Jatuh Tempo (Overdue)',
+                    'menunggu_approval_kembali' => 'Menunggu Approval Kembali',
+                    'selesai' => 'Selesai Dikembalikan',
+                ],
+                'icon' => 'refresh',
+            ],
+            [
+                'type' => 'gate_logs',
+                'short_label' => 'Gate Logs RFID',
+                'title' => 'Log Keamanan Gate Security RFID',
+                'desc' => 'Catatan deteksi antena gerbang HW-VX6330, insiden sirene terpicu (denied), dan status foto bukti.',
+                'count' => $counts['gate_logs'] ?? 0,
+                'count_label' => 'Log',
+                'uses_dates' => true,
+                'statuses' => [
+                    '' => 'Semua Aktivitas Gerbang',
+                    'denied' => 'Hanya Pelanggaran (Denied)',
+                    'allowed' => 'Hanya Akses Sah (Allowed)',
+                ],
+                'icon' => 'shield',
+            ],
+            [
+                'type' => 'maintenance',
+                'short_label' => 'Maintenance & Biaya',
+                'title' => 'Laporan Pemeliharaan & Biaya (M&R)',
+                'desc' => 'Rekap tiket kendala, rincian tindakan teknisi, vendor pihak ketiga, dan total biaya perbaikan.',
+                'count' => $counts['maintenance'] ?? 0,
+                'count_label' => 'Tiket',
+                'uses_dates' => true,
+                'statuses' => [
+                    '' => 'Semua Status Tiket',
+                    'open' => 'Open (Menunggu)',
+                    'in_progress' => 'Dalam Perbaikan',
+                    'resolved' => 'Resolved (Selesai)',
+                ],
+                'icon' => 'tool',
+            ],
+        ];
+    @endphp
+
     <div class="space-y-4">
 
-        @if($errors->any())
+        @if($errors->any() || ! empty($filterErrors))
             <div class="bg-rose-50 border border-rose-200 text-rose-800 px-4 py-3 rounded-lg text-xs">
                 <ul class="list-disc pl-4 space-y-0.5">
                     @foreach($errors->all() as $err)
                         <li>{{ $err }}</li>
+                    @endforeach
+                    @foreach(($filterErrors ?? []) as $fErr)
+                        <li>{{ $fErr }}</li>
                     @endforeach
                 </ul>
             </div>
         @endif
 
         <!-- Header & Filter Periode Global -->
-        <div class="bg-white rounded-xl p-4 sm:p-5 border border-neutral-200 space-y-4">
+        <form id="report-filter-form" method="GET" action="{{ route('reports.index') }}" class="bg-white rounded-xl p-4 sm:p-5 border border-neutral-200 space-y-4">
             <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
                 <div>
                     <h2 class="text-base font-bold text-neutral-900 tracking-tight font-heading">Unduh Berkas Laporan Resmi</h2>
-                    <p class="text-xs text-neutral-500 mt-0.5">Ekspor data riil Laboratorium SIJA SMKN 1 Cibinong ke format dokumen PDF resmi berkop sekolah atau Excel (.xlsx).</p>
+                    <p class="text-xs text-neutral-500 mt-0.5">Buka halaman dasbor statistik untuk meninjau data atau ekspor langsung Laboratorium SIJA SMKN 1 Cibinong ke PDF dan Excel (.xlsx).</p>
                 </div>
 
                 <div class="flex items-center gap-1.5 flex-wrap">
@@ -30,93 +105,48 @@
                 </div>
             </div>
 
-            <div class="pt-3 border-t border-neutral-100 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 items-end">
-                <div>
+            <div class="pt-3 border-t border-neutral-100 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 items-end">
+                <div class="lg:col-span-3">
                     <x-input-label for="report-start-date" value="Tanggal Mulai" />
-                    <x-text-input id="report-start-date" type="date" value="{{ request('start_date') }}" class="mt-1 w-full font-mono text-xs" />
+                    <x-text-input id="report-start-date" name="start_date" type="date" value="{{ $activeStart }}" class="mt-1 w-full font-mono text-xs" />
                 </div>
-                <div>
+                <div class="lg:col-span-3">
                     <x-input-label for="report-end-date" value="Tanggal Akhir" />
-                    <x-text-input id="report-end-date" type="date" value="{{ request('end_date') }}" class="mt-1 w-full font-mono text-xs" />
+                    <x-text-input id="report-end-date" name="end_date" type="date" value="{{ $activeEnd }}" class="mt-1 w-full font-mono text-xs" />
                 </div>
-                <div class="sm:col-span-2 flex items-center gap-2 text-xs text-neutral-500 font-mono bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2">
+                <div class="lg:col-span-4 flex items-center gap-2 text-xs text-neutral-500 font-mono bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-2 min-h-[38px]">
                     <svg class="w-4 h-4 text-neutral-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
-                    <span id="report-period-preview">Periode aktif: Semua data tercatat (kosongkan tanggal untuk ekspor penuh)</span>
+                    <span id="report-period-preview" class="truncate">Periode aktif: Semua data tercatat</span>
+                </div>
+                <div class="lg:col-span-2 flex items-center justify-end">
+                    <button type="submit" class="w-full inline-flex items-center justify-center gap-1.5 px-3.5 py-2 bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-semibold rounded-lg transition-colors min-h-[38px]">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                        </svg>
+                        <span>Terapkan</span>
+                    </button>
                 </div>
             </div>
-        </div>
+        </form>
 
+        <!-- 4 Kartu Pilihan Modul Laporan -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            @php
-                $reports = [
-                    [
-                        'type' => 'inventaris',
-                        'title' => 'Laporan Inventarisasi Aset',
-                        'desc' => 'Daftar lengkap seluruh barang, kode barcode, tag EPC, lokasi rak, dan kondisi stok terkini.',
-                        'count' => $counts['inventaris'] ?? 0,
-                        'count_label' => 'Item',
-                        'uses_dates' => false,
-                        'statuses' => [
-                            '' => 'Semua Status Barang',
-                            'tersedia' => 'Tersedia',
-                            'dipinjam' => 'Sedang Dipinjam',
-                            'under_maintenance' => 'Under Maintenance',
-                        ],
-                        'icon' => 'box',
-                    ],
-                    [
-                        'type' => 'loans',
-                        'title' => 'Rekapitulasi Peminjaman Siswa',
-                        'desc' => 'Riwayat transaksi peminjaman, durasi pakai, kondisi kembali, dan status kepatuhan jatuh tempo.',
-                        'count' => $counts['loans'] ?? 0,
-                        'count_label' => 'Transaksi',
-                        'uses_dates' => true,
-                        'statuses' => [
-                            '' => 'Semua Status Peminjaman',
-                            'aktif' => 'Aktif Dipinjam',
-                            'overdue' => 'Melewati Jatuh Tempo (Overdue)',
-                            'selesai' => 'Selesai Dikembalikan',
-                        ],
-                        'icon' => 'refresh',
-                    ],
-                    [
-                        'type' => 'gate_logs',
-                        'title' => 'Log Keamanan Gate Security RFID',
-                        'desc' => 'Catatan deteksi antena gerbang HW-VX6330, insiden sirene terpicu (denied), dan status foto bukti.',
-                        'count' => $counts['gate_logs'] ?? 0,
-                        'count_label' => 'Log',
-                        'uses_dates' => true,
-                        'statuses' => [
-                            '' => 'Semua Aktivitas Gerbang',
-                            'denied' => 'Hanya Pelanggaran (Denied)',
-                            'allowed' => 'Hanya Akses Sah (Allowed)',
-                        ],
-                        'icon' => 'shield',
-                    ],
-                    [
-                        'type' => 'maintenance',
-                        'title' => 'Laporan Pemeliharaan & Biaya (M&R)',
-                        'desc' => 'Rekap tiket kendala, rincian tindakan teknisi, vendor pihak ketiga, dan total biaya perbaikan.',
-                        'count' => $counts['maintenance'] ?? 0,
-                        'count_label' => 'Tiket',
-                        'uses_dates' => true,
-                        'statuses' => [
-                            '' => 'Semua Status Tiket',
-                            'open' => 'Open (Menunggu)',
-                            'in_progress' => 'Dalam Perbaikan',
-                            'resolved' => 'Resolved (Selesai)',
-                        ],
-                        'icon' => 'tool',
-                    ],
-                ];
-            @endphp
-
             @foreach($reports as $report)
-                <div class="bg-white rounded-xl border border-neutral-200 p-5 flex flex-col justify-between gap-4 report-card"
+                @php
+                    $cardParams = array_filter([
+                        'start_date' => $report['uses_dates'] ? $activeStart : null,
+                        'end_date' => $report['uses_dates'] ? $activeEnd : null,
+                    ], fn ($v) => $v !== null && $v !== '');
+                    $dashboardUrl = route('reports.dashboard', array_merge(['type' => $report['type']], $cardParams));
+                    $pdfUrl = route('reports.pdf', array_merge(['type' => $report['type']], $cardParams));
+                    $excelUrl = route('reports.excel', array_merge(['type' => $report['type']], $cardParams));
+                @endphp
+                <div class="rounded-xl border border-neutral-200 bg-white p-5 flex flex-col justify-between gap-4 transition-colors hover:border-neutral-300 report-card"
                      data-type="{{ $report['type'] }}"
                      data-uses-dates="{{ $report['uses_dates'] ? '1' : '0' }}"
+                     data-view-base="{{ route('reports.dashboard', $report['type']) }}"
                      data-pdf-base="{{ route('reports.pdf', $report['type']) }}"
                      data-excel-base="{{ route('reports.excel', $report['type']) }}">
                     <div class="flex items-start justify-between gap-3">
@@ -153,7 +183,7 @@
                     </div>
 
                     <div class="pt-3 border-t border-neutral-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-                        <div class="sm:w-52">
+                        <div class="sm:w-48">
                             <select aria-label="Filter status {{ $report['title'] }}"
                                     class="report-status-select w-full rounded-lg border-neutral-200 text-xs py-1.5 px-2.5 focus:border-primary focus:ring-primary">
                                 @foreach($report['statuses'] as $val => $label)
@@ -162,16 +192,24 @@
                             </select>
                         </div>
 
-                        <div class="flex items-center gap-2">
-                            <a href="{{ route('reports.pdf', $report['type']) }}"
-                               class="report-pdf-link inline-flex items-center gap-1.5 px-3.5 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-semibold rounded-lg transition-colors">
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <a href="{{ $dashboardUrl }}"
+                               class="report-view-link inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg border bg-primary-50/70 hover:bg-primary text-primary-700 hover:text-white border-indigo-200 transition-colors">
+                                <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                                <span>Lihat Dasbor</span>
+                            </a>
+                            <a href="{{ $pdfUrl }}"
+                               class="report-pdf-link inline-flex items-center gap-1.5 px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-semibold rounded-lg transition-colors">
                                 <svg class="w-4 h-4 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
                                 <span>Unduh PDF</span>
                             </a>
-                            <a href="{{ route('reports.excel', $report['type']) }}"
-                               class="report-excel-link inline-flex items-center gap-1.5 px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-semibold rounded-lg transition-colors">
+                            <a href="{{ $excelUrl }}"
+                               class="report-excel-link inline-flex items-center gap-1.5 px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-xs font-semibold rounded-lg transition-colors">
                                 <svg class="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
@@ -188,6 +226,7 @@
     @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            const filterForm = document.getElementById('report-filter-form');
             const startInput = document.getElementById('report-start-date');
             const endInput = document.getElementById('report-end-date');
             const preview = document.getElementById('report-period-preview');
@@ -201,22 +240,25 @@
             }
 
             function syncLinks() {
-                const start = startInput.value;
-                const end = endInput.value;
+                const start = startInput ? startInput.value : '';
+                const end = endInput ? endInput.value : '';
 
-                if (start && end) {
-                    preview.textContent = `Periode aktif: ${start} s.d. ${end}`;
-                } else if (start) {
-                    preview.textContent = `Periode aktif: Mulai ${start}`;
-                } else if (end) {
-                    preview.textContent = `Periode aktif: Sampai ${end}`;
-                } else {
-                    preview.textContent = 'Periode aktif: Semua data tercatat (kosongkan tanggal untuk ekspor penuh)';
+                if (preview) {
+                    if (start && end) {
+                        preview.textContent = `Periode aktif: ${start} s.d. ${end}`;
+                    } else if (start) {
+                        preview.textContent = `Periode aktif: Mulai ${start}`;
+                    } else if (end) {
+                        preview.textContent = `Periode aktif: Sampai ${end}`;
+                    } else {
+                        preview.textContent = 'Periode aktif: Semua data tercatat (kosongkan tanggal untuk ekspor penuh)';
+                    }
                 }
 
                 cards.forEach(function (card) {
                     const usesDates = card.dataset.usesDates === '1';
                     const statusSelect = card.querySelector('.report-status-select');
+                    const viewLink = card.querySelector('.report-view-link');
                     const pdfLink = card.querySelector('.report-pdf-link');
                     const excelLink = card.querySelector('.report-excel-link');
 
@@ -226,8 +268,15 @@
                     if (statusSelect && statusSelect.value) params.set('status', statusSelect.value);
 
                     const query = params.toString();
-                    pdfLink.href = query ? `${card.dataset.pdfBase}?${query}` : card.dataset.pdfBase;
-                    excelLink.href = query ? `${card.dataset.excelBase}?${query}` : card.dataset.excelBase;
+                    if (pdfLink) {
+                        pdfLink.href = query ? `${card.dataset.pdfBase}?${query}` : card.dataset.pdfBase;
+                    }
+                    if (excelLink) {
+                        excelLink.href = query ? `${card.dataset.excelBase}?${query}` : card.dataset.excelBase;
+                    }
+                    if (viewLink) {
+                        viewLink.href = query ? `${card.dataset.viewBase}?${query}` : card.dataset.viewBase;
+                    }
                 });
             }
 
@@ -261,6 +310,7 @@
                         endInput.value = '';
                     }
                     syncLinks();
+                    if (filterForm) filterForm.submit();
                 });
             });
 

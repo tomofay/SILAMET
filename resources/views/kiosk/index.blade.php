@@ -461,27 +461,46 @@
                             <!-- List Barang Terpilih -->
                             <div x-show="selectedItems.length > 0" class="space-y-2.5 max-h-72 overflow-y-auto pr-1">
                                 <template x-for="(item, idx) in selectedItems" :key="item.id">
-                                    <div class="p-3 rounded-lg bg-neutral-50 border border-neutral-200 flex items-center justify-between gap-3">
-                                        <div class="flex items-center gap-3 min-w-0">
-                                            <span class="w-7 h-7 rounded-lg bg-primary text-white font-mono text-xs font-bold flex items-center justify-center shrink-0" x-text="idx + 1"></span>
-                                            <div class="min-w-0">
-                                                <div class="text-sm font-bold text-neutral-900 truncate" x-text="item.name"></div>
-                                                <div class="text-xs text-neutral-500 font-mono mt-0.5">
-                                                    <span class="font-semibold text-neutral-800" x-text="item.item_code"></span> · Rak: <span x-text="item.location"></span>
+                                    <div class="p-3 rounded-lg bg-neutral-50 border border-neutral-200 space-y-2">
+                                        <div class="flex items-center justify-between gap-3">
+                                            <div class="flex items-center gap-3 min-w-0">
+                                                <span class="w-7 h-7 rounded-lg bg-primary text-white font-mono text-xs font-bold flex items-center justify-center shrink-0" x-text="idx + 1"></span>
+                                                <div class="min-w-0">
+                                                    <div class="flex items-center gap-1.5 flex-wrap">
+                                                        <span class="text-sm font-bold text-neutral-900 truncate" x-text="item.name"></span>
+                                                        <span x-show="item.type === 'bahan_habis_pakai'" class="px-1.5 py-0.2 rounded font-mono text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200">BHP</span>
+                                                    </div>
+                                                    <div class="text-xs text-neutral-500 font-mono mt-0.5">
+                                                        <span class="font-semibold text-neutral-800" x-text="item.item_code"></span> · Rak: <span x-text="item.location"></span>
+                                                    </div>
                                                 </div>
                                             </div>
+                                            <button 
+                                                type="button" 
+                                                @click="removeItem(item.id)" 
+                                                class="min-h-[44px] min-w-[44px] rounded-lg bg-white hover:bg-rose-50 text-neutral-500 hover:text-rose-700 flex items-center justify-center border border-neutral-200 hover:border-rose-200 transition-colors shrink-0 cursor-pointer" 
+                                                title="Hapus dari daftar"
+                                                aria-label="Hapus barang dari daftar"
+                                            >
+                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                                </svg>
+                                            </button>
                                         </div>
-                                        <button 
-                                            type="button" 
-                                            @click="removeItem(item.id)" 
-                                            class="min-h-[44px] min-w-[44px] rounded-lg bg-white hover:bg-rose-50 text-neutral-500 hover:text-rose-700 flex items-center justify-center border border-neutral-200 hover:border-rose-200 transition-colors shrink-0" 
-                                            title="Hapus dari daftar"
-                                            aria-label="Hapus barang dari daftar"
-                                        >
-                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                            </svg>
-                                        </button>
+                                        <template x-if="item.type === 'bahan_habis_pakai'">
+                                            <div class="pt-2 border-t border-neutral-200 flex items-center justify-between text-xs">
+                                                <div>
+                                                    <span class="font-bold text-neutral-800">Jumlah konektor/unit dipakai:</span>
+                                                    <p class="text-[10px] text-neutral-500">Isi jumlah pcs yang diambil</p>
+                                                </div>
+                                                <div class="flex items-center gap-1.5">
+                                                    <button type="button" @click="item.quantity = Math.max(1, (item.quantity || 1) - 1)" class="w-7 h-7 rounded-lg bg-neutral-200 hover:bg-neutral-300 text-neutral-800 font-bold flex items-center justify-center cursor-pointer">-</button>
+                                                    <input type="number" x-model.number="item.quantity" min="1" max="10000" class="w-16 text-center font-mono font-bold text-xs py-1 rounded-lg border border-neutral-300">
+                                                    <button type="button" @click="item.quantity = (item.quantity || 1) + 1" class="w-7 h-7 rounded-lg bg-neutral-200 hover:bg-neutral-300 text-neutral-800 font-bold flex items-center justify-center cursor-pointer">+</button>
+                                                    <span class="font-mono text-[11px] text-neutral-600 font-semibold">pcs</span>
+                                                </div>
+                                            </div>
+                                        </template>
                                     </div>
                                 </template>
                             </div>
@@ -1505,6 +1524,7 @@
                             return;
                         }
 
+                        item.quantity = item.quantity || 1;
                         this.playAudioTone('beep');
                         this.selectedItems.push(item);
                         this.scanInputs.itemCode = '';
@@ -1523,6 +1543,7 @@
                         this.showToast('info', 'Barang Dihapus', `"${item.name}" dihapus dari daftar.`);
                         return;
                     }
+                    item.quantity = item.quantity || 1;
                     this.selectedItems.push(item);
                     this.playAudioTone('beep');
                     this.showToast('success', 'Barang Ditambahkan', `"${item.name}" masuk ke daftar (${this.selectedItems.length} barang).`);
@@ -1694,6 +1715,10 @@
 
                     const photoBase64 = await this.captureSnapshot();
                     const itemIds = this.selectedItems.map(i => i.id);
+                    const quantities = {};
+                    this.selectedItems.forEach(i => {
+                        quantities[i.id] = i.quantity || 1;
+                    });
 
                     try {
                         const response = await fetch('/api/v1/loans', {
@@ -1706,6 +1731,7 @@
                             body: JSON.stringify({
                                 user_id: this.currentUser.id,
                                 item_ids: itemIds,
+                                quantities: quantities,
                                 usage_duration: this.selectedDuration,
                                 photo: photoBase64
                             })

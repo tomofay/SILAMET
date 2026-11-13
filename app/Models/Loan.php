@@ -17,6 +17,7 @@ class Loan extends Model
     protected $fillable = [
         'user_id',
         'item_id',
+        'quantity_borrowed',
         'status',
         'condition_in',
         'capture_image_path',
@@ -32,6 +33,7 @@ class Loan extends Model
     {
         return [
             'status' => LoanStatus::class,
+            'quantity_borrowed' => 'integer',
             'usage_duration' => LoanDuration::class,
             'borrowed_at' => 'datetime',
             'due_at' => 'datetime',

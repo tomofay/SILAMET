@@ -77,28 +77,59 @@
 
                         <div class="border border-neutral-200 rounded-xl p-3 max-h-80 overflow-y-auto space-y-2 bg-neutral-50/50">
                             @forelse(\App\Models\Item::where('status', 'tersedia')->orderBy('name')->get() as $item)
-                                <label class="flex items-center gap-3 p-3 bg-white rounded-xl border border-neutral-200/80 hover:border-neutral-900 cursor-pointer text-xs transition-colors shadow-2xs">
-                                    <input type="checkbox" name="item_ids[]" value="{{ $item->id }}" 
-                                        @checked(is_array(old('item_ids')) && in_array($item->id, old('item_ids')))
-                                        class="rounded-md border-neutral-300 text-neutral-900 focus:ring-neutral-900 h-4 w-4">
-                                    <div class="w-8 h-8 rounded-lg bg-neutral-100 border border-neutral-200 flex items-center justify-center shrink-0 text-neutral-500">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                                        </svg>
-                                    </div>
-                                    <div class="flex-1 min-w-0">
-                                        <div class="font-semibold text-neutral-900 truncate">{{ $item->name }}</div>
-                                        <div class="flex items-center gap-2 mt-0.5">
-                                            <span class="text-[11px] text-neutral-500 font-mono">{{ $item->item_code }}</span>
-                                            @if($item->epc_tag)
-                                                <span class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-neutral-100 text-neutral-600 border border-neutral-200">UHF RFID</span>
-                                            @endif
+                                <div x-data="{ checked: {{ (is_array(old('item_ids')) && in_array($item->id, old('item_ids'))) ? 'true' : 'false' }} }"
+                                     class="p-3 bg-white rounded-xl border border-neutral-200/80 transition-colors shadow-2xs space-y-2.5"
+                                     :class="checked ? 'border-neutral-900 ring-1 ring-neutral-900 bg-neutral-50/50' : 'hover:border-neutral-300'">
+                                    <label class="flex items-center gap-3 cursor-pointer text-xs">
+                                        <input type="checkbox" name="item_ids[]" value="{{ $item->id }}" 
+                                            x-model="checked"
+                                            class="rounded-md border-neutral-300 text-neutral-900 focus:ring-neutral-900 h-4 w-4">
+                                        <div class="w-8 h-8 rounded-lg bg-neutral-100 border border-neutral-200 flex items-center justify-center shrink-0 text-neutral-500">
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                                            </svg>
                                         </div>
-                                    </div>
-                                    <span class="font-mono text-[11px] text-neutral-500 shrink-0 px-2 py-0.5 rounded bg-neutral-100 border border-neutral-200">
-                                        {{ $item->location ?: 'Lab SIJA' }}
-                                    </span>
-                                </label>
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-center gap-2">
+                                                <span class="font-semibold text-neutral-900 truncate">{{ $item->name }}</span>
+                                                @if($item->type->value === 'bahan_habis_pakai')
+                                                    <span class="px-2 py-0.5 rounded-full font-mono text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200">BHP / Sekali Pakai</span>
+                                                @endif
+                                            </div>
+                                            <div class="flex items-center gap-2 mt-0.5">
+                                                <span class="text-[11px] text-neutral-500 font-mono">{{ $item->item_code }}</span>
+                                                @if($item->epc_tag)
+                                                    <span class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-neutral-100 text-neutral-600 border border-neutral-200">UHF RFID</span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                        <span class="font-mono text-[11px] text-neutral-500 shrink-0 px-2 py-0.5 rounded bg-neutral-100 border border-neutral-200">
+                                            {{ $item->location ?: 'Lab SIJA' }}
+                                        </span>
+                                    </label>
+
+                                    @if($item->type->value === 'bahan_habis_pakai')
+                                        <!-- Kolom Wajib Diisi Jumlah Pemakaian untuk Bahan Sekali Pakai / Konektor -->
+                                        <div x-show="checked"
+                                             x-transition
+                                             class="pt-2 border-t border-neutral-200/60 flex items-center justify-between gap-3 text-xs pl-7">
+                                            <div>
+                                                <span class="font-bold text-neutral-900">Jumlah konektor / unit yang dipakai *</span>
+                                                <p class="text-[11px] text-neutral-500">1 pack konektor berisi 100 pcs. Masukkan jumlah pcs yang diambil.</p>
+                                            </div>
+                                            <div class="flex items-center gap-1.5 shrink-0">
+                                                <input type="number"
+                                                       name="quantities[{{ $item->id }}]"
+                                                       min="1"
+                                                       max="10000"
+                                                       value="{{ old('quantities.'.$item->id, 1) }}"
+                                                       :required="checked"
+                                                       class="w-20 px-2.5 py-1 text-center font-mono font-bold text-xs rounded-lg border border-neutral-300 focus:border-neutral-900 focus:ring-neutral-900" />
+                                                <span class="font-mono text-xs font-semibold text-neutral-600">pcs</span>
+                                            </div>
+                                        </div>
+                                    @endif
+                                </div>
                             @empty
                                 <div class="py-8 text-center text-xs text-neutral-500">
                                     Tidak ada alat praktikum yang berstatus tersedia saat ini.

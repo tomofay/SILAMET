@@ -55,7 +55,14 @@
             <dl class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-5 text-sm">
                 <div class="p-3.5 rounded-xl bg-neutral-50/70 border border-neutral-200/80">
                     <dt class="text-neutral-500 text-[11px] font-bold uppercase tracking-wider font-heading">Barang Dipinjam</dt>
-                    <dd class="font-bold text-neutral-900 text-xs mt-1.5 font-heading">{{ $loan->item->name ?? '-' }}</dd>
+                    <dd class="font-bold text-neutral-900 text-xs mt-1.5 font-heading">
+                        {{ $loan->item->name ?? '-' }}
+                        @if(($loan->quantity_borrowed ?? 1) > 1 || optional($loan->item)->type?->value === 'bahan_habis_pakai')
+                            <span class="ml-1 px-2 py-0.5 rounded-full font-mono text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                                {{ $loan->quantity_borrowed ?? 1 }} pcs
+                            </span>
+                        @endif
+                    </dd>
                     <dd class="text-[11px] text-neutral-600 font-mono mt-0.5">{{ $loan->item->item_code ?? '—' }}</dd>
                 </div>
                 <div class="p-3.5 rounded-xl bg-neutral-50/70 border border-neutral-200/80">

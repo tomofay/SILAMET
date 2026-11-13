@@ -98,7 +98,10 @@
             </div>
         @endif
 
-        <form id="create-item-form" method="POST" action="{{ route('items.store') }}">
+        <form id="create-item-form"
+              method="POST"
+              action="{{ route('items.store') }}"
+              @keydown.enter="if ($event.target.tagName !== 'TEXTAREA' && $event.target.type !== 'submit') { $event.preventDefault(); }">
             @csrf
             <!-- Default status barang baru adalah selalu tersedia -->
             <input type="hidden" name="status" value="tersedia">
@@ -162,6 +165,7 @@
                                                   class="w-full font-mono text-center text-sm font-bold rounded-xl border-neutral-300 focus:border-primary focus:ring-primary tracking-wider uppercase"
                                                   value="{{ old('item_code') }}"
                                                   required
+                                                  @keydown.enter.prevent="document.getElementById('bhp_stock')?.focus()"
                                                   placeholder="Scan Barcode Kemasan (misal: BCD-RJ45-CAT6)" />
                                     <x-input-error :messages="$errors->get('item_code')" class="mt-1.5" />
                                 </div>
@@ -289,7 +293,7 @@
                                 <p class="text-[11px] text-neutral-500 mt-0.5 max-w-md mx-auto">Dekatkan stiker RFID ke pembaca USB reader atau ketikkan kode hexa EPC unik alat.</p>
                                 
                                 <div class="mt-4 max-w-md mx-auto">
-                                    <x-text-input id="epc_tag" name="epc_tag" class="w-full font-mono text-center text-xs rounded-xl border-neutral-300 focus:border-primary focus:ring-primary tracking-wider" value="{{ old('epc_tag') }}" placeholder="Contoh EPC: E280689400004001" />
+                                    <x-text-input id="epc_tag" name="epc_tag" class="w-full font-mono text-center text-xs rounded-xl border-neutral-300 focus:border-primary focus:ring-primary tracking-wider" value="{{ old('epc_tag') }}" @keydown.enter.prevent="$event.target.blur()" placeholder="Contoh EPC: E280689400004001" />
                                     <x-input-error :messages="$errors->get('epc_tag')" class="mt-1.5" />
                                 </div>
                             </div>
@@ -333,7 +337,7 @@
 
                             <div>
                                 <x-input-label for="aset_item_code" value="Kode Barang Unik *" />
-                                <x-text-input id="aset_item_code" name="item_code" class="mt-1.5 w-full font-mono text-xs rounded-xl border-neutral-200 focus:border-primary focus:ring-primary uppercase font-bold" value="{{ old('item_code') }}" required placeholder="Contoh: TL840_18" />
+                                <x-text-input id="aset_item_code" name="item_code" class="mt-1.5 w-full font-mono text-xs rounded-xl border-neutral-200 focus:border-primary focus:ring-primary uppercase font-bold" value="{{ old('item_code') }}" required @keydown.enter.prevent="document.getElementById('aset-location')?.focus()" placeholder="Contoh: TL840_18" />
                                 <x-input-error :messages="$errors->get('item_code')" class="mt-1.5" />
                             </div>
 

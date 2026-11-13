@@ -171,7 +171,14 @@
                                     </div>
                                 </td>
                                 <td class="px-5 py-4">
-                                    <div class="text-neutral-900 font-bold text-xs font-heading">{{ $loan->item->name ?? '-' }}</div>
+                                    <div class="flex items-center gap-1.5 flex-wrap">
+                                        <span class="text-neutral-900 font-bold text-xs font-heading">{{ $loan->item->name ?? '-' }}</span>
+                                        @if(($loan->quantity_borrowed ?? 1) > 1 || optional($loan->item)->type?->value === 'bahan_habis_pakai')
+                                            <span class="px-2 py-0.5 rounded-full font-mono text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                                                {{ $loan->quantity_borrowed ?? 1 }} pcs
+                                            </span>
+                                        @endif
+                                    </div>
                                     <div class="text-[11px] text-neutral-500 font-mono mt-0.5">{{ $loan->item->item_code ?? '—' }}</div>
                                 </td>
                                 <td class="px-5 py-4 text-xs text-neutral-700 font-medium whitespace-nowrap">

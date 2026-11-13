@@ -109,4 +109,37 @@ class LoanActiveAndHistoryTest extends TestCase
             ->get(route('loans.history'))
             ->assertForbidden();
     }
+
+    public function test_can_create_loan_with_custom_connector_quantity(): void
+    {
+        $teknisi = User::factory()->teknisi()->create();
+        $student = User::factory()->siswa()->create(['phone' => '08123456789']);
+        $connector = Item::factory()->available()->create([
+            'name' => 'Konektor RJ45 Cat6',
+            'type' => \App\Enums\ItemType::BAHAN_HABIS_PAKAI,
+            'stock' => 100,
+        ]);
+
+        $response = $this->actingAs($teknisi)->post(route('loans.store'), [
+            'user_id' => $student->id,
+            'item_ids' => [$connector->id],
+            'quantities' => [
+                $connector->id => 15,
+            ],
+            'usage_duration' => LoanDuration::PULANG_SEKOLAH->value,
+        ]);
+
+        $response->assertRedirect(route('loans.index'));
+
+        $this->assertDatabaseHas('loans', [
+            'user_id' => $student->id,
+            'item_id' => $connector->id,
+            'quantity_borrowed' => 15,
+            'status' => 'aktif',
+        ]);
+
+        $indexResponse = $this->actingAs($teknisi)->get(route('loans.index'));
+        $indexResponse->assertOk()
+            ->assertSee('15 pcs');
+    }
 }

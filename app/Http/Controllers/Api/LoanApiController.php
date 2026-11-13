@@ -29,13 +29,15 @@ class LoanApiController extends Controller
             'item_ids' => 'nullable|array|min:1',
             'item_ids.*' => 'exists:items,id',
             'usage_duration' => ['required', Rule::enum(LoanDuration::class)],
+            'quantities' => 'nullable|array',
+            'quantities.*' => 'nullable|integer|min:1|max:10000',
             'photo' => 'nullable|string', // base64 dari webcam
         ]);
 
         $itemIds = [];
-        if (!empty($validated['item_ids'])) {
+        if (! empty($validated['item_ids'])) {
             $itemIds = array_values(array_unique($validated['item_ids']));
-        } elseif (!empty($validated['item_id'])) {
+        } elseif (! empty($validated['item_id'])) {
             $itemIds = [$validated['item_id']];
         } else {
             return response()->json([
@@ -57,7 +59,7 @@ class LoanApiController extends Controller
 
         $photoPath = null;
         $loans = DB::transaction(function () use ($validated, $itemIds, $cameraService, $borrowedAt, &$photoPath) {
-            if (!empty($validated['photo'])) {
+            if (! empty($validated['photo'])) {
                 $imageData = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $validated['photo']), true);
                 if ($imageData === false) {
                     abort(422, 'Format snapshot tidak valid.');
@@ -82,9 +84,12 @@ class LoanApiController extends Controller
                     abort(422, sprintf('Barang "%s" sedang memiliki peminjaman aktif.', $item->name));
                 }
 
+                $borrowedQty = isset($validated['quantities'][$itemId]) ? max(1, (int) $validated['quantities'][$itemId]) : 1;
+
                 $loan = Loan::create([
                     'user_id' => $validated['user_id'],
                     'item_id' => $item->id,
+                    'quantity_borrowed' => $borrowedQty,
                     'status' => LoanStatus::AKTIF,
                     'capture_image_path' => $photoPath,
                     'usage_duration' => $validated['usage_duration'],
@@ -100,12 +105,12 @@ class LoanApiController extends Controller
         });
 
         $firstLoan = $loans[0];
-        $itemNames = collect($loans)->map(fn($l) => $l->item->name)->implode(', ');
+        $itemNames = collect($loans)->map(fn ($l) => $l->item->name)->implode(', ');
 
         return response()->json([
             'success' => true,
-            'message' => count($loans) > 1 
-                ? sprintf('Peminjaman %d barang berhasil dicatat.', count($loans)) 
+            'message' => count($loans) > 1
+                ? sprintf('Peminjaman %d barang berhasil dicatat.', count($loans))
                 : 'Peminjaman berhasil dicatat.',
             'data' => [
                 'loan' => $firstLoan->load('user:id,name,nis_nip,phone'),
@@ -149,8 +154,8 @@ class LoanApiController extends Controller
             $ticketId = null;
 
             if ($validated['condition_in'] === 'rusak') {
-                $issueDesc = !empty($validated['issue_description']) 
-                    ? trim($validated['issue_description']) 
+                $issueDesc = ! empty($validated['issue_description'])
+                    ? trim($validated['issue_description'])
                     : 'Barang dikembalikan dalam kondisi rusak. Silakan periksa fisik barang.';
                 $ticket = MaintenanceTicket::create([
                     'item_id' => $item->id,
@@ -194,7 +199,7 @@ class LoanApiController extends Controller
         // Find user by barcode token (SLM-XXXXXXXX) or fallback to nis_nip
         $user = \App\Services\BarcodeTokenService::resolveUser($validated['nis']);
 
-        if (!$user) {
+        if (! $user) {
             return response()->json([
                 'success' => false,
                 'message' => 'Siswa dengan NIS tersebut tidak ditemukan.',
@@ -241,19 +246,19 @@ class LoanApiController extends Controller
     public function returnKiosk(Request $request)
     {
         // Mendukung format multi-item (items array) maupun single item format
-        if (!$request->has('items') && $request->has('item_code')) {
+        if (! $request->has('items') && $request->has('item_code')) {
             $request->merge([
                 'items' => [
                     [
                         'item_code' => $request->input('item_code'),
                         'condition_in' => $request->input('condition_in'),
                         'issue_description' => $request->input('issue_description'),
-                    ]
-                ]
+                    ],
+                ],
             ]);
 
             // Jika request single lama tidak menyertakan NIS (seperti di test lama), ambil dari borrower aktif
-            if (!$request->filled('nis')) {
+            if (! $request->filled('nis')) {
                 $tempItem = \App\Services\BarcodeTokenService::resolveItem($request->input('item_code'));
                 if ($tempItem) {
                     $activeL = Loan::with('user')->where('item_id', $tempItem->id)->where('status', LoanStatus::AKTIF)->latest()->first();
@@ -278,7 +283,7 @@ class LoanApiController extends Controller
         // Find user by barcode token (SLM-XXXXXXXX) or fallback to nis_nip
         $user = \App\Services\BarcodeTokenService::resolveUser($validated['nis']);
 
-        if (!$user) {
+        if (! $user) {
             return response()->json([
                 'success' => false,
                 'message' => 'Siswa dengan NIS tersebut tidak ditemukan.',
@@ -301,7 +306,7 @@ class LoanApiController extends Controller
                     || (strcasecmp($it->item_code, $code) === 0)
                     || ((string) $it->id === $code);
             });
-            if (!$found) {
+            if (! $found) {
                 return response()->json([
                     'success' => false,
                     'message' => "Barang dengan kode/barcode '{$code}' tidak ditemukan di sistem.",
@@ -333,7 +338,7 @@ class LoanApiController extends Controller
                     ->latest()
                     ->first();
 
-                if (!$activeLoan) {
+                if (! $activeLoan) {
                     abort(422, "Barang '{$lockedItem->name}' ({$lockedItem->item_code}) tidak sedang dalam status peminjaman aktif.");
                 }
 
@@ -354,7 +359,7 @@ class LoanApiController extends Controller
                 ]);
 
                 if ($condition === 'rusak') {
-                    $description = !empty($entry['issue_description'])
+                    $description = ! empty($entry['issue_description'])
                         ? $entry['issue_description']
                         : 'Barang dikembalikan dalam kondisi rusak melalui Kiosk Mandiri.';
 

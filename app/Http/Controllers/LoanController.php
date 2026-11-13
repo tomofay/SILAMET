@@ -137,6 +137,8 @@ class LoanController extends Controller
             'item_id' => 'nullable|exists:items,id',
             'item_ids' => 'nullable|array|min:1',
             'item_ids.*' => 'exists:items,id',
+            'quantities' => 'nullable|array',
+            'quantities.*' => 'nullable|integer|min:1|max:10000',
             'usage_duration' => ['required', Rule::enum(LoanDuration::class)],
         ]);
 
@@ -171,9 +173,12 @@ class LoanController extends Controller
                     abort(422, sprintf('Barang "%s" tidak tersedia.', $item->name));
                 }
 
+                $borrowedQty = isset($validated['quantities'][$itemId]) ? max(1, (int) $validated['quantities'][$itemId]) : 1;
+
                 Loan::create([
                     'user_id' => $validated['user_id'],
                     'item_id' => $item->id,
+                    'quantity_borrowed' => $borrowedQty,
                     'status' => 'aktif',
                     'usage_duration' => $validated['usage_duration'],
                     'borrowed_at' => $borrowedAt,

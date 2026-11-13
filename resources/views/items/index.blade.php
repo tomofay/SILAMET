@@ -33,46 +33,56 @@
             </div>
         @endif
 
-        <!-- Top Action Bar: High-Visibility Segmented Switcher & Actions (No Title Fluff) -->
+        @php
+            $asetGroups = collect($groups ?? [])->where('type', 'aset')->values();
+            $bhpGroups = collect($groups ?? [])->where('type', 'bahan_habis_pakai')->values();
+        @endphp
+
+        <!-- Top Action Bar: Segmented Switcher & Actions -->
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-3 border-b border-neutral-200">
-            <!-- Left Side: Prominent High-Visibility Switcher & Back Button -->
+            <!-- Left Side: Switcher Tabs or Back Button -->
             <div class="flex items-center gap-2.5 flex-wrap">
                 @if($activeGroup)
                     <a href="{{ route('items.index') }}"
                        class="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-bold shadow-sm transition-all"
                        title="Kembali ke Semua Kelompok">
-                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+                        <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                         </svg>
                         <span>Semua Kelompok</span>
                     </a>
                 @else
-                    <a href="{{ route('items.index') }}"
-                       class="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full text-xs font-bold transition-all duration-150 {{ $viewMode === 'groups' ? 'bg-neutral-900 text-white shadow-md ring-2 ring-neutral-900' : 'bg-white text-neutral-800 hover:bg-neutral-100 border border-neutral-300 shadow-sm' }}">
-                        <svg class="w-4 h-4 {{ $viewMode === 'groups' ? 'text-white' : 'text-neutral-500' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <div class="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full text-xs font-bold bg-neutral-900 text-white shadow-md ring-2 ring-neutral-900">
+                        <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
                         </svg>
                         <span>Daftar Kelompok Barang</span>
-                        <span class="px-2.5 py-0.5 rounded-full font-mono text-[11px] font-extrabold {{ $viewMode === 'groups' ? 'bg-neutral-800 text-white border border-neutral-700' : 'bg-neutral-100 text-neutral-900 border border-neutral-200' }}">
+                        <span class="px-2.5 py-0.5 rounded-full font-mono text-[11px] font-extrabold bg-neutral-800 text-white border border-neutral-700">
                             {{ count($groups) }}
                         </span>
-                    </a>
-
-                    <a href="{{ route('items.index', ['view' => 'all']) }}"
-                       class="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full text-xs font-bold transition-all duration-150 {{ $viewMode === 'all' && $search === '' ? 'bg-neutral-900 text-white shadow-md ring-2 ring-neutral-900' : 'bg-white text-neutral-800 hover:bg-neutral-100 border border-neutral-300 shadow-sm' }}">
-                        <svg class="w-4 h-4 {{ ($viewMode === 'all' && $search === '') ? 'text-white' : 'text-neutral-500' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-                        </svg>
-                        <span>Semua Unit</span>
-                        <span class="px-2.5 py-0.5 rounded-full font-mono text-[11px] font-extrabold {{ ($viewMode === 'all' && $search === '') ? 'bg-neutral-800 text-white border border-neutral-700' : 'bg-neutral-100 text-neutral-900 border border-neutral-200' }}">
-                            {{ $totalItemCount }}
-                        </span>
-                    </a>
+                    </div>
                 @endif
             </div>
 
-            <!-- Right Side: Search & Primary Action Button -->
+            <!-- Right Side: Filter Dropdown, Search & Primary Action Button -->
             <div class="flex items-center gap-2.5 flex-wrap">
+                @if($viewMode === 'groups')
+                    <!-- Dropdown Filter Kategori di Sebelah Kanan (Modern & Hemat Ruang) -->
+                    <div class="relative shrink-0">
+                        <select x-model="groupTypeFilter"
+                                class="pl-4 pr-9 py-2 rounded-full border border-neutral-300 bg-white text-xs font-bold text-neutral-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary shadow-sm cursor-pointer appearance-none">
+                            <option value="all">Semua Kelompok ({{ count($groups) }})</option>
+                            <option value="aset">Barang Praktikum (Aset) ({{ $asetGroups->count() }})</option>
+                            <option value="bahan_habis_pakai">Bahan Sekali Pakai (BHP) ({{ $bhpGroups->count() }})</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-neutral-500">
+                            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </div>
+                    </div>
+                @endif
+
                 <!-- Search Pill Form -->
                 <form method="GET" action="{{ route('items.index') }}" class="flex items-center gap-2 w-full sm:w-auto">
                     @if($activeGroup)
@@ -94,7 +104,7 @@
                         Cari
                     </button>
                     @if($search !== '')
-                        <a href="{{ $activeGroup ? route('items.index', ['group' => $activeGroup['slug']]) : route('items.index', $viewMode === 'all' ? ['view' => 'all'] : []) }}"
+                        <a href="{{ $activeGroup ? route('items.index', ['group' => $activeGroup['slug']]) : route('items.index') }}"
                            class="px-2 py-2 text-xs font-semibold text-neutral-500 hover:text-neutral-900 shrink-0">
                             Reset
                         </a>
@@ -123,53 +133,6 @@
         </div>
 
         @if($viewMode === 'groups')
-            @php
-                $asetGroups = collect($groups)->where('type', 'aset')->values();
-                $bhpGroups = collect($groups)->where('type', 'bahan_habis_pakai')->values();
-            @endphp
-
-            <!-- Sub-filter Kategori Kelompok: Semua / Barang Praktikum / Bahan Sekali Pakai -->
-            <div class="flex items-center gap-2 flex-wrap">
-                <button type="button"
-                        @click="groupTypeFilter = 'all'"
-                        :class="groupTypeFilter === 'all' ? 'bg-neutral-900 text-white shadow-sm ring-1 ring-neutral-900' : 'bg-white text-neutral-600 hover:text-neutral-900 border border-neutral-200 hover:bg-neutral-50'"
-                        class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all">
-                    <span>Semua Kelompok</span>
-                    <span class="px-2 py-0.5 rounded-full font-mono text-[10px] font-extrabold"
-                          :class="groupTypeFilter === 'all' ? 'bg-neutral-800 text-white' : 'bg-neutral-100 text-neutral-700'">
-                        {{ count($groups) }}
-                    </span>
-                </button>
-
-                <button type="button"
-                        @click="groupTypeFilter = 'aset'"
-                        :class="groupTypeFilter === 'aset' ? 'bg-primary text-white shadow-sm ring-1 ring-primary' : 'bg-white text-neutral-600 hover:text-neutral-900 border border-neutral-200 hover:bg-neutral-50'"
-                        class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all">
-                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
-                    </svg>
-                    <span>Barang Praktikum (Aset)</span>
-                    <span class="px-2 py-0.5 rounded-full font-mono text-[10px] font-extrabold"
-                          :class="groupTypeFilter === 'aset' ? 'bg-primary-700 text-white' : 'bg-neutral-100 text-neutral-700'">
-                        {{ $asetGroups->count() }}
-                    </span>
-                </button>
-
-                <button type="button"
-                        @click="groupTypeFilter = 'bahan_habis_pakai'"
-                        :class="groupTypeFilter === 'bahan_habis_pakai' ? 'bg-primary text-white shadow-sm ring-1 ring-primary' : 'bg-white text-neutral-600 hover:text-neutral-900 border border-neutral-200 hover:bg-neutral-50'"
-                        class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all">
-                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                    </svg>
-                    <span>Bahan Sekali Pakai (BHP)</span>
-                    <span class="px-2 py-0.5 rounded-full font-mono text-[10px] font-extrabold"
-                          :class="groupTypeFilter === 'bahan_habis_pakai' ? 'bg-primary-700 text-white' : 'bg-neutral-100 text-neutral-700'">
-                        {{ $bhpGroups->count() }}
-                    </span>
-                </button>
-            </div>
-
             <div class="space-y-6">
                 <!-- SEKSI 1: BARANG PRAKTIKUM (ASET / DIPAKAI BERULANG) -->
                 <div x-show="groupTypeFilter === 'all' || groupTypeFilter === 'aset'" x-transition class="space-y-3">
@@ -393,7 +356,7 @@
                                             </td>
                                             <td class="px-5 py-4 text-center whitespace-nowrap">
                                                 <span class="inline-flex items-center px-3 py-1 rounded-full font-mono text-xs font-bold bg-neutral-100 text-neutral-900 border border-neutral-200">
-                                                    {{ $grp['total_units'] }} unit ({{ $grp['item_count'] }} item)
+                                                    {{ $grp['total_units'] }} pack
                                                 </span>
                                             </td>
                                             <td class="px-5 py-4">
@@ -459,7 +422,11 @@
                             <div class="flex items-center gap-2 flex-wrap">
                                 <h3 class="text-sm font-bold text-neutral-900 font-heading">Kelompok: {{ $activeGroup['label'] }}</h3>
                                 <span class="px-2.5 py-0.5 rounded-full font-mono text-[11px] font-bold bg-primary-50 text-primary-700 border border-indigo-200">
-                                    {{ $activeGroup['item_count'] }} barang ({{ $activeGroup['total_units'] }} unit)
+                                    @if(($activeGroup['type'] ?? '') === 'bahan_habis_pakai')
+                                        {{ $activeGroup['total_units'] }} pack
+                                    @else
+                                        {{ $activeGroup['item_count'] }} barang ({{ $activeGroup['total_units'] }} unit)
+                                    @endif
                                 </span>
                             </div>
                             <p class="text-[11px] text-neutral-500 mt-0.5">Menampilkan seluruh unit {{ $activeGroup['label'] }} beserta kode aset, tag RFID, barcode, dan status maintenance.</p>
@@ -532,26 +499,18 @@
                                         </span>
                                     </td>
                                     <td class="px-4 py-3.5">
-                                        <div class="flex items-center gap-3">
-                                            <!-- Product Icon Avatar ala Dribbble -->
-                                            <div class="w-8 h-8 rounded-lg bg-neutral-100 border border-neutral-200 flex items-center justify-center shrink-0 text-neutral-600">
-                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
-                                                </svg>
-                                            </div>
-                                            <div>
-                                                <div class="flex items-center gap-1.5 flex-wrap">
-                                                    <span class="font-bold text-neutral-900 text-xs font-heading">{{ $item->name }}</span>
-                                                    @if(filled($item->category) && !$activeGroup)
-                                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-neutral-100 text-neutral-700 border border-neutral-200">
-                                                            {{ $item->category }}
-                                                        </span>
-                                                    @endif
-                                                </div>
-                                                @if($item->epc_tag)
-                                                    <div class="text-[11px] text-neutral-500 font-mono mt-0.5">EPC: {{ $item->epc_tag }}</div>
+                                        <div>
+                                            <div class="flex items-center gap-1.5 flex-wrap">
+                                                <span class="font-bold text-neutral-900 text-xs font-heading">{{ $item->name }}</span>
+                                                @if(filled($item->category) && !$activeGroup)
+                                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-neutral-100 text-neutral-700 border border-neutral-200">
+                                                        {{ $item->category }}
+                                                    </span>
                                                 @endif
                                             </div>
+                                            @if($item->epc_tag)
+                                                <div class="text-[11px] text-neutral-500 font-mono mt-0.5">EPC: {{ $item->epc_tag }}</div>
+                                            @endif
                                         </div>
                                     </td>
                                     <td class="px-4 py-3.5 whitespace-nowrap">
@@ -559,14 +518,8 @@
                                             {{ $item->type->label() }}
                                         </span>
                                     </td>
-                                    <td class="px-4 py-3.5 text-center font-mono font-semibold text-xs">
-                                        @if($item->type->value === 'bahan_habis_pakai' && $item->stock <= 0)
-                                            <span class="px-2.5 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200">0 (Habis)</span>
-                                        @elseif($item->type->value === 'bahan_habis_pakai' && $item->stock <= 5)
-                                            <span class="px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200">{{ $item->stock }} (Tipis)</span>
-                                        @else
-                                            <span class="text-neutral-800">{{ $item->stock }}</span>
-                                        @endif
+                                    <td class="px-4 py-3.5 text-center font-mono font-semibold text-xs text-neutral-800">
+                                        {{ $item->stock }}
                                     </td>
                                     <td class="px-4 py-3.5 whitespace-nowrap">
                                         <span class="font-mono text-xs text-neutral-600 bg-neutral-50 px-2.5 py-0.5 rounded-md border border-neutral-200">
@@ -599,20 +552,6 @@
                                     </td>
                                     <td class="px-4 py-3.5 text-right whitespace-nowrap">
                                         <div class="inline-flex items-center justify-end gap-1">
-                                            @if($item->type->value === 'bahan_habis_pakai')
-                                                <button type="button"
-                                                    class="open-stock-modal p-1.5 rounded-lg border border-neutral-200 bg-white hover:bg-neutral-50 text-amber-700 hover:text-amber-900 transition-colors shadow-sm"
-                                                    data-item-id="{{ $item->id }}"
-                                                    data-item-name="{{ $item->name }}"
-                                                    data-item-code="{{ $item->item_code }}"
-                                                    data-item-stock="{{ $item->stock }}"
-                                                    title="Catat Stok Masuk / Keluar"
-                                                    aria-label="Mutasi Stok {{ $item->name }}">
-                                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
-                                                    </svg>
-                                                </button>
-                                            @endif
                                             <a href="{{ route('items.barcodes') }}?ids={{ $item->id }}" target="_blank" class="p-1.5 rounded-lg border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-600 hover:text-neutral-900 transition-colors shadow-sm" title="Cetak Barcode" aria-label="Cetak Barcode {{ $item->item_code }}">
                                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
@@ -821,58 +760,6 @@
 
     </div>
 
-    <!-- Modal Catat Mutasi Stok Bahan Habis Pakai -->
-    <div id="stock-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
-        <div class="absolute inset-0 bg-neutral-950/60" id="stock-modal-backdrop"></div>
-        <div class="relative bg-white border border-neutral-200 rounded-2xl max-w-md w-full p-6 overflow-hidden shadow-xl">
-            <div class="flex items-center justify-between pb-3 border-b border-neutral-100">
-                <div>
-                    <h3 class="font-bold text-neutral-900 text-sm font-heading">Catat Mutasi Stok (BHP)</h3>
-                    <p id="stock-modal-subtitle" class="text-[11px] font-mono text-neutral-500 mt-0.5"></p>
-                </div>
-                <button type="button" id="stock-modal-close" class="p-1.5 text-neutral-400 hover:text-neutral-700 rounded-lg hover:bg-neutral-100 transition-colors" aria-label="Tutup modal stok">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
-
-            <form method="POST" action="{{ route('stock-movements.store') }}" class="mt-4 space-y-3.5">
-                @csrf
-                <input type="hidden" name="item_id" id="stock-modal-item-id">
-
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <x-input-label for="stock-modal-type" value="Jenis Mutasi *" />
-                        <select id="stock-modal-type" name="type" class="mt-1.5 w-full rounded-xl border-neutral-200 text-xs focus:border-primary focus:ring-primary" required>
-                            <option value="out">Keluar (Pakai)</option>
-                            <option value="in">Masuk (Tambah)</option>
-                        </select>
-                    </div>
-                    <div>
-                        <x-input-label for="stock-modal-qty" value="Jumlah *" />
-                        <x-text-input id="stock-modal-qty" name="quantity" type="number" min="1" value="1" required class="mt-1.5 w-full font-mono text-xs rounded-xl border-neutral-200 focus:border-primary focus:ring-primary" />
-                    </div>
-                </div>
-
-                <div>
-                    <x-input-label for="stock-modal-recipient" value="Pengambil / Kelas / Vendor" />
-                    <x-text-input id="stock-modal-recipient" name="recipient_name" type="text" placeholder="Contoh: XII SIJA 1 / Pembelian Lab" class="mt-1.5 w-full text-xs rounded-xl border-neutral-200 focus:border-primary focus:ring-primary" />
-                </div>
-
-                <div>
-                    <x-input-label for="stock-modal-desc" value="Keterangan *" />
-                    <x-text-input id="stock-modal-desc" name="description" type="text" required placeholder="Contoh: Praktikum instalasi kabel LAN / Stok baru" class="mt-1.5 w-full text-xs rounded-xl border-neutral-200 focus:border-primary focus:ring-primary" />
-                </div>
-
-                <div class="pt-3 border-t border-neutral-100 flex items-center justify-end gap-2.5">
-                    <button type="button" id="stock-modal-cancel" class="px-4 py-2 rounded-full border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-700 text-xs font-semibold transition-colors shadow-sm">Batal</button>
-                    <button type="submit" class="px-5 py-2 rounded-full bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-semibold transition-colors shadow-sm">Simpan Mutasi</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
     @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -882,32 +769,6 @@
             const countLabel = document.getElementById('selected-item-count');
             const btnPrint = document.getElementById('btn-print-selected');
             const bulkHiddenIds = document.getElementById('bulk-category-hidden-ids');
-
-            const stockModal = document.getElementById('stock-modal');
-            const stockItemId = document.getElementById('stock-modal-item-id');
-            const stockSubtitle = document.getElementById('stock-modal-subtitle');
-            const stockClose = document.getElementById('stock-modal-close');
-            const stockCancel = document.getElementById('stock-modal-cancel');
-            const stockBackdrop = document.getElementById('stock-modal-backdrop');
-
-            function openStockModal(btn) {
-                stockItemId.value = btn.dataset.itemId;
-                stockSubtitle.textContent = `${btn.dataset.itemName} (${btn.dataset.itemCode}) · Sisa stok: ${btn.dataset.itemStock}`;
-                stockModal.classList.remove('hidden');
-                stockModal.classList.add('flex');
-            }
-
-            function closeStockModal() {
-                stockModal.classList.add('hidden');
-                stockModal.classList.remove('flex');
-            }
-
-            document.querySelectorAll('.open-stock-modal').forEach(btn => {
-                btn.addEventListener('click', () => openStockModal(btn));
-            });
-            if (stockClose) stockClose.addEventListener('click', closeStockModal);
-            if (stockCancel) stockCancel.addEventListener('click', closeStockModal);
-            if (stockBackdrop) stockBackdrop.addEventListener('click', closeStockModal);
 
             function updateBulkBar() {
                 const checked = Array.from(checkboxes).filter(cb => cb.checked);

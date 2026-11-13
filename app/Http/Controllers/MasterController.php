@@ -103,8 +103,8 @@ class MasterController extends Controller
             'name.max' => 'Nama kelompok barang maksimal 80 karakter.',
         ]);
 
-        $cleanName = $this->itemGroupService->cleanCategory($validated['name']);
-        if ($cleanName === null || preg_replace('/[^a-z0-9]/i', '', $cleanName) === '') {
+        $cleanName = mb_strtoupper((string) $this->itemGroupService->cleanCategory($validated['name']));
+        if ($cleanName === '' || preg_replace('/[^a-z0-9]/i', '', $cleanName) === '') {
             throw ValidationException::withMessages([
                 'name' => 'Nama kelompok barang harus mengandung minimal satu huruf atau angka.',
             ]);
@@ -153,8 +153,8 @@ class MasterController extends Controller
             'name.max' => 'Nama kelompok barang maksimal 80 karakter.',
         ]);
 
-        $cleanName = $this->itemGroupService->cleanCategory($validated['name']);
-        if ($cleanName === null || preg_replace('/[^a-z0-9]/i', '', $cleanName) === '') {
+        $cleanName = mb_strtoupper((string) $this->itemGroupService->cleanCategory($validated['name']));
+        if ($cleanName === '' || preg_replace('/[^a-z0-9]/i', '', $cleanName) === '') {
             throw ValidationException::withMessages([
                 'name' => 'Nama kelompok barang harus mengandung minimal satu huruf atau angka.',
             ]);
@@ -244,6 +244,18 @@ class MasterController extends Controller
                 }
                 $preselectedType = $matched['type'] ?? 'aset';
             }
+        } elseif ($preselectedCategory !== null) {
+            $matchedGroup = ItemGroup::where('name', $preselectedCategory)
+                ->orWhere('slug', $this->itemGroupService->canonicalKey($preselectedCategory))
+                ->first();
+            if ($matchedGroup) {
+                $preselectedType = $matchedGroup->type ?? 'aset';
+                $returnGroup = $matchedGroup->slug;
+            }
+        }
+
+        if ($request->has('type') && in_array($request->query('type'), ['aset', 'bahan_habis_pakai'], true)) {
+            $preselectedType = $request->query('type');
         }
 
         $isLockedGroup = filled($returnGroup) && filled($preselectedCategory);

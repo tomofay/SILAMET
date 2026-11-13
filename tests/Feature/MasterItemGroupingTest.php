@@ -515,4 +515,61 @@ class MasterItemGroupingTest extends TestCase
 
         $response->assertSessionHasErrors(['item_code']);
     }
+
+    public function test_group_name_is_always_saved_uppercase(): void
+    {
+        $teknisi = User::factory()->teknisi()->create();
+
+        $response = $this->actingAs($teknisi)
+            ->post(route('items.groups.store'), [
+                'name' => 'konektor rj45',
+                'type' => 'bahan_habis_pakai',
+            ]);
+
+        $response->assertRedirect(route('items.index'))
+            ->assertSessionHas('success');
+
+        $this->assertDatabaseHas('item_groups', [
+            'name' => 'KONEKTOR RJ45',
+            'type' => 'bahan_habis_pakai',
+        ]);
+    }
+
+    public function test_inside_group_view_only_shows_back_button_and_hides_top_tabs(): void
+    {
+        $teknisi = User::factory()->teknisi()->create();
+
+        ItemGroup::create([
+            'name' => 'TPLINK',
+            'slug' => 'tplink',
+            'type' => 'aset',
+        ]);
+
+        $response = $this->actingAs($teknisi)
+            ->get(route('items.index', ['group' => 'tplink']));
+
+        $response->assertOk()
+            ->assertSee('Semua Kelompok')
+            ->assertDontSee('Daftar Kelompok Barang')
+            ->assertDontSee('Semua Unit');
+    }
+
+    public function test_create_item_in_bhp_group_displays_barcode_kemasan_form(): void
+    {
+        $teknisi = User::factory()->teknisi()->create();
+
+        ItemGroup::create([
+            'name' => 'KONEKTOR',
+            'slug' => 'konektor',
+            'type' => 'bahan_habis_pakai',
+        ]);
+
+        $response = $this->actingAs($teknisi)
+            ->get(route('items.create', ['category' => 'KONEKTOR', 'return_group' => 'konektor']));
+
+        $response->assertOk()
+            ->assertSee('Identitas Kode Barcode / Kode Unik Kemasan')
+            ->assertSee('Kuantitas Stok Awal')
+            ->assertSee('KONEKTOR');
+    }
 }

@@ -12,7 +12,8 @@
              editGroupModalOpen: false,
              editGroupSlug: '',
              editGroupName: '',
-             editGroupType: 'aset'
+             editGroupType: 'aset',
+             groupTypeFilter: 'all'
          }"
          @keydown.escape.window="groupModalOpen = false; editGroupModalOpen = false">
 
@@ -45,29 +46,29 @@
                         </svg>
                         <span>Semua Kelompok</span>
                     </a>
+                @else
+                    <a href="{{ route('items.index') }}"
+                       class="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full text-xs font-bold transition-all duration-150 {{ $viewMode === 'groups' ? 'bg-neutral-900 text-white shadow-md ring-2 ring-neutral-900' : 'bg-white text-neutral-800 hover:bg-neutral-100 border border-neutral-300 shadow-sm' }}">
+                        <svg class="w-4 h-4 {{ $viewMode === 'groups' ? 'text-white' : 'text-neutral-500' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                        </svg>
+                        <span>Daftar Kelompok Barang</span>
+                        <span class="px-2.5 py-0.5 rounded-full font-mono text-[11px] font-extrabold {{ $viewMode === 'groups' ? 'bg-neutral-800 text-white border border-neutral-700' : 'bg-neutral-100 text-neutral-900 border border-neutral-200' }}">
+                            {{ count($groups) }}
+                        </span>
+                    </a>
+
+                    <a href="{{ route('items.index', ['view' => 'all']) }}"
+                       class="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full text-xs font-bold transition-all duration-150 {{ $viewMode === 'all' && $search === '' ? 'bg-neutral-900 text-white shadow-md ring-2 ring-neutral-900' : 'bg-white text-neutral-800 hover:bg-neutral-100 border border-neutral-300 shadow-sm' }}">
+                        <svg class="w-4 h-4 {{ ($viewMode === 'all' && $search === '') ? 'text-white' : 'text-neutral-500' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                        </svg>
+                        <span>Semua Unit</span>
+                        <span class="px-2.5 py-0.5 rounded-full font-mono text-[11px] font-extrabold {{ ($viewMode === 'all' && $search === '') ? 'bg-neutral-800 text-white border border-neutral-700' : 'bg-neutral-100 text-neutral-900 border border-neutral-200' }}">
+                            {{ $totalItemCount }}
+                        </span>
+                    </a>
                 @endif
-
-                <a href="{{ route('items.index') }}"
-                   class="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full text-xs font-bold transition-all duration-150 {{ $viewMode === 'groups' ? 'bg-neutral-900 text-white shadow-md ring-2 ring-neutral-900' : 'bg-white text-neutral-800 hover:bg-neutral-100 border border-neutral-300 shadow-sm' }}">
-                    <svg class="w-4 h-4 {{ $viewMode === 'groups' ? 'text-white' : 'text-neutral-500' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
-                    </svg>
-                    <span>Daftar Kelompok Barang</span>
-                    <span class="px-2.5 py-0.5 rounded-full font-mono text-[11px] font-extrabold {{ $viewMode === 'groups' ? 'bg-neutral-800 text-white border border-neutral-700' : 'bg-neutral-100 text-neutral-900 border border-neutral-200' }}">
-                        {{ count($groups) }}
-                    </span>
-                </a>
-
-                <a href="{{ route('items.index', ['view' => 'all']) }}"
-                   class="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full text-xs font-bold transition-all duration-150 {{ $viewMode === 'all' && $search === '' ? 'bg-neutral-900 text-white shadow-md ring-2 ring-neutral-900' : 'bg-white text-neutral-800 hover:bg-neutral-100 border border-neutral-300 shadow-sm' }}">
-                    <svg class="w-4 h-4 {{ ($viewMode === 'all' && $search === '') ? 'text-white' : 'text-neutral-500' }}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-                    </svg>
-                    <span>Semua Unit</span>
-                    <span class="px-2.5 py-0.5 rounded-full font-mono text-[11px] font-extrabold {{ ($viewMode === 'all' && $search === '') ? 'bg-neutral-800 text-white border border-neutral-700' : 'bg-neutral-100 text-neutral-900 border border-neutral-200' }}">
-                        {{ $totalItemCount }}
-                    </span>
-                </a>
             </div>
 
             <!-- Right Side: Search & Primary Action Button -->
@@ -122,176 +123,326 @@
         </div>
 
         @if($viewMode === 'groups')
-            <!-- Tampilan Utama: List Nama Kelompok Barang (TPLINK, PC, MIKROTIK, dll) -->
-            <div class="bg-white rounded-2xl border border-neutral-200 overflow-hidden shadow-sm">
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-neutral-200 text-sm">
-                        <thead class="bg-neutral-50/70 border-b border-neutral-200/80">
-                            <tr>
-                                <th class="px-5 py-3.5 text-left text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Kelompok / Nama Barang</th>
-                                <th class="px-5 py-3.5 text-left text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Tipe &amp; Lokasi</th>
-                                <th class="px-5 py-3.5 text-center text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Jumlah Unit</th>
-                                <th class="px-5 py-3.5 text-left text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Ringkasan Status</th>
-                                <th class="px-5 py-3.5 text-right text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-neutral-100">
-                            @forelse($groups as $grp)
-                                <tr class="hover:bg-neutral-50/70 transition-colors group">
-                                    <td class="px-5 py-4">
-                                        <div class="flex items-center gap-3.5">
-                                            <!-- Group Icon Avatar ala Dribbble -->
-                                            <div class="w-10 h-10 rounded-xl bg-neutral-100 border border-neutral-200/80 flex items-center justify-center shrink-0 text-neutral-700">
-                                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
-                                                </svg>
-                                            </div>
-                                            <div>
-                                                <div class="flex items-center gap-2 flex-wrap">
+            @php
+                $asetGroups = collect($groups)->where('type', 'aset')->values();
+                $bhpGroups = collect($groups)->where('type', 'bahan_habis_pakai')->values();
+            @endphp
+
+            <!-- Sub-filter Kategori Kelompok: Semua / Barang Praktikum / Bahan Sekali Pakai -->
+            <div class="flex items-center gap-2 flex-wrap">
+                <button type="button"
+                        @click="groupTypeFilter = 'all'"
+                        :class="groupTypeFilter === 'all' ? 'bg-neutral-900 text-white shadow-sm ring-1 ring-neutral-900' : 'bg-white text-neutral-600 hover:text-neutral-900 border border-neutral-200 hover:bg-neutral-50'"
+                        class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all">
+                    <span>Semua Kelompok</span>
+                    <span class="px-2 py-0.5 rounded-full font-mono text-[10px] font-extrabold"
+                          :class="groupTypeFilter === 'all' ? 'bg-neutral-800 text-white' : 'bg-neutral-100 text-neutral-700'">
+                        {{ count($groups) }}
+                    </span>
+                </button>
+
+                <button type="button"
+                        @click="groupTypeFilter = 'aset'"
+                        :class="groupTypeFilter === 'aset' ? 'bg-primary text-white shadow-sm ring-1 ring-primary' : 'bg-white text-neutral-600 hover:text-neutral-900 border border-neutral-200 hover:bg-neutral-50'"
+                        class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all">
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+                    </svg>
+                    <span>Barang Praktikum (Aset)</span>
+                    <span class="px-2 py-0.5 rounded-full font-mono text-[10px] font-extrabold"
+                          :class="groupTypeFilter === 'aset' ? 'bg-primary-700 text-white' : 'bg-neutral-100 text-neutral-700'">
+                        {{ $asetGroups->count() }}
+                    </span>
+                </button>
+
+                <button type="button"
+                        @click="groupTypeFilter = 'bahan_habis_pakai'"
+                        :class="groupTypeFilter === 'bahan_habis_pakai' ? 'bg-primary text-white shadow-sm ring-1 ring-primary' : 'bg-white text-neutral-600 hover:text-neutral-900 border border-neutral-200 hover:bg-neutral-50'"
+                        class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all">
+                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                    </svg>
+                    <span>Bahan Sekali Pakai (BHP)</span>
+                    <span class="px-2 py-0.5 rounded-full font-mono text-[10px] font-extrabold"
+                          :class="groupTypeFilter === 'bahan_habis_pakai' ? 'bg-primary-700 text-white' : 'bg-neutral-100 text-neutral-700'">
+                        {{ $bhpGroups->count() }}
+                    </span>
+                </button>
+            </div>
+
+            <div class="space-y-6">
+                <!-- SEKSI 1: BARANG PRAKTIKUM (ASET / DIPAKAI BERULANG) -->
+                <div x-show="groupTypeFilter === 'all' || groupTypeFilter === 'aset'" x-transition class="space-y-3">
+                    <div class="flex items-center justify-between gap-3 px-1">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-7 h-7 rounded-lg bg-primary-50 text-primary border border-indigo-200 flex items-center justify-center shrink-0">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h2 class="text-xs font-bold uppercase tracking-wider text-neutral-900 font-heading">Barang Praktikum (Aset / Dipakai Berulang)</h2>
+                                <p class="text-[11px] text-neutral-500">Perangkat jaringan, komputer, dan peralatan praktikum berseri dengan pengamanan RFID &amp; pemeliharaan berkala.</p>
+                            </div>
+                        </div>
+                        <span class="px-2.5 py-0.5 rounded-full font-mono text-[10px] font-bold bg-neutral-100 text-neutral-700 border border-neutral-200">
+                            {{ $asetGroups->count() }} kelompok
+                        </span>
+                    </div>
+
+                    <div class="bg-white rounded-2xl border border-neutral-200 overflow-hidden shadow-sm">
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-neutral-200 text-sm">
+                                <thead class="bg-neutral-50/70 border-b border-neutral-200/80">
+                                    <tr>
+                                        <th class="px-5 py-3.5 text-left text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Kelompok / Nama Barang</th>
+                                        <th class="px-5 py-3.5 text-left text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Tipe &amp; Lokasi</th>
+                                        <th class="px-5 py-3.5 text-center text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Jumlah Unit</th>
+                                        <th class="px-5 py-3.5 text-left text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Ringkasan Status</th>
+                                        <th class="px-5 py-3.5 text-right text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-neutral-100">
+                                    @forelse($asetGroups as $grp)
+                                        <tr class="hover:bg-neutral-50/70 transition-colors group">
+                                            <td class="px-5 py-4">
+                                                <div class="flex items-center gap-3.5">
+                                                    <div class="w-10 h-10 rounded-xl bg-primary-50 border border-indigo-100 flex items-center justify-center shrink-0 text-primary">
+                                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                                                        </svg>
+                                                    </div>
+                                                    <div>
+                                                        <div class="flex items-center gap-2 flex-wrap">
+                                                            <a href="{{ route('items.index', ['group' => $grp['slug']]) }}"
+                                                               class="text-sm font-bold text-neutral-900 group-hover:text-primary transition-colors font-heading uppercase tracking-wide">
+                                                                {{ $grp['label'] }}
+                                                            </a>
+                                                            @if($grp['is_explicit_category'])
+                                                                <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-primary-50 text-primary-700 border border-indigo-200">
+                                                                    Aset
+                                                                </span>
+                                                            @endif
+                                                        </div>
+                                                        @if(!empty($grp['preview_codes']))
+                                                            <div class="text-[11px] text-neutral-500 font-mono mt-0.5">
+                                                                Kode: {{ implode(', ', $grp['preview_codes']) }}@if($grp['item_count'] > count($grp['preview_codes'])) +{{ $grp['item_count'] - count($grp['preview_codes']) }} lainnya @endif
+                                                            </div>
+                                                        @elseif($grp['item_count'] === 0)
+                                                            <div class="text-[11px] text-neutral-400 mt-0.5">
+                                                                Kelompok kosong — klik Buka Daftar untuk menambah unit
+                                                            </div>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-5 py-4">
+                                                <span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full border bg-primary-50 text-primary-700 border-indigo-200">
+                                                    Aset Praktikum
+                                                </span>
+                                                <div class="text-[11px] font-mono text-neutral-500 mt-1">
+                                                    {{ !empty($grp['locations']) ? implode(', ', array_slice($grp['locations'], 0, 2)) : '—' }}
+                                                </div>
+                                            </td>
+                                            <td class="px-5 py-4 text-center whitespace-nowrap">
+                                                <span class="inline-flex items-center px-3 py-1 rounded-full font-mono text-xs font-bold bg-neutral-100 text-neutral-900 border border-neutral-200">
+                                                    {{ $grp['item_count'] }} item
+                                                </span>
+                                            </td>
+                                            <td class="px-5 py-4">
+                                                @if($grp['item_count'] === 0)
+                                                    <span class="text-[11px] font-medium text-neutral-400">Belum ada unit</span>
+                                                @else
+                                                    <div class="flex items-center gap-1.5 flex-wrap">
+                                                        @if($grp['available_count'] > 0)
+                                                            <span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full border bg-emerald-50 text-emerald-700 border-emerald-200 font-mono">
+                                                                {{ $grp['available_count'] }} Tersedia
+                                                            </span>
+                                                        @endif
+                                                        @if($grp['borrowed_count'] > 0)
+                                                            <span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full border bg-sky-50 text-sky-700 border-sky-200 font-mono">
+                                                                {{ $grp['borrowed_count'] }} Dipinjam
+                                                            </span>
+                                                        @endif
+                                                        @if($grp['maintenance_count'] > 0)
+                                                            <span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full border bg-amber-50 text-amber-800 border-amber-200 font-mono">
+                                                                {{ $grp['maintenance_count'] }} Maint
+                                                            </span>
+                                                        @endif
+                                                    </div>
+                                                @endif
+                                            </td>
+                                            <td class="px-5 py-4 text-right whitespace-nowrap">
+                                                <div class="inline-flex items-center justify-end gap-1.5 flex-wrap">
+                                                    <button type="button"
+                                                            @click="editGroupModalOpen = true; editGroupSlug = '{{ $grp['slug'] }}'; editGroupName = '{{ addslashes(strtoupper($grp['label'])) }}'; editGroupType = '{{ $grp['type'] ?? 'aset' }}'"
+                                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-700 text-xs font-semibold shadow-sm transition-colors"
+                                                            title="Ubah Nama Kelompok"
+                                                            aria-label="Edit Kelompok {{ $grp['label'] }}">
+                                                        <svg class="w-3.5 h-3.5 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                        </svg>
+                                                        <span>Edit</span>
+                                                    </button>
+
                                                     <a href="{{ route('items.index', ['group' => $grp['slug']]) }}"
-                                                       class="text-sm font-bold text-neutral-900 group-hover:text-primary transition-colors font-heading">
-                                                        {{ $grp['label'] }}
+                                                       class="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-full bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-semibold shadow-sm transition-colors">
+                                                        <span>Buka Daftar</span>
+                                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                                                        </svg>
                                                     </a>
-                                                    @if($grp['is_explicit_category'])
-                                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-primary-50 text-primary-700 border border-indigo-200">
-                                                            Kelompok
-                                                        </span>
+
+                                                    @if(!empty($grp['item_ids']))
+                                                        <a href="{{ route('items.barcodes', ['ids' => implode(',', $grp['item_ids'])]) }}"
+                                                           target="_blank"
+                                                           class="p-1.5 rounded-full border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-600 hover:text-neutral-900 transition-colors shadow-sm"
+                                                           title="Cetak Semua Barcode {{ $grp['label'] }}"
+                                                           aria-label="Cetak Barcode {{ $grp['label'] }}">
+                                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                                                            </svg>
+                                                        </a>
                                                     @endif
                                                 </div>
-                                                @if(!empty($grp['preview_codes']))
-                                                    <div class="text-[11px] text-neutral-500 font-mono mt-0.5">
-                                                        Kode: {{ implode(', ', $grp['preview_codes']) }}@if($grp['item_count'] > count($grp['preview_codes'])) +{{ $grp['item_count'] - count($grp['preview_codes']) }} lainnya @endif
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="5" class="py-8 px-4 text-center">
+                                                <p class="text-xs text-neutral-400">Belum ada kelompok barang praktikum (aset).</p>
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SEKSI 2: BAHAN HABIS PAKAI (SEKALI PAKAI / BHP) -->
+                <div x-show="groupTypeFilter === 'all' || groupTypeFilter === 'bahan_habis_pakai'" x-transition class="space-y-3 pt-2">
+                    <div class="flex items-center justify-between gap-3 px-1">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-7 h-7 rounded-lg bg-amber-50 text-amber-700 border border-amber-200 flex items-center justify-center shrink-0">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h2 class="text-xs font-bold uppercase tracking-wider text-neutral-900 font-heading">Bahan Sekali Pakai (BHP)</h2>
+                                <p class="text-[11px] text-neutral-500">Konektor RJ-45, Fast Connector, kabel UTP, dan bahan praktikum sekali pakai yang dipindai via barcode kemasan.</p>
+                            </div>
+                        </div>
+                        <span class="px-2.5 py-0.5 rounded-full font-mono text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                            {{ $bhpGroups->count() }} kelompok
+                        </span>
+                    </div>
+
+                    <div class="bg-white rounded-2xl border border-neutral-200 overflow-hidden shadow-sm">
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-neutral-200 text-sm">
+                                <thead class="bg-neutral-50/70 border-b border-neutral-200/80">
+                                    <tr>
+                                        <th class="px-5 py-3.5 text-left text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Kelompok / Nama Bahan</th>
+                                        <th class="px-5 py-3.5 text-left text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Tipe &amp; Lokasi</th>
+                                        <th class="px-5 py-3.5 text-center text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Total Stok Kuantitas</th>
+                                        <th class="px-5 py-3.5 text-left text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Ketersediaan</th>
+                                        <th class="px-5 py-3.5 text-right text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-neutral-100">
+                                    @forelse($bhpGroups as $grp)
+                                        <tr class="hover:bg-neutral-50/70 transition-colors group">
+                                            <td class="px-5 py-4">
+                                                <div class="flex items-center gap-3.5">
+                                                    <div class="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center shrink-0 text-amber-700">
+                                                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                                                        </svg>
                                                     </div>
-                                                @elseif($grp['item_count'] === 0)
-                                                    <div class="text-[11px] text-neutral-400 mt-0.5">
-                                                        Kelompok kosong — klik Buka Daftar untuk menambah unit
+                                                    <div>
+                                                        <div class="flex items-center gap-2 flex-wrap">
+                                                            <a href="{{ route('items.index', ['group' => $grp['slug']]) }}"
+                                                               class="text-sm font-bold text-neutral-900 group-hover:text-primary transition-colors font-heading uppercase tracking-wide">
+                                                                {{ $grp['label'] }}
+                                                            </a>
+                                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-800 border border-amber-200">
+                                                                Sekali Pakai
+                                                            </span>
+                                                        </div>
+                                                        @if(!empty($grp['preview_codes']))
+                                                            <div class="text-[11px] text-neutral-500 font-mono mt-0.5">
+                                                                Barcode: {{ implode(', ', $grp['preview_codes']) }}
+                                                            </div>
+                                                        @elseif($grp['item_count'] === 0)
+                                                            <div class="text-[11px] text-neutral-400 mt-0.5">
+                                                                Kelompok kosong — klik Buka Daftar untuk menambah item bahan
+                                                            </div>
+                                                        @endif
                                                     </div>
-                                                @endif
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="px-5 py-4">
-                                        @if($grp['aset_count'] > 0 || $grp['bhp_count'] > 0)
-                                            <div class="flex items-center gap-1.5 flex-wrap">
-                                                @if($grp['aset_count'] > 0)
-                                                    <span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full border bg-primary-50 text-primary-700 border-indigo-200">
-                                                        Aset ({{ $grp['aset_count'] }})
-                                                    </span>
-                                                @endif
-                                                @if($grp['bhp_count'] > 0)
-                                                    <span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full border bg-neutral-100 text-neutral-700 border-neutral-200">
-                                                        BHP ({{ $grp['bhp_count'] }})
-                                                    </span>
-                                                @endif
-                                            </div>
-                                            <div class="text-[11px] font-mono text-neutral-500 mt-1">
-                                                {{ !empty($grp['locations']) ? implode(', ', array_slice($grp['locations'], 0, 2)) : '—' }}
-                                            </div>
-                                        @else
-                                            <span class="text-[11px] text-neutral-400">Belum ada unit</span>
-                                        @endif
-                                    </td>
-                                    <td class="px-5 py-4 text-center whitespace-nowrap">
-                                        <span class="inline-flex items-center px-3 py-1 rounded-full font-mono text-xs font-bold bg-neutral-100 text-neutral-900 border border-neutral-200">
-                                            {{ $grp['item_count'] }} item
-                                        </span>
-                                        @if($grp['total_units'] !== $grp['item_count'])
-                                            <div class="text-[10px] font-mono text-neutral-500 mt-0.5">
-                                                Total stok: {{ $grp['total_units'] }}
-                                            </div>
-                                        @endif
-                                    </td>
-                                    <td class="px-5 py-4">
-                                        @if($grp['item_count'] === 0)
-                                            <span class="text-[11px] font-medium text-neutral-400">Belum ada unit</span>
-                                        @else
-                                            <div class="flex items-center gap-1.5 flex-wrap">
-                                                @if($grp['available_count'] > 0)
+                                                </div>
+                                            </td>
+                                            <td class="px-5 py-4">
+                                                <span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full border bg-amber-50 text-amber-800 border-amber-200">
+                                                    Bahan Sekali Pakai (BHP)
+                                                </span>
+                                                <div class="text-[11px] font-mono text-neutral-500 mt-1">
+                                                    {{ !empty($grp['locations']) ? implode(', ', array_slice($grp['locations'], 0, 2)) : '—' }}
+                                                </div>
+                                            </td>
+                                            <td class="px-5 py-4 text-center whitespace-nowrap">
+                                                <span class="inline-flex items-center px-3 py-1 rounded-full font-mono text-xs font-bold bg-neutral-100 text-neutral-900 border border-neutral-200">
+                                                    {{ $grp['total_units'] }} unit ({{ $grp['item_count'] }} item)
+                                                </span>
+                                            </td>
+                                            <td class="px-5 py-4">
+                                                @if($grp['total_units'] > 10)
                                                     <span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full border bg-emerald-50 text-emerald-700 border-emerald-200 font-mono">
-                                                        {{ $grp['available_count'] }} Tersedia
+                                                        Stok Siap ({{ $grp['total_units'] }})
                                                     </span>
-                                                @endif
-                                                @if($grp['borrowed_count'] > 0)
-                                                    <span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full border bg-sky-50 text-sky-700 border-sky-200 font-mono">
-                                                        {{ $grp['borrowed_count'] }} Dipinjam
-                                                    </span>
-                                                @endif
-                                                @if($grp['maintenance_count'] > 0)
+                                                @elseif($grp['total_units'] > 0)
                                                     <span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full border bg-amber-50 text-amber-800 border-amber-200 font-mono">
-                                                        {{ $grp['maintenance_count'] }} Maint
+                                                        Stok Menipis ({{ $grp['total_units'] }})
                                                     </span>
+                                                @else
+                                                    <span class="text-[11px] font-medium text-neutral-400">Habis</span>
                                                 @endif
-                                                @if($grp['unscheduled_count'] > 0 && $canManageMaintenance)
-                                                    <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full border bg-neutral-50 text-neutral-600 border-neutral-200 font-mono">
-                                                        {{ $grp['unscheduled_count'] }} blm jadwal
-                                                    </span>
-                                                @endif
-                                            </div>
-                                        @endif
-                                    </td>
-                                    <td class="px-5 py-4 text-right whitespace-nowrap">
-                                        <div class="inline-flex items-center justify-end gap-1.5 flex-wrap">
-                                            <button type="button"
-                                                    @click="editGroupModalOpen = true; editGroupSlug = '{{ $grp['slug'] }}'; editGroupName = '{{ addslashes($grp['label']) }}'; editGroupType = '{{ $grp['type'] ?? 'aset' }}'"
-                                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-700 text-xs font-semibold shadow-sm transition-colors"
-                                                    title="Ubah Nama Kelompok"
-                                                    aria-label="Edit Kelompok {{ $grp['label'] }}">
-                                                <svg class="w-3.5 h-3.5 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                </svg>
-                                                <span>Edit</span>
-                                            </button>
+                                            </td>
+                                            <td class="px-5 py-4 text-right whitespace-nowrap">
+                                                <div class="inline-flex items-center justify-end gap-1.5 flex-wrap">
+                                                    <button type="button"
+                                                            @click="editGroupModalOpen = true; editGroupSlug = '{{ $grp['slug'] }}'; editGroupName = '{{ addslashes(strtoupper($grp['label'])) }}'; editGroupType = '{{ $grp['type'] ?? 'bahan_habis_pakai' }}'"
+                                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-neutral-300 bg-white hover:bg-neutral-100 text-neutral-700 text-xs font-semibold shadow-sm transition-colors"
+                                                            title="Ubah Nama Kelompok"
+                                                            aria-label="Edit Kelompok {{ $grp['label'] }}">
+                                                        <svg class="w-3.5 h-3.5 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                        </svg>
+                                                        <span>Edit</span>
+                                                    </button>
 
-                                            <a href="{{ route('items.index', ['group' => $grp['slug']]) }}"
-                                               class="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-full bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-semibold shadow-sm transition-colors">
-                                                <span>Buka Daftar</span>
-                                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                                                </svg>
-                                            </a>
-
-                                            @if(!empty($grp['item_ids']))
-                                                <a href="{{ route('items.barcodes', ['ids' => implode(',', $grp['item_ids'])]) }}"
-                                                   target="_blank"
-                                                   class="p-1.5 rounded-full border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-600 hover:text-neutral-900 transition-colors shadow-sm"
-                                                   title="Cetak Semua Barcode {{ $grp['label'] }}"
-                                                   aria-label="Cetak Barcode {{ $grp['label'] }}">
-                                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                                                    </svg>
-                                                </a>
-                                            @endif
-                                        </div>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="5" class="py-16 px-4 text-center">
-                                        <!-- Dribbble Empty State (dribbble_4.png) -->
-                                        <div class="flex flex-col items-center justify-center max-w-sm mx-auto">
-                                            <div class="w-14 h-14 rounded-2xl bg-neutral-100 border border-neutral-200 flex items-center justify-center text-neutral-400 mb-3 shadow-inner">
-                                                <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                                                </svg>
-                                            </div>
-                                            <h3 class="font-heading font-bold text-neutral-900 text-sm">Belum Ada Kelompok Barang</h3>
-                                            <p class="text-xs text-neutral-500 mt-1 text-center">
-                                                Buat kelompok barang pertama (misal: TPLINK, PC, MIKROTIK) lalu buka daftarnya untuk menambahkan unit.
-                                            </p>
-                                            <button type="button"
-                                                    @click="groupModalOpen = true"
-                                                    class="mt-4 px-5 py-2 rounded-full bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-semibold shadow-sm inline-flex items-center gap-1.5 transition-colors">
-                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-                                                </svg>
-                                                <span>Tambah Kelompok Barang</span>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+                                                    <a href="{{ route('items.index', ['group' => $grp['slug']]) }}"
+                                                       class="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-full bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-semibold shadow-sm transition-colors">
+                                                        <span>Buka Daftar</span>
+                                                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                                                        </svg>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="5" class="py-8 px-4 text-center">
+                                                <p class="text-xs text-neutral-400">Belum ada kelompok bahan sekali pakai (BHP).</p>
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
         @else
@@ -351,7 +502,7 @@
                 </div>
             </div>
 
-            <!-- Table Container (Isi Penuh Unit Kelompok atau Semua Unit ala Dribbble Table) -->
+            {{-- Table Container (Isi Penuh Unit Kelompok atau Semua Unit) --}}
             <div class="bg-white rounded-2xl border border-neutral-200 overflow-hidden shadow-sm">
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-neutral-200 text-sm">
@@ -566,9 +717,10 @@
                                           maxlength="80"
                                           required
                                           autofocus
+                                          @input="$event.target.value = $event.target.value.toUpperCase()"
                                           value="{{ old('_form') === 'create_group' ? old('name') : '' }}"
-                                          placeholder="Contoh: MIKROTIK, TPLINK, PC"
-                                          class="mt-1.5 w-full text-xs rounded-xl border-neutral-200 focus:border-primary focus:ring-primary uppercase" />
+                                          placeholder="CONTOH: MIKROTIK, TPLINK, KONEKTOR"
+                                          class="mt-1.5 w-full text-xs rounded-xl border-neutral-200 focus:border-primary focus:ring-primary uppercase font-bold" />
                             <x-input-error :messages="$errors->get('name')" class="mt-1.5" />
                         </div>
 
@@ -633,8 +785,9 @@
                                           required
                                           autofocus
                                           x-model="editGroupName"
-                                          placeholder="Contoh: MIKROTIK, TPLINK, PC"
-                                          class="mt-1.5 w-full text-xs rounded-xl border-neutral-200 focus:border-primary focus:ring-primary uppercase" />
+                                          @input="editGroupName = $event.target.value.toUpperCase()"
+                                          placeholder="CONTOH: MIKROTIK, TPLINK, KONEKTOR"
+                                          class="mt-1.5 w-full text-xs rounded-xl border-neutral-200 focus:border-primary focus:ring-primary uppercase font-bold" />
                             <x-input-error :messages="$errors->get('name')" class="mt-1.5" />
                         </div>
 

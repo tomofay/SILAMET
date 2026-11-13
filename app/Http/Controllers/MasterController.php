@@ -4,12 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Enums\ItemType;
 use App\Enums\StockMovementType;
+use App\Models\DamagedAsset;
 use App\Models\Item;
 use App\Models\ItemGroup;
 use App\Models\PreventiveSchedule;
 use App\Models\StockMovement;
 use App\Services\ItemGroupService;
 use Carbon\Carbon;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Arr;
@@ -177,6 +179,14 @@ class MasterController extends Controller
             'location' => 'required|string|max:100',
             'preventive_interval_months' => 'nullable|integer|min:1|max:60',
             'preventive_last_serviced_at' => 'nullable|date',
+        ], [
+            'item_code.required' => 'Kode barang wajib diisi.',
+            'item_code.unique' => 'Kode barang ini sudah digunakan oleh barang aktif.',
+            'epc_tag.unique' => 'Tag EPC RFID ini sudah terdaftar pada barang lain.',
+            'name.required' => 'Nama barang wajib diisi.',
+            'type.required' => 'Tipe barang wajib dipilih.',
+            'status.required' => 'Status barang wajib dipilih.',
+            'location.required' => 'Lokasi penempatan barang wajib diisi.',
         ]);
 
         if ($validated['type'] === 'aset') {
@@ -205,44 +215,81 @@ class MasterController extends Controller
             ? Carbon::parse($validated['preventive_last_serviced_at'])->startOfDay()
             : Carbon::today();
 
-        DB::transaction(function () use ($itemAttributes, $intervalMonths, $lastServicedAt) {
-            $item = Item::create($itemAttributes);
+        $existingTrashed = Item::onlyTrashed()->where('item_code', $itemAttributes['item_code'])->first();
+        $isRestored = false;
 
-            if ($item->type === ItemType::BAHAN_HABIS_PAKAI && $item->stock > 0 && Auth::id()) {
-                StockMovement::create([
-                    'item_id' => $item->id,
-                    'user_id' => Auth::id(),
-                    'type' => StockMovementType::IN,
-                    'quantity' => $item->stock,
-                    'stock_before' => 0,
-                    'stock_after' => $item->stock,
-                    'description' => 'Stok awal pendaftaran barang habis pakai',
+        try {
+            DB::transaction(function () use ($itemAttributes, $intervalMonths, $lastServicedAt, $existingTrashed, &$isRestored) {
+                // If EPC tag was used on another trashed item, detach it to prevent unique index violation
+                if (! empty($itemAttributes['epc_tag'])) {
+                    Item::onlyTrashed()
+                        ->where('epc_tag', $itemAttributes['epc_tag'])
+                        ->when($existingTrashed, fn ($q) => $q->where('id', '!=', $existingTrashed->id))
+                        ->update(['epc_tag' => null]);
+                }
+
+                if ($existingTrashed) {
+                    $existingTrashed->restore();
+                    $existingTrashed->update($itemAttributes);
+                    $item = $existingTrashed;
+                    $isRestored = true;
+                } else {
+                    $item = Item::create($itemAttributes);
+                }
+
+                if ($item->type === ItemType::BAHAN_HABIS_PAKAI && $item->stock > 0 && Auth::id()) {
+                    StockMovement::create([
+                        'item_id' => $item->id,
+                        'user_id' => Auth::id(),
+                        'type' => StockMovementType::IN,
+                        'quantity' => $item->stock,
+                        'stock_before' => 0,
+                        'stock_after' => $item->stock,
+                        'description' => $isRestored ? 'Stok pemulihan barang habis pakai' : 'Stok awal pendaftaran barang habis pakai',
+                    ]);
+                }
+
+                if ($intervalMonths !== null) {
+                    $nextDueDate = PreventiveSchedule::calculateNextDueDate($lastServicedAt, $intervalMonths);
+
+                    PreventiveSchedule::create([
+                        'item_id' => $item->id,
+                        'title' => Str::limit('Perawatan Berkala — '.$item->name, 150, ''),
+                        'interval_months' => $intervalMonths,
+                        'last_serviced_at' => $lastServicedAt->toDateString(),
+                        'maintenance_date' => $lastServicedAt->toDateString(),
+                        'quantity' => max(1, (int) $item->stock),
+                        'safe_quantity' => max(1, (int) $item->stock),
+                        'damaged_quantity' => 0,
+                        'next_due_date' => $nextDueDate->toDateString(),
+                        'status' => 'scheduled',
+                        'workflow_stage' => 'scheduled',
+                        'created_by' => Auth::id(),
+                    ]);
+                }
+            });
+        } catch (UniqueConstraintViolationException $e) {
+            $msg = $e->getMessage();
+            if (str_contains($msg, 'items_item_code_unique')) {
+                throw ValidationException::withMessages([
+                    'item_code' => "Kode barang \"{$itemAttributes['item_code']}\" sudah terdaftar di sistem. Silakan gunakan kode unik lain.",
                 ]);
             }
-
-            if ($intervalMonths !== null) {
-                $nextDueDate = PreventiveSchedule::calculateNextDueDate($lastServicedAt, $intervalMonths);
-
-                PreventiveSchedule::create([
-                    'item_id' => $item->id,
-                    'title' => Str::limit('Perawatan Berkala — '.$item->name, 150, ''),
-                    'interval_months' => $intervalMonths,
-                    'last_serviced_at' => $lastServicedAt->toDateString(),
-                    'maintenance_date' => $lastServicedAt->toDateString(),
-                    'quantity' => max(1, (int) $item->stock),
-                    'safe_quantity' => max(1, (int) $item->stock),
-                    'damaged_quantity' => 0,
-                    'next_due_date' => $nextDueDate->toDateString(),
-                    'status' => 'scheduled',
-                    'workflow_stage' => 'scheduled',
-                    'created_by' => Auth::id(),
+            if (str_contains($msg, 'items_epc_tag_unique')) {
+                throw ValidationException::withMessages([
+                    'epc_tag' => "Tag EPC RFID \"{$itemAttributes['epc_tag']}\" sudah terdaftar pada perangkat lain.",
                 ]);
             }
-        });
+            throw ValidationException::withMessages([
+                'item_code' => 'Data identitas unik barang (kode atau tag EPC) bertabrakan dengan data yang sudah ada.',
+            ]);
+        }
 
-        $successMessage = $intervalMonths !== null
-            ? 'Item dan jadwal maintenance berkala berhasil ditambahkan.'
-            : 'Item berhasil ditambahkan.';
+        $successMessage = $isRestored
+            ? "Item '{$itemAttributes['item_code']}' berhasil dipulihkan kembali ke katalog master."
+            : ($intervalMonths !== null
+                ? 'Item dan jadwal maintenance berkala berhasil ditambahkan.'
+                : 'Item berhasil ditambahkan.');
 
         $returnGroup = trim((string) $request->input('return_group', ''));
         if ($returnGroup !== '') {
@@ -295,36 +342,76 @@ class MasterController extends Controller
             'stock' => 'nullable|integer|min:0',
             'status' => 'required|in:tersedia,dipinjam,under_maintenance',
             'location' => 'required|string|max:100',
+        ], [
+            'item_code.required' => 'Kode barang wajib diisi.',
+            'item_code.unique' => 'Kode barang ini sudah digunakan oleh barang aktif lain.',
+            'epc_tag.unique' => 'Tag EPC RFID ini sudah terdaftar pada barang lain.',
+            'name.required' => 'Nama barang wajib diisi.',
+            'type.required' => 'Tipe barang wajib dipilih.',
+            'status.required' => 'Status barang wajib dipilih.',
+            'location.required' => 'Lokasi penempatan barang wajib diisi.',
         ]);
+
+        // Prevent updating item_code to match a trashed item (different item)
+        if (Item::onlyTrashed()->where('item_code', $validated['item_code'])->where('id', '!=', $id)->exists()) {
+            throw ValidationException::withMessages([
+                'item_code' => "Kode barang \"{$validated['item_code']}\" sudah tercatat dalam riwayat barang terhapus/afkir. Gunakan kode lain.",
+            ]);
+        }
 
         $validated['category'] = $this->itemGroupService->cleanCategory($validated['category'] ?? null);
 
-        DB::transaction(function () use ($id, $validated) {
-            $item = Item::query()->lockForUpdate()->findOrFail($id);
-            $oldStock = (int) $item->stock;
+        try {
+            DB::transaction(function () use ($id, $validated) {
+                // If EPC tag was used on a trashed item, detach it to avoid unique key violation
+                if (! empty($validated['epc_tag'])) {
+                    Item::onlyTrashed()
+                        ->where('epc_tag', $validated['epc_tag'])
+                        ->where('id', '!=', $id)
+                        ->update(['epc_tag' => null]);
+                }
 
-            if ($validated['type'] === 'aset') {
-                $validated['stock'] = 1;
-            } elseif (! array_key_exists('stock', $validated) || $validated['stock'] === null) {
-                $validated['stock'] = $oldStock;
-            }
+                $item = Item::query()->lockForUpdate()->findOrFail($id);
+                $oldStock = (int) $item->stock;
 
-            $item->update($validated);
-            $newStock = (int) $item->stock;
+                if ($validated['type'] === 'aset') {
+                    $validated['stock'] = 1;
+                } elseif (! array_key_exists('stock', $validated) || $validated['stock'] === null) {
+                    $validated['stock'] = $oldStock;
+                }
 
-            if ($item->type === ItemType::BAHAN_HABIS_PAKAI && $newStock !== $oldStock && Auth::id()) {
-                $diff = abs($newStock - $oldStock);
-                StockMovement::create([
-                    'item_id' => $item->id,
-                    'user_id' => Auth::id(),
-                    'type' => $newStock > $oldStock ? StockMovementType::IN : StockMovementType::OUT,
-                    'quantity' => $diff,
-                    'stock_before' => $oldStock,
-                    'stock_after' => $newStock,
-                    'description' => 'Penyesuaian stok melalui edit Master Aset',
+                $item->update($validated);
+                $newStock = (int) $item->stock;
+
+                if ($item->type === ItemType::BAHAN_HABIS_PAKAI && $newStock !== $oldStock && Auth::id()) {
+                    $diff = abs($newStock - $oldStock);
+                    StockMovement::create([
+                        'item_id' => $item->id,
+                        'user_id' => Auth::id(),
+                        'type' => $newStock > $oldStock ? StockMovementType::IN : StockMovementType::OUT,
+                        'quantity' => $diff,
+                        'stock_before' => $oldStock,
+                        'stock_after' => $newStock,
+                        'description' => 'Penyesuaian stok melalui edit Master Aset',
+                    ]);
+                }
+            });
+        } catch (UniqueConstraintViolationException $e) {
+            $msg = $e->getMessage();
+            if (str_contains($msg, 'items_item_code_unique')) {
+                throw ValidationException::withMessages([
+                    'item_code' => "Kode barang \"{$validated['item_code']}\" sudah terdaftar di sistem. Gunakan kode unik lain.",
                 ]);
             }
-        });
+            if (str_contains($msg, 'items_epc_tag_unique')) {
+                throw ValidationException::withMessages([
+                    'epc_tag' => "Tag EPC RFID \"{$validated['epc_tag']}\" sudah terdaftar pada perangkat lain.",
+                ]);
+            }
+            throw ValidationException::withMessages([
+                'item_code' => 'Data identitas unik barang bertabrakan dengan data lain.',
+            ]);
+        }
 
         $returnGroup = trim((string) $request->input('return_group', ''));
         if ($returnGroup !== '') {
@@ -372,12 +459,23 @@ class MasterController extends Controller
     }
 
     /**
-     * Hapus item (soft delete).
+     * Hapus item (soft delete jika berelasi riwayat, force delete jika belum pernah digunakan).
      */
     public function destroy(string $id)
     {
         $item = Item::findOrFail($id);
-        $item->delete();
+
+        $hasHistory = $item->loans()->exists()
+            || $item->tickets()->exists()
+            || $item->preventiveSchedules()->exists()
+            || $item->stockMovements()->exists()
+            || DamagedAsset::where('item_id', $item->id)->exists();
+
+        if ($hasHistory) {
+            $item->delete();
+        } else {
+            $item->forceDelete();
+        }
 
         return redirect()->route('items.index')
             ->with('success', 'Item berhasil dihapus.');

@@ -182,15 +182,15 @@
                                 </td>
                                 <td class="px-5 py-4 whitespace-nowrap">
                                     @if($loan->isBhp())
-                                        <div x-data="loanCountdownTimer('{{ $loan->bhpAutoArchiveAt()?->toIso8601String() }}')" class="space-y-1">
+                                        <div x-data="loanRealtimeStopwatch('{{ $loan->borrowed_at?->toIso8601String() }}')" class="space-y-1">
                                             <span class="inline-flex items-center gap-1.5 font-mono text-[11px] font-bold text-amber-800 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200 shadow-2xs">
                                                 <svg class="w-3.5 h-3.5 text-amber-600 animate-spin-slow shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                 </svg>
-                                                <span x-text="timeText">{{ $loan->bhpRemainingTime() ? 'Histori dlm ' . $loan->bhpRemainingTime() : 'Otomatis Selesai 24 Jam' }}</span>
+                                                <span x-text="timeText">Dipinjam {{ $loan->bhpElapsedTime() }}</span>
                                             </span>
                                             <div class="text-[10px] text-neutral-400 font-mono">
-                                                Auto-arsip 24 jam / ganti tanggal
+                                                Otomatis selesai saat ganti tanggal
                                             </div>
                                         </div>
                                     @elseif($isOverdue)
@@ -307,36 +307,25 @@
     </div>
 
     <script>
-        function loanCountdownTimer(targetIso) {
+        function loanRealtimeStopwatch(startIso) {
             return {
-                target: targetIso ? new Date(targetIso).getTime() : 0,
+                startTime: startIso ? new Date(startIso).getTime() : Date.now(),
                 timeText: 'Menghitung...',
                 timer: null,
                 init() {
-                    if (!this.target) {
-                        this.timeText = 'Otomatis Selesai (24 Jam)';
-                        return;
-                    }
                     this.update();
                     this.timer = setInterval(() => this.update(), 1000);
                 },
                 update() {
                     const now = Date.now();
-                    const diff = this.target - now;
-                    if (diff <= 0) {
-                        this.timeText = 'Memindahkan ke histori...';
-                        if (this.timer) {
-                            clearInterval(this.timer);
-                        }
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 2500);
-                        return;
-                    }
-                    const hours = Math.floor(diff / (1000 * 60 * 60));
-                    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-                    this.timeText = `Histori dlm ${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                    const elapsed = Math.max(0, now - this.startTime);
+                    const totalSeconds = Math.floor(elapsed / 1000);
+                    const hours = Math.floor(totalSeconds / 3600);
+                    const minutes = Math.floor((totalSeconds % 3600) / 60);
+                    const seconds = totalSeconds % 60;
+
+                    const pad = (n) => String(n).padStart(2, '0');
+                    this.timeText = `Dipinjam ${pad(hours)}:${pad(minutes)}:${pad(seconds)} yang lalu`;
                 }
             };
         }

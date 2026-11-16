@@ -182,7 +182,7 @@
                                 <td class="px-5 py-4 font-mono text-xs text-neutral-600 whitespace-nowrap">
                                     {{ optional($loan->returned_at)->format('d/m/Y H:i') ?? '—' }}
                                     @if($loan->isBhp())
-                                        <div class="text-[10px] text-amber-700 font-mono mt-0.5 font-medium">Selesai Otomatis (24 Jam)</div>
+                                        <div class="text-[10px] text-amber-700 font-mono mt-0.5 font-medium">Selesai Otomatis (Ganti Tanggal)</div>
                                     @endif
                                 </td>
                                 <td class="px-5 py-4">

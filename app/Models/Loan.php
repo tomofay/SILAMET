@@ -159,7 +159,31 @@ class Loan extends Model
     }
 
     /**
-     * Waktu otomatis masuk ke histori (24 jam sejak peminjaman).
+     * Waktu berjalan (elapsed time) sejak barang sekali pakai dipinjam.
+     */
+    public function bhpElapsedTime(): string
+    {
+        if (! $this->borrowed_at) {
+            return 'Baru saja';
+        }
+
+        $diffSeconds = (int) $this->borrowed_at->diffInSeconds(now());
+        $hours = intdiv($diffSeconds, 3600);
+        $minutes = intdiv($diffSeconds % 3600, 60);
+
+        if ($hours > 0) {
+            return "{$hours} jam {$minutes} mnt lalu";
+        }
+
+        if ($minutes > 0) {
+            return "{$minutes} mnt lalu";
+        }
+
+        return 'Baru saja';
+    }
+
+    /**
+     * Waktu otomatis masuk ke histori (saat berganti tanggal).
      */
     public function bhpAutoArchiveAt(): ?Carbon
     {
@@ -167,32 +191,11 @@ class Loan extends Model
             return null;
         }
 
-        return $this->borrowed_at->copy()->addHours(24);
+        return $this->borrowed_at->copy()->endOfDay();
     }
 
     /**
-     * Waktu tersisa sebelum barang sekali pakai otomatis masuk ke histori.
-     */
-    public function bhpRemainingTime(): ?string
-    {
-        $archiveAt = $this->bhpAutoArchiveAt();
-        if (! $archiveAt || now()->greaterThanOrEqualTo($archiveAt) || now()->toDateString() > $this->borrowed_at->toDateString()) {
-            return null;
-        }
-
-        $diffSeconds = (int) now()->diffInSeconds($archiveAt);
-        $hours = intdiv($diffSeconds, 3600);
-        $minutes = intdiv($diffSeconds % 3600, 60);
-
-        if ($hours > 0) {
-            return "{$hours} jam {$minutes} mnt";
-        }
-
-        return "{$minutes} mnt";
-    }
-
-    /**
-     * Arsipkan secara otomatis peminjaman bahan sekali pakai yang telah melewati 24 jam atau berganti hari kalender.
+     * Arsipkan secara otomatis peminjaman bahan sekali pakai saat berganti hari kalender (ganti tanggal).
      */
     public static function autoArchiveExpiredBhp(): int
     {
@@ -203,15 +206,15 @@ class Loan extends Model
             ->where('status', LoanStatus::AKTIF)
             ->whereHas('item', fn ($q) => $q->where('type', ItemType::BAHAN_HABIS_PAKAI))
             ->where(function ($q) use ($cutoff, $today) {
-                $q->where('borrowed_at', '<=', $cutoff)
-                    ->orWhereDate('borrowed_at', '<', $today);
+                $q->whereDate('borrowed_at', '<', $today)
+                    ->orWhere('borrowed_at', '<=', $cutoff);
             })
             ->get();
 
         foreach ($expiredLoans as $loan) {
             $loan->update([
                 'status' => LoanStatus::SELESAI,
-                'returned_at' => $loan->borrowed_at ? $loan->borrowed_at->copy()->addHours(24) : now(),
+                'returned_at' => $loan->borrowed_at ? $loan->borrowed_at->copy()->endOfDay() : now(),
                 'condition_in' => 'bagus',
             ]);
         }

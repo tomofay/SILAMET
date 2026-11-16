@@ -393,8 +393,8 @@ class ManualLoanAndDashboardRefactorTest extends TestCase
         $indexResponse = $this->actingAs($staff)->get(route('loans.index'));
         $indexResponse->assertOk()
             ->assertSee('RJ45 Pack 1')
-            ->assertSee('Histori dlm')
-            ->assertSee('Auto-arsip 24 jam / ganti tanggal');
+            ->assertSee('Dipinjam')
+            ->assertSee('Otomatis selesai saat ganti tanggal');
 
         $freshLoan->refresh();
         $expiredLoan->refresh();
@@ -409,7 +409,7 @@ class ManualLoanAndDashboardRefactorTest extends TestCase
         // Kunjungi halaman histori loans -> expired loan tampil dengan penanda otomatis dan Habis Terpakai
         $historyResponse = $this->actingAs($staff)->get(route('loans.history'));
         $historyResponse->assertOk()
-            ->assertSee('Selesai Otomatis (24 Jam)')
+            ->assertSee('Selesai Otomatis (Ganti Tanggal)')
             ->assertSee('Habis Terpakai');
     }
 }

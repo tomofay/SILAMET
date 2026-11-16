@@ -573,4 +573,41 @@ class MasterItemGroupingTest extends TestCase
             ->assertSee('Kuantitas Stok Awal')
             ->assertSee('KONEKTOR');
     }
+
+    public function test_aset_group_view_omits_stock_column_and_edit_has_category_dropdown_without_stock_input(): void
+    {
+        $teknisi = User::factory()->teknisi()->create();
+
+        ItemGroup::create([
+            'name' => 'TPLINK',
+            'slug' => 'tplink',
+            'type' => 'aset',
+        ]);
+
+        $item = Item::factory()->create([
+            'category' => 'TPLINK',
+            'name' => 'TPLINK Router 01',
+            'type' => 'aset',
+            'stock' => 1,
+        ]);
+
+        // 1. In Aset group view, 'Stok' column header is omitted
+        $response = $this->actingAs($teknisi)
+            ->get(route('items.index', ['group' => 'tplink']));
+
+        $response->assertOk()
+            ->assertSee('Kelompok: TPLINK')
+            ->assertDontSee('<th class="px-4 py-3.5 text-center text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Stok</th>', false);
+
+        // 2. In edit form, stock input is omitted and category is a select dropdown
+        $editResponse = $this->actingAs($teknisi)
+            ->get(route('items.edit', $item->id));
+
+        $editResponse->assertOk()
+            ->assertDontSee('Jumlah Kuantitas Stok')
+            ->assertDontSee('name="stock"', false)
+            ->assertSee('id="category"', false)
+            ->assertSee('name="category"', false)
+            ->assertSee('<option value="TPLINK"', false);
+    }
 }

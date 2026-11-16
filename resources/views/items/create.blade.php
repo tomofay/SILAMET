@@ -208,12 +208,17 @@
                                     </div>
                                 @else
                                     <x-input-label for="bhp-category" value="Nama Kelompok *" />
-                                    <x-text-input id="bhp-category" name="category" x-model="category" list="item-category-suggestions" class="mt-1.5 w-full text-xs font-bold uppercase rounded-xl border-neutral-200 focus:border-primary focus:ring-primary" placeholder="PILIH / KETIK KELOMPOK (MISAL: KONEKTOR)" required />
-                                    <datalist id="item-category-suggestions">
+                                    <select id="bhp-category"
+                                            name="category"
+                                            class="mt-1.5 w-full text-xs font-bold uppercase rounded-xl border-neutral-200 focus:border-primary focus:ring-primary text-neutral-800"
+                                            required>
+                                        <option value="">— PILIH KELOMPOK BAHAN —</option>
                                         @foreach(($categorySuggestions ?? []) as $cat)
-                                            <option value="{{ $cat }}"></option>
+                                            <option value="{{ $cat }}" @selected(strtoupper(old('category', $category ?? '')) === strtoupper($cat))>
+                                                {{ strtoupper($cat) }}
+                                            </option>
                                         @endforeach
-                                    </datalist>
+                                    </select>
                                 @endif
                                 <x-input-error :messages="$errors->get('category')" class="mt-1.5" />
                             </div>
@@ -353,21 +358,17 @@
                                     </div>
                                 @else
                                     <x-input-label for="aset-category" value="Kelompok / Kategori Barang *" />
-                                    <x-text-input id="aset-category" name="category" x-model="category" list="item-category-suggestions" class="mt-1.5 w-full text-xs font-bold uppercase rounded-xl border-neutral-200 focus:border-primary focus:ring-primary" placeholder="PILIH ATAU KETIK KELOMPOK" required />
-                                    <datalist id="item-category-suggestions">
+                                    <select id="aset-category"
+                                            name="category"
+                                            class="mt-1.5 w-full text-xs font-bold uppercase rounded-xl border-neutral-200 focus:border-primary focus:ring-primary text-neutral-800"
+                                            required>
+                                        <option value="">— PILIH KELOMPOK BARANG —</option>
                                         @foreach(($categorySuggestions ?? []) as $cat)
-                                            <option value="{{ $cat }}"></option>
+                                            <option value="{{ $cat }}" @selected(strtoupper(old('category', $category ?? '')) === strtoupper($cat))>
+                                                {{ strtoupper($cat) }}
+                                            </option>
                                         @endforeach
-                                    </datalist>
-                                    @if(!empty($categorySuggestions))
-                                        <div class="flex items-center gap-1.5 flex-wrap mt-2">
-                                            @foreach(array_slice($categorySuggestions, 0, 4) as $cat)
-                                                <button type="button" @click="category = @js($cat)" class="px-2 py-0.5 rounded-full border border-neutral-200 bg-neutral-50 hover:bg-neutral-100 text-[10px] font-semibold text-neutral-700 transition-colors uppercase">
-                                                    {{ $cat }}
-                                                </button>
-                                            @endforeach
-                                        </div>
-                                    @endif
+                                    </select>
                                 @endif
                                 <x-input-error :messages="$errors->get('category')" class="mt-1.5" />
                             </div>

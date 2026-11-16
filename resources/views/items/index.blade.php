@@ -470,6 +470,11 @@
                 </div>
             </div>
 
+            @php
+                $isAsetGroupView = $activeGroup && ($activeGroup['type'] ?? '') === 'aset';
+                $showStockColumn = ! $isAsetGroupView;
+            @endphp
+
             {{-- Table Container (Isi Penuh Unit Kelompok atau Semua Unit) --}}
             <div class="bg-white rounded-2xl border border-neutral-200 overflow-hidden shadow-sm">
                 <div class="overflow-x-auto">
@@ -482,7 +487,9 @@
                                 <th class="px-4 py-3.5 text-left text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Kode Aset</th>
                                 <th class="px-4 py-3.5 text-left text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Nama Barang &amp; Tag RFID</th>
                                 <th class="px-4 py-3.5 text-left text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Tipe</th>
-                                <th class="px-4 py-3.5 text-center text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Stok</th>
+                                @if($showStockColumn)
+                                    <th class="px-4 py-3.5 text-center text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Stok</th>
+                                @endif
                                 <th class="px-4 py-3.5 text-left text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Lokasi Rak</th>
                                 <th class="px-4 py-3.5 text-left text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Status</th>
                                 <th class="px-4 py-3.5 text-right text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Aksi</th>
@@ -519,9 +526,11 @@
                                             {{ $item->type->label() }}
                                         </span>
                                     </td>
-                                    <td class="px-4 py-3.5 text-center font-mono font-semibold text-xs text-neutral-800">
-                                        {{ $item->stock }}
-                                    </td>
+                                    @if($showStockColumn)
+                                        <td class="px-4 py-3.5 text-center font-mono font-semibold text-xs text-neutral-800">
+                                            {{ $item->type->value === 'aset' ? '—' : $item->stock }}
+                                        </td>
+                                    @endif
                                     <td class="px-4 py-3.5 whitespace-nowrap">
                                         <span class="font-mono text-xs text-neutral-600 bg-neutral-50 px-2.5 py-0.5 rounded-md border border-neutral-200">
                                             {{ $item->location ?? 'Rak Utama' }}
@@ -583,7 +592,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="8" class="py-16 px-4 text-center">
+                                    <td colspan="{{ $showStockColumn ? 8 : 7 }}" class="py-16 px-4 text-center">
                                         <!-- Dribbble Empty State (dribbble_4.png) -->
                                         <div class="flex flex-col items-center justify-center max-w-sm mx-auto">
                                             <div class="w-14 h-14 rounded-2xl bg-neutral-100 border border-neutral-200 flex items-center justify-center text-neutral-400 mb-3 shadow-inner">

@@ -8,7 +8,7 @@
             : route('items.index');
     @endphp
 
-    <div class="space-y-6 max-w-7xl mx-auto" x-data="{ category: @js(old('category', $item->category ?? '')) }">
+    <div class="space-y-6 max-w-7xl mx-auto">
 
         <!-- Top Action Bar (Discard & Save Buttons ala Dribbble Template) -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-neutral-200">
@@ -130,28 +130,20 @@
                         </div>
                     </div>
 
-                    <!-- Card 3: Tipe & Kuantitas Unit (Pricing & Inventory ala Dribbble) -->
+                    <!-- Card 3: Tipe Barang (Pricing & Inventory ala Dribbble) -->
                     <div class="bg-white rounded-2xl border border-neutral-200 p-5 sm:p-6 shadow-sm space-y-4">
                         <div class="border-b border-neutral-100 pb-3">
-                            <h2 class="text-sm font-bold uppercase tracking-wider text-neutral-900 font-heading">Tipe &amp; Kuantitas Stok</h2>
-                            <p class="text-xs text-neutral-500 mt-0.5">Tentukan perlakuan sirkulasi barang (unit tunggal berseri atau bahan habis pakai).</p>
+                            <h2 class="text-sm font-bold uppercase tracking-wider text-neutral-900 font-heading">Tipe Barang</h2>
+                            <p class="text-xs text-neutral-500 mt-0.5">Tentukan perlakuan sirkulasi barang (unit praktikum aset atau bahan habis pakai).</p>
                         </div>
 
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <x-input-label for="type" value="Tipe Barang *" />
-                                <select id="type" name="type" class="mt-1.5 w-full rounded-xl border-neutral-200 text-sm font-semibold focus:border-primary focus:ring-primary" required>
-                                    <option value="aset" @selected(old('type', $item->type->value) === 'aset')>Barang Praktikum (Aset / Dipakai Berulang)</option>
-                                    <option value="bahan_habis_pakai" @selected(old('type', $item->type->value) === 'bahan_habis_pakai')>Bahan Habis Pakai (Sekali Pakai / BHP)</option>
-                                </select>
-                                <x-input-error :messages="$errors->get('type')" class="mt-2" />
-                            </div>
-
-                            <div>
-                                <x-input-label for="stock" value="Jumlah Kuantitas Stok *" />
-                                <x-text-input id="stock" name="stock" type="number" min="0" class="mt-1.5 w-full font-mono text-sm rounded-xl border-neutral-200 focus:border-primary focus:ring-primary" value="{{ old('stock', $item->stock) }}" required />
-                                <x-input-error :messages="$errors->get('stock')" class="mt-2" />
-                            </div>
+                        <div>
+                            <x-input-label for="type" value="Tipe Barang *" />
+                            <select id="type" name="type" class="mt-1.5 w-full rounded-xl border-neutral-200 text-sm font-semibold focus:border-primary focus:ring-primary" required>
+                                <option value="aset" @selected(old('type', $item->type->value) === 'aset')>Barang Praktikum (Aset / Dipakai Berulang)</option>
+                                <option value="bahan_habis_pakai" @selected(old('type', $item->type->value) === 'bahan_habis_pakai')>Bahan Habis Pakai (Sekali Pakai / BHP)</option>
+                            </select>
+                            <x-input-error :messages="$errors->get('type')" class="mt-2" />
                         </div>
                     </div>
 
@@ -192,21 +184,21 @@
 
                         <div>
                             <x-input-label for="category" value="Kelompok / Kategori Barang" />
-                            <x-text-input id="category" name="category" x-model="category" list="item-category-suggestions" class="mt-1.5 w-full text-xs rounded-xl border-neutral-200 focus:border-primary focus:ring-primary" placeholder="Ketik: TPLINK, PC, MIKROTIK" />
-                            <datalist id="item-category-suggestions">
+                            <select id="category"
+                                    name="category"
+                                    class="mt-1.5 w-full text-xs font-bold uppercase rounded-xl border-neutral-200 focus:border-primary focus:ring-primary text-neutral-800">
+                                <option value="">— TANPA KELOMPOK —</option>
                                 @foreach(($categorySuggestions ?? []) as $cat)
-                                    <option value="{{ $cat }}"></option>
+                                    <option value="{{ $cat }}" @selected(strtoupper(old('category', $item->category ?? '')) === strtoupper($cat))>
+                                        {{ strtoupper($cat) }}
+                                    </option>
                                 @endforeach
-                            </datalist>
-                            @if(!empty($categorySuggestions))
-                                <div class="flex items-center gap-1.5 flex-wrap mt-2">
-                                    @foreach(array_slice($categorySuggestions, 0, 4) as $cat)
-                                        <button type="button" @click="category = @js($cat)" class="px-2 py-0.5 rounded-full border border-neutral-200 bg-neutral-50 hover:bg-neutral-100 text-[10px] font-semibold text-neutral-700 transition-colors">
-                                            {{ $cat }}
-                                        </button>
-                                    @endforeach
-                                </div>
-                            @endif
+                                @if(filled($item->category) && !in_array(strtoupper($item->category), array_map('strtoupper', $categorySuggestions ?? [])))
+                                    <option value="{{ $item->category }}" selected>
+                                        {{ strtoupper($item->category) }}
+                                    </option>
+                                @endif
+                            </select>
                             <x-input-error :messages="$errors->get('category')" class="mt-1.5" />
                         </div>
                     </div>

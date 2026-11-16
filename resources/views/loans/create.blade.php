@@ -29,7 +29,10 @@
             </div>
         </div>
 
-        <form id="create-loan-form" method="POST" action="{{ route('loans.store') }}">
+        <form id="create-loan-form"
+              method="POST"
+              action="{{ route('loans.store') }}"
+              @keydown.enter="if ($event.target.tagName !== 'TEXTAREA' && $event.target.type !== 'submit') { $event.preventDefault(); }">
             @csrf
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">

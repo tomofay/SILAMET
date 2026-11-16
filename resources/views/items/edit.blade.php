@@ -8,7 +8,7 @@
             : route('items.index');
     @endphp
 
-    <div class="space-y-6 max-w-7xl mx-auto">
+    <div class="space-y-6 max-w-7xl mx-auto" x-data="{ itemType: '{{ old('type', $item->type->value) }}' }">
 
         <!-- Top Action Bar (Discard & Save Buttons ala Dribbble Template) -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-neutral-200">
@@ -62,7 +62,10 @@
             </div>
         @endif
 
-        <form id="edit-item-form" method="POST" action="{{ route('items.update', $item->id) }}">
+        <form id="edit-item-form"
+              method="POST"
+              action="{{ route('items.update', $item->id) }}"
+              @keydown.enter="if ($event.target.tagName !== 'TEXTAREA' && $event.target.type !== 'submit') { $event.preventDefault(); }">
             @csrf
             @method('PUT')
             @if(filled($returnGroup ?? null))
@@ -84,13 +87,60 @@
 
                         <div>
                             <x-input-label for="name" value="Nama Barang *" />
-                            <x-text-input id="name" name="name" class="mt-1.5 w-full text-sm rounded-xl border-neutral-200 focus:border-primary focus:ring-primary" value="{{ old('name', $item->name) }}" required />
+                            <x-text-input id="name" name="name" class="mt-1.5 w-full text-sm rounded-xl border-neutral-200 focus:border-primary focus:ring-primary font-medium" value="{{ old('name', $item->name) }}" required @keydown.enter.prevent />
                             <x-input-error :messages="$errors->get('name')" class="mt-2" />
                         </div>
                     </div>
 
-                    <!-- Card 2: Identifikasi & Tag RFID (Media / Identification Area ala Dribbble) -->
-                    <div class="bg-white rounded-2xl border border-neutral-200 p-5 sm:p-6 shadow-sm space-y-4">
+                    <!-- Card 2A: Identitas Kode Barcode Kemasan (KHUSUS BAHAN HABIS PAKAI / BHP) -->
+                    <div x-show="itemType === 'bahan_habis_pakai'" class="bg-white rounded-2xl border border-neutral-200 p-5 sm:p-6 shadow-sm space-y-4">
+                        <div class="border-b border-neutral-100 pb-3 flex items-center justify-between">
+                            <div>
+                                <h2 class="text-sm font-bold uppercase tracking-wider text-neutral-900 font-heading">Identitas Kode Barcode / Kode Unik Kemasan</h2>
+                                <p class="text-xs text-neutral-500 mt-0.5">Pindai barcode pada kemasan / kardus pembungkus bahan menggunakan USB Barcode Scanner atau ketikkan kode unik.</p>
+                            </div>
+                            <span class="px-2.5 py-0.5 rounded font-mono text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                                USB SCANNER
+                            </span>
+                        </div>
+
+                        <div class="border-2 border-dashed border-neutral-300 rounded-2xl p-6 text-center bg-neutral-50/60">
+                            <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-700 border border-amber-200 mx-auto flex items-center justify-center mb-3 shadow-inner">
+                                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                                </svg>
+                            </div>
+                            <p class="text-xs font-bold text-neutral-800">Scan Barcode Pada Dus / Kemasan Pembungkus</p>
+                            <p class="text-[11px] text-neutral-500 mt-0.5 max-w-md mx-auto">Arahkan USB Barcode Scanner ke kode barcode kemasan bahan ini, atau ketikkan kode manual di bawah:</p>
+
+                            <div class="mt-4 max-w-md mx-auto">
+                                <x-text-input id="bhp_item_code"
+                                              name="item_code"
+                                              class="w-full font-mono text-center text-sm font-bold rounded-xl border-neutral-300 focus:border-primary focus:ring-primary tracking-wider uppercase"
+                                              value="{{ old('item_code', $item->item_code) }}"
+                                              x-bind:disabled="itemType !== 'bahan_habis_pakai'"
+                                              x-bind:required="itemType === 'bahan_habis_pakai'"
+                                              @keydown.enter.prevent
+                                              placeholder="Scan Barcode Kemasan" />
+                                <x-input-error :messages="$errors->get('item_code')" class="mt-1.5" />
+                            </div>
+                        </div>
+
+                        <div class="p-3 rounded-xl bg-neutral-50 border border-neutral-200 flex items-center justify-between text-xs">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                                </svg>
+                                <span class="font-medium text-neutral-700">QR Code / Barcode Token</span>
+                            </div>
+                            <span class="font-mono text-[11px] font-bold text-neutral-800 bg-white px-2 py-0.5 rounded border border-neutral-200">
+                                {{ $item->barcode_token ?? 'Token Terdaftar' }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Card 2B: Identifikasi & Tag RFID (KHUSUS UNIT PRAKTIKUM / ASET) -->
+                    <div x-show="itemType === 'aset'" class="bg-white rounded-2xl border border-neutral-200 p-5 sm:p-6 shadow-sm space-y-4">
                         <div class="border-b border-neutral-100 pb-3 flex items-center justify-between">
                             <div>
                                 <h2 class="text-sm font-bold uppercase tracking-wider text-neutral-900 font-heading">Identifikasi &amp; Keamanan RFID</h2>
@@ -112,7 +162,13 @@
                             <p class="text-[11px] text-neutral-500 mt-0.5 max-w-md mx-auto">Dekatkan stiker RFID ke pembaca USB reader atau ketikkan kode hexa EPC unik alat.</p>
                             
                             <div class="mt-4 max-w-md mx-auto">
-                                <x-text-input id="epc_tag" name="epc_tag" class="w-full font-mono text-center text-xs rounded-xl border-neutral-300 focus:border-primary focus:ring-primary tracking-wider" value="{{ old('epc_tag', $item->epc_tag) }}" placeholder="Contoh EPC: E280689400004001" />
+                                <x-text-input id="epc_tag"
+                                              name="epc_tag"
+                                              class="w-full font-mono text-center text-xs rounded-xl border-neutral-300 focus:border-primary focus:ring-primary tracking-wider"
+                                              value="{{ old('epc_tag', $item->epc_tag) }}"
+                                              x-bind:disabled="itemType !== 'aset'"
+                                              @keydown.enter.prevent
+                                              placeholder="Contoh EPC: E280689400004001" />
                                 <x-input-error :messages="$errors->get('epc_tag')" class="mt-1.5" />
                             </div>
                         </div>
@@ -139,7 +195,7 @@
 
                         <div>
                             <x-input-label for="type" value="Tipe Barang *" />
-                            <select id="type" name="type" class="mt-1.5 w-full rounded-xl border-neutral-200 text-sm font-semibold focus:border-primary focus:ring-primary" required>
+                            <select id="type" name="type" x-model="itemType" class="mt-1.5 w-full rounded-xl border-neutral-200 text-sm font-semibold focus:border-primary focus:ring-primary" required>
                                 <option value="aset" @selected(old('type', $item->type->value) === 'aset')>Barang Praktikum (Aset / Dipakai Berulang)</option>
                                 <option value="bahan_habis_pakai" @selected(old('type', $item->type->value) === 'bahan_habis_pakai')>Bahan Habis Pakai (Sekali Pakai / BHP)</option>
                             </select>
@@ -176,9 +232,16 @@
                             <p class="text-[11px] text-neutral-500 mt-0.5">Pengelompokan perangkat dan kode aset unik.</p>
                         </div>
 
-                        <div>
-                            <x-input-label for="item_code" value="Kode Barang Unik *" />
-                            <x-text-input id="item_code" name="item_code" class="mt-1.5 w-full font-mono text-xs rounded-xl border-neutral-200 focus:border-primary focus:ring-primary uppercase" value="{{ old('item_code', $item->item_code) }}" required />
+                        <!-- Kode Barang Unik untuk Aset (Untuk BHP diinput di Card 2A Dashed Box) -->
+                        <div x-show="itemType === 'aset'">
+                            <x-input-label for="aset_item_code" value="Kode Barang Unik *" />
+                            <x-text-input id="aset_item_code"
+                                          name="item_code"
+                                          class="mt-1.5 w-full font-mono text-xs rounded-xl border-neutral-200 focus:border-primary focus:ring-primary uppercase font-bold"
+                                          value="{{ old('item_code', $item->item_code) }}"
+                                          x-bind:disabled="itemType !== 'aset'"
+                                          x-bind:required="itemType === 'aset'"
+                                          @keydown.enter.prevent />
                             <x-input-error :messages="$errors->get('item_code')" class="mt-1.5" />
                         </div>
 

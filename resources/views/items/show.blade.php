@@ -211,91 +211,93 @@
             </div>
         @endif
 
-        <!-- Jadwal Pemeliharaan Preventif (Rounded-2xl Card) -->
-        <div class="bg-white rounded-2xl border border-neutral-200 overflow-hidden shadow-sm">
-            <div class="px-5 py-4 border-b border-neutral-200 bg-neutral-50/70 flex items-center justify-between gap-2">
-                <div>
-                    <h3 class="font-bold text-neutral-900 text-sm tracking-tight font-heading">Jadwal Pemeliharaan Preventif</h3>
-                    <p class="text-[11px] text-neutral-500">Siklus perawatan rutin berkala untuk menjaga keandalan operasional perangkat.</p>
+        @if($item->type->value === 'aset')
+            <!-- Jadwal Pemeliharaan Preventif (Rounded-2xl Card) -->
+            <div class="bg-white rounded-2xl border border-neutral-200 overflow-hidden shadow-sm">
+                <div class="px-5 py-4 border-b border-neutral-200 bg-neutral-50/70 flex items-center justify-between gap-2">
+                    <div>
+                        <h3 class="font-bold text-neutral-900 text-sm tracking-tight font-heading">Jadwal Pemeliharaan Preventif</h3>
+                        <p class="text-[11px] text-neutral-500">Siklus perawatan rutin berkala untuk menjaga keandalan operasional perangkat.</p>
+                    </div>
+                    @if(in_array(auth()->user()?->role?->value, ['teknisi', 'kabeng'], true))
+                        <a href="{{ route('maintenance.schedules.index', ['item_id' => $item->id]) }}" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full border border-neutral-200 bg-white hover:bg-neutral-50 text-xs font-semibold text-neutral-700 shadow-2xs transition-colors">
+                            <span>Atur Jadwal Maintenance</span>
+                        </a>
+                    @endif
                 </div>
-                @if(in_array(auth()->user()?->role?->value, ['teknisi', 'kabeng'], true))
-                    <a href="{{ route('maintenance.schedules.index', ['item_id' => $item->id]) }}" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-full border border-neutral-200 bg-white hover:bg-neutral-50 text-xs font-semibold text-neutral-700 shadow-2xs transition-colors">
-                        <span>Atur Jadwal Maintenance</span>
-                    </a>
-                @endif
-            </div>
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-neutral-200 text-sm">
-                    <thead class="bg-neutral-50/70">
-                        <tr>
-                            <th class="px-5 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">Kegiatan</th>
-                            <th class="px-5 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">Siklus</th>
-                            <th class="px-5 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">Servis Terakhir</th>
-                            <th class="px-5 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">Jadwal Berikutnya</th>
-                            <th class="px-5 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-neutral-100">
-                        @forelse($item->preventiveSchedules as $schedule)
-                            <tr class="hover:bg-neutral-50/70 transition-colors">
-                                <td class="px-5 py-3 text-xs font-semibold text-neutral-900">{{ $schedule->title }}</td>
-                                <td class="px-5 py-3 font-mono text-xs text-neutral-600">Setiap {{ $schedule->interval_months }} bln</td>
-                                <td class="px-5 py-3 font-mono text-xs text-neutral-600">{{ optional($schedule->last_serviced_at)->format('d/m/Y') }}</td>
-                                <td class="px-5 py-3 font-mono text-xs font-semibold text-neutral-900">{{ optional($schedule->next_due_date)->format('d/m/Y') }}</td>
-                                <td class="px-5 py-3">
-                                    <span class="font-mono text-[11px] font-semibold px-2.5 py-0.5 rounded-full border {{ $schedule->status === 'paused' ? 'bg-neutral-100 text-neutral-600 border-neutral-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200' }}">
-                                        {{ $schedule->countdownLabel() }}
-                                    </span>
-                                </td>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-neutral-200 text-sm">
+                        <thead class="bg-neutral-50/70">
+                            <tr>
+                                <th class="px-5 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">Kegiatan</th>
+                                <th class="px-5 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">Siklus</th>
+                                <th class="px-5 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">Servis Terakhir</th>
+                                <th class="px-5 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">Jadwal Berikutnya</th>
+                                <th class="px-5 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">Status</th>
                             </tr>
-                        @empty
-                            <tr><td colspan="5" class="px-5 py-8 text-center text-xs text-neutral-500">Barang ini belum memiliki jadwal maintenance berkala.</td></tr>
-                        @endforelse
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody class="divide-y divide-neutral-100">
+                            @forelse($item->preventiveSchedules as $schedule)
+                                <tr class="hover:bg-neutral-50/70 transition-colors">
+                                    <td class="px-5 py-3 text-xs font-semibold text-neutral-900">{{ $schedule->title }}</td>
+                                    <td class="px-5 py-3 font-mono text-xs text-neutral-600">Setiap {{ $schedule->interval_months }} bln</td>
+                                    <td class="px-5 py-3 font-mono text-xs text-neutral-600">{{ optional($schedule->last_serviced_at)->format('d/m/Y') }}</td>
+                                    <td class="px-5 py-3 font-mono text-xs font-semibold text-neutral-900">{{ optional($schedule->next_due_date)->format('d/m/Y') }}</td>
+                                    <td class="px-5 py-3">
+                                        <span class="font-mono text-[11px] font-semibold px-2.5 py-0.5 rounded-full border {{ $schedule->status === 'paused' ? 'bg-neutral-100 text-neutral-600 border-neutral-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200' }}">
+                                            {{ $schedule->countdownLabel() }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr><td colspan="5" class="px-5 py-8 text-center text-xs text-neutral-500">Barang ini belum memiliki jadwal maintenance berkala.</td></tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
             </div>
-        </div>
 
-        <!-- Riwayat Maintenance (Rounded-2xl Card) -->
-        <div class="bg-white rounded-2xl border border-neutral-200 overflow-hidden shadow-sm">
-            <div class="px-5 py-4 border-b border-neutral-200 bg-neutral-50/70">
-                <h3 class="font-bold text-neutral-900 text-sm tracking-tight font-heading">Riwayat Maintenance</h3>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-neutral-200 text-sm">
-                    <thead class="bg-neutral-50/70">
-                        <tr>
-                            <th class="px-5 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">Deskripsi Kendala</th>
-                            <th class="px-5 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">Pelapor</th>
-                            <th class="px-5 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">Status</th>
-                            <th class="px-5 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">Tanggal</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-neutral-100">
-                        @forelse($item->tickets as $ticket)
-                            <tr class="hover:bg-neutral-50/70 transition-colors">
-                                <td class="px-5 py-3 text-xs text-neutral-800 max-w-md truncate">{{ $ticket->issue_description }}</td>
-                                <td class="px-5 py-3 text-xs text-neutral-700">{{ $ticket->reportedBy->name ?? '-' }}</td>
-                                <td class="px-5 py-3">
-                                    @php
-                                        $tbadge = match($ticket->status->value) {
-                                            'open' => 'bg-rose-50 text-rose-700 border-rose-200',
-                                            'in_progress' => 'bg-amber-50 text-amber-800 border-amber-200',
-                                            'resolved' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
-                                            default => 'bg-neutral-100 text-neutral-600 border-neutral-200',
-                                        };
-                                    @endphp
-                                    <span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full border {{ $tbadge }}">{{ $ticket->status->label() }}</span>
-                                </td>
-                                <td class="px-5 py-3 font-mono text-xs text-neutral-600">{{ optional($ticket->created_at)->format('d/m/Y H:i') }}</td>
+            <!-- Riwayat Maintenance (Rounded-2xl Card) -->
+            <div class="bg-white rounded-2xl border border-neutral-200 overflow-hidden shadow-sm">
+                <div class="px-5 py-4 border-b border-neutral-200 bg-neutral-50/70">
+                    <h3 class="font-bold text-neutral-900 text-sm tracking-tight font-heading">Riwayat Maintenance</h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-neutral-200 text-sm">
+                        <thead class="bg-neutral-50/70">
+                            <tr>
+                                <th class="px-5 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">Deskripsi Kendala</th>
+                                <th class="px-5 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">Pelapor</th>
+                                <th class="px-5 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">Status</th>
+                                <th class="px-5 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">Tanggal</th>
                             </tr>
-                        @empty
-                            <tr><td colspan="4" class="px-5 py-8 text-center text-xs text-neutral-500">Belum ada riwayat maintenance.</td></tr>
-                        @endforelse
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody class="divide-y divide-neutral-100">
+                            @forelse($item->tickets as $ticket)
+                                <tr class="hover:bg-neutral-50/70 transition-colors">
+                                    <td class="px-5 py-3 text-xs text-neutral-800 max-w-md truncate">{{ $ticket->issue_description }}</td>
+                                    <td class="px-5 py-3 text-xs text-neutral-700">{{ $ticket->reportedBy->name ?? '-' }}</td>
+                                    <td class="px-5 py-3">
+                                        @php
+                                            $tbadge = match($ticket->status->value) {
+                                                'open' => 'bg-rose-50 text-rose-700 border-rose-200',
+                                                'in_progress' => 'bg-amber-50 text-amber-800 border-amber-200',
+                                                'resolved' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                                                default => 'bg-neutral-100 text-neutral-600 border-neutral-200',
+                                            };
+                                        @endphp
+                                        <span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full border {{ $tbadge }}">{{ $ticket->status->label() }}</span>
+                                    </td>
+                                    <td class="px-5 py-3 font-mono text-xs text-neutral-600">{{ optional($ticket->created_at)->format('d/m/Y H:i') }}</td>
+                                </tr>
+                            @empty
+                                <tr><td colspan="4" class="px-5 py-8 text-center text-xs text-neutral-500">Belum ada riwayat maintenance.</td></tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
             </div>
-        </div>
+        @endif
 
     </div>
 </x-app-layout>

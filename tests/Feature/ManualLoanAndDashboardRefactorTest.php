@@ -306,4 +306,51 @@ class ManualLoanAndDashboardRefactorTest extends TestCase
             ->assertJsonPath('success', false)
             ->assertJsonPath('message', 'Pilih durasi peminjaman untuk barang praktikum yang dipinjam.');
     }
+
+    public function test_bhp_item_does_not_display_maintenance_status_in_items_index_and_show(): void
+    {
+        $staff = $this->actingAsStaff();
+
+        $bhpItem = Item::factory()->create([
+            'name' => 'Konektor RJ45 Pack 1',
+            'type' => ItemType::BAHAN_HABIS_PAKAI,
+            'category' => 'KONEKTOR',
+            'status' => ItemStatus::TERSEDIA,
+        ]);
+
+        $asetItem = Item::factory()->create([
+            'name' => 'TP-Link Router 1',
+            'type' => ItemType::ASET,
+            'category' => 'ROUTER',
+            'status' => ItemStatus::TERSEDIA,
+        ]);
+
+        // 1. Pada items index kelompok BHP, tidak boleh ada teks 'Belum Dijadwalkan'
+        $bhpIndexResponse = $this->actingAs($staff)
+            ->get(route('items.index', ['group' => 'konektor']));
+        $bhpIndexResponse->assertOk()
+            ->assertSee('Konektor RJ45 Pack 1')
+            ->assertDontSee('Belum Dijadwalkan');
+
+        // 2. Pada items index kelompok Aset, harus tetap ada status maintenance
+        $asetIndexResponse = $this->actingAs($staff)
+            ->get(route('items.index', ['group' => 'router']));
+        $asetIndexResponse->assertOk()
+            ->assertSee('TP-Link Router 1')
+            ->assertSee('Belum Dijadwalkan');
+
+        // 3. Pada items show BHP, card Jadwal Pemeliharaan Preventif dan Riwayat Maintenance tidak ditampilkan
+        $bhpShowResponse = $this->actingAs($staff)
+            ->get(route('items.show', $bhpItem->id));
+        $bhpShowResponse->assertOk()
+            ->assertDontSee('Jadwal Pemeliharaan Preventif')
+            ->assertDontSee('Riwayat Maintenance');
+
+        // 4. Pada items show Aset, card Jadwal Pemeliharaan Preventif dan Riwayat Maintenance tetap ditampilkan
+        $asetShowResponse = $this->actingAs($staff)
+            ->get(route('items.show', $asetItem->id));
+        $asetShowResponse->assertOk()
+            ->assertSee('Jadwal Pemeliharaan Preventif')
+            ->assertSee('Riwayat Maintenance');
+    }
 }

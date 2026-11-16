@@ -218,7 +218,7 @@
                         <div>
                             <select id="status" name="status" class="w-full rounded-xl border-neutral-200 text-xs font-semibold focus:border-primary focus:ring-primary" required>
                                 <option value="tersedia" @selected(old('status', $item->status->value) === 'tersedia')>Tersedia (Siap Dipinjam)</option>
-                                <option value="under_maintenance" @selected(old('status', $item->status->value) === 'under_maintenance')>Dalam Perbaikan (M&amp;R)</option>
+                                <option value="under_maintenance" x-show="itemType === 'aset'" @selected(old('status', $item->status->value) === 'under_maintenance')>Dalam Perbaikan (M&amp;R)</option>
                                 <option value="dipinjam" @selected(old('status', $item->status->value) === 'dipinjam')>Sedang Dipinjam</option>
                             </select>
                             <x-input-error :messages="$errors->get('status')" class="mt-2" />

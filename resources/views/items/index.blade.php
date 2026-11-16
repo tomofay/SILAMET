@@ -550,15 +550,17 @@
                                         <span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full border {{ $badge }}">
                                             {{ $item->status->label() }}
                                         </span>
-                                        <div class="mt-1 text-[10px] font-mono">
-                                            @if($nearestSched && $nearestSched->status === 'scheduled')
-                                                <span class="text-neutral-500">Maint: {{ optional($nearestSched->next_due_date)->format('d/m/Y') }}</span>
-                                            @elseif($nearestSched)
-                                                <span class="text-neutral-400">Maint: Dijeda</span>
-                                            @else
-                                                <span class="text-amber-700">Belum Dijadwalkan</span>
-                                            @endif
-                                        </div>
+                                        @if($item->type->value === 'aset')
+                                            <div class="mt-1 text-[10px] font-mono">
+                                                @if($nearestSched && $nearestSched->status === 'scheduled')
+                                                    <span class="text-neutral-500">Maint: {{ optional($nearestSched->next_due_date)->format('d/m/Y') }}</span>
+                                                @elseif($nearestSched)
+                                                    <span class="text-neutral-400">Maint: Dijeda</span>
+                                                @else
+                                                    <span class="text-amber-700">Belum Dijadwalkan</span>
+                                                @endif
+                                            </div>
+                                        @endif
                                     </td>
                                     <td class="px-4 py-3.5 text-right whitespace-nowrap">
                                         <div class="inline-flex items-center justify-end gap-1">

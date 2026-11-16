@@ -183,7 +183,7 @@ class Loan extends Model
     }
 
     /**
-     * Waktu otomatis masuk ke histori (saat berganti tanggal).
+     * Waktu target otomatis masuk ke histori (jam 24:00 tengah malam / ganti tanggal).
      */
     public function bhpAutoArchiveAt(): ?Carbon
     {
@@ -192,6 +192,27 @@ class Loan extends Model
         }
 
         return $this->borrowed_at->copy()->endOfDay();
+    }
+
+    /**
+     * Sisa waktu sebelum pergantian tanggal (jam 24:00 tengah malam).
+     */
+    public function bhpRemainingTimeToMidnight(): string
+    {
+        $target = $this->bhpAutoArchiveAt();
+        if (! $target || now()->greaterThanOrEqualTo($target)) {
+            return '0 mnt';
+        }
+
+        $diffSeconds = (int) now()->diffInSeconds($target);
+        $hours = intdiv($diffSeconds, 3600);
+        $minutes = intdiv($diffSeconds % 3600, 60);
+
+        if ($hours > 0) {
+            return "{$hours} jam {$minutes} mnt";
+        }
+
+        return "{$minutes} mnt";
     }
 
     /**

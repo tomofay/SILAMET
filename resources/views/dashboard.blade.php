@@ -315,7 +315,7 @@
                                                     </span>
                                                 @elseif($loan->isBhp())
                                                     <span class="font-mono text-[10px] text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 shrink-0 font-medium">
-                                                        Dipinjam: {{ $loan->bhpElapsedTime() }}
+                                                        Sisa: {{ $loan->bhpRemainingTimeToMidnight() }}
                                                     </span>
                                                 @else
                                                     <span class="font-mono text-[10px] text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 shrink-0">

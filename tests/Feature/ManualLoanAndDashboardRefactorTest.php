@@ -393,8 +393,8 @@ class ManualLoanAndDashboardRefactorTest extends TestCase
         $indexResponse = $this->actingAs($staff)->get(route('loans.index'));
         $indexResponse->assertOk()
             ->assertSee('RJ45 Pack 1')
-            ->assertSee('Dipinjam')
-            ->assertSee('Otomatis selesai saat ganti tanggal');
+            ->assertSee('Sisa')
+            ->assertSee('Auto-arsip jam 24:00 (ganti tanggal)');
 
         $freshLoan->refresh();
         $expiredLoan->refresh();

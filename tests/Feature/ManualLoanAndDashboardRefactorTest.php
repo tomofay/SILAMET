@@ -197,4 +197,113 @@ class ManualLoanAndDashboardRefactorTest extends TestCase
         $response->assertSee('2. Sudah Dikembalikan');
         $response->assertSee('3. Terlambat');
     }
+
+    public function test_manual_borrow_bhp_item_without_duration_sets_null_duration_and_due_date(): void
+    {
+        $staff = $this->actingAsStaff();
+        $student = User::factory()->siswa()->create(['phone' => '081234567890']);
+
+        $bhpItem = Item::factory()->create([
+            'name' => 'Fast Connector SC UPC',
+            'type' => ItemType::BAHAN_HABIS_PAKAI,
+            'stock' => 50,
+            'status' => ItemStatus::TERSEDIA,
+        ]);
+
+        $response = $this->actingAs($staff)->post(route('loans.store'), [
+            'user_id' => $student->id,
+            'item_ids' => [$bhpItem->id],
+            'quantities' => [$bhpItem->id => 2],
+            'usage_duration' => null,
+        ]);
+
+        $response->assertRedirect(route('loans.index'));
+
+        $loan = Loan::where('item_id', $bhpItem->id)->first();
+        $this->assertNotNull($loan);
+        $this->assertNull($loan->usage_duration);
+        $this->assertNull($loan->due_at);
+        $this->assertFalse($loan->isOverdue());
+    }
+
+    public function test_manual_borrow_aset_item_without_duration_fails_validation(): void
+    {
+        $staff = $this->actingAsStaff();
+        $student = User::factory()->siswa()->create(['phone' => '081234567890']);
+
+        $asetItem = Item::factory()->create([
+            'name' => 'MikroTik RouterBoard',
+            'type' => ItemType::ASET,
+            'status' => ItemStatus::TERSEDIA,
+        ]);
+
+        $response = $this->actingAs($staff)->post(route('loans.store'), [
+            'user_id' => $student->id,
+            'item_ids' => [$asetItem->id],
+            'usage_duration' => null,
+        ]);
+
+        $response->assertSessionHasErrors('usage_duration');
+    }
+
+    public function test_kiosk_api_borrow_bhp_without_duration_sets_null_duration_and_due_date(): void
+    {
+        $student = User::factory()->siswa()->create([
+            'phone' => '081234567890',
+            'nis_nip' => '12345678',
+        ]);
+        $token = $student->createToken('kiosk-test')->plainTextToken;
+
+        $bhpItem = Item::factory()->create([
+            'name' => 'Konektor RJ45 Cat6',
+            'type' => ItemType::BAHAN_HABIS_PAKAI,
+            'stock' => 100,
+            'status' => ItemStatus::TERSEDIA,
+        ]);
+
+        $response = $this->withHeader('Authorization', "Bearer {$token}")
+            ->postJson('/api/v1/loans', [
+                'user_id' => $student->id,
+                'item_ids' => [$bhpItem->id],
+                'quantities' => [$bhpItem->id => 5],
+                'usage_duration' => null,
+            ]);
+
+        $response->assertOk()
+            ->assertJsonPath('success', true);
+
+        $loan = Loan::where('item_id', $bhpItem->id)->first();
+        $this->assertNotNull($loan);
+        $this->assertNull($loan->usage_duration);
+        $this->assertNull($loan->due_at);
+        $this->assertFalse($loan->isOverdue());
+
+        // Pastikan barang BHP tidak muncul pada daftar alat yang harus dikembalikan di Kiosk
+        $activeResponse = $this->getJson('/api/v1/loans/active-by-nis?nis=12345678');
+        $activeResponse->assertOk()
+            ->assertJsonCount(0, 'data.active_loans');
+    }
+
+    public function test_kiosk_api_borrow_aset_without_duration_fails_validation(): void
+    {
+        $student = User::factory()->siswa()->create(['phone' => '081234567890']);
+        $token = $student->createToken('kiosk-test')->plainTextToken;
+
+        $asetItem = Item::factory()->create([
+            'name' => 'Cisco Catalyst Switch',
+            'type' => ItemType::ASET,
+            'status' => ItemStatus::TERSEDIA,
+        ]);
+
+        $response = $this->withHeader('Authorization', "Bearer {$token}")
+            ->postJson('/api/v1/loans', [
+                'user_id' => $student->id,
+                'item_ids' => [$asetItem->id],
+                'usage_duration' => null,
+            ]);
+
+        $response->assertStatus(422)
+            ->assertJsonPath('success', false)
+            ->assertJsonPath('message', 'Pilih durasi peminjaman untuk barang praktikum yang dipinjam.');
+    }
 }

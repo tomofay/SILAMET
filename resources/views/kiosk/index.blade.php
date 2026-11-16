@@ -532,116 +532,169 @@
                 <div class="lg:col-span-6 flex flex-col">
                     <div class="bg-white rounded-xl p-5 border border-neutral-200 flex-1 flex flex-col justify-between">
                         <div>
-                            <div class="flex items-center justify-between mb-1.5">
-                                <div class="flex items-center gap-2">
-                                    <div class="p-2 rounded-lg bg-primary/10 text-primary-600">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                    </div>
-                                    <h3 class="text-base font-bold text-neutral-900">Pilih Durasi Pemakaian</h3>
-                                </div>
-                                <span class="text-xs font-medium text-neutral-500">*Sentuh salah satu</span>
-                            </div>
-                            <p class="text-xs text-neutral-500 mb-4">
-                                Batas waktu pengembalian otomatis dihitung dan dipantau sistem.
-                            </p>
-
-                            <!-- Duration Grid -->
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
-                                
-                                <!-- Card 1: Pulang Sekolah -->
-                                <button 
-                                    type="button"
-                                    @click="setDuration('pulang_sekolah')"
-                                    :class="selectedDuration === 'pulang_sekolah' ? 'border-primary bg-primary-50/70' : 'border-neutral-200 hover:border-neutral-300 bg-white'"
-                                    class="min-h-[84px] p-4 rounded-xl border-2 text-left transition-colors flex flex-col justify-between"
-                                >
-                                    <div class="flex items-center justify-between w-full">
-                                        <span class="font-bold text-sm sm:text-base text-neutral-900">Pulang Sekolah</span>
-                                        <span class="w-5 h-5 rounded-full border-2 border-primary flex items-center justify-center shrink-0" x-show="selectedDuration === 'pulang_sekolah'">
-                                            <span class="w-2.5 h-2.5 rounded-full bg-primary"></span>
-                                        </span>
-                                    </div>
-                                    <span class="text-xs font-mono text-neutral-500">Hari ini, 16:00 WIB</span>
-                                </button>
-
-                                <!-- Card 2: 1 Hari -->
-                                <button 
-                                    type="button"
-                                    @click="setDuration('1_hari')"
-                                    :class="selectedDuration === '1_hari' ? 'border-primary bg-primary-50/70' : 'border-neutral-200 hover:border-neutral-300 bg-white'"
-                                    class="min-h-[84px] p-4 rounded-xl border-2 text-left transition-colors flex flex-col justify-between"
-                                >
-                                    <div class="flex items-center justify-between w-full">
-                                        <span class="font-bold text-sm sm:text-base text-neutral-900">1 Hari</span>
-                                        <span class="w-5 h-5 rounded-full border-2 border-primary flex items-center justify-center shrink-0" x-show="selectedDuration === '1_hari'">
-                                            <span class="w-2.5 h-2.5 rounded-full bg-primary"></span>
-                                        </span>
-                                    </div>
-                                    <span class="text-xs font-mono text-neutral-500">Besok, 23:59 WIB</span>
-                                </button>
-
-                                <!-- Card 3: 2 Hari -->
-                                <button 
-                                    type="button"
-                                    @click="setDuration('2_hari')"
-                                    :class="selectedDuration === '2_hari' ? 'border-primary bg-primary-50/70' : 'border-neutral-200 hover:border-neutral-300 bg-white'"
-                                    class="min-h-[84px] p-4 rounded-xl border-2 text-left transition-colors flex flex-col justify-between"
-                                >
-                                    <div class="flex items-center justify-between w-full">
-                                        <span class="font-bold text-sm sm:text-base text-neutral-900">2 Hari</span>
-                                        <span class="w-5 h-5 rounded-full border-2 border-primary flex items-center justify-center shrink-0" x-show="selectedDuration === '2_hari'">
-                                            <span class="w-2.5 h-2.5 rounded-full bg-primary"></span>
-                                        </span>
-                                    </div>
-                                    <span class="text-xs font-mono text-neutral-500">+2 Hari, 23:59 WIB</span>
-                                </button>
-
-                                <!-- Card 4: 3 Hari -->
-                                <button 
-                                    type="button"
-                                    @click="setDuration('3_hari')"
-                                    :class="selectedDuration === '3_hari' ? 'border-primary bg-primary-50/70' : 'border-neutral-200 hover:border-neutral-300 bg-white'"
-                                    class="min-h-[84px] p-4 rounded-xl border-2 text-left transition-colors flex flex-col justify-between"
-                                >
-                                    <div class="flex items-center justify-between w-full">
-                                        <span class="font-bold text-sm sm:text-base text-neutral-900">3 Hari</span>
-                                        <span class="w-5 h-5 rounded-full border-2 border-primary flex items-center justify-center shrink-0" x-show="selectedDuration === '3_hari'">
-                                            <span class="w-2.5 h-2.5 rounded-full bg-primary"></span>
-                                        </span>
-                                    </div>
-                                    <span class="text-xs font-mono text-neutral-500">+3 Hari, 23:59 WIB</span>
-                                </button>
-
-                                <!-- Card 5: 1 Minggu (Span 2) -->
-                                <button 
-                                    type="button"
-                                    @click="setDuration('1_minggu')"
-                                    :class="selectedDuration === '1_minggu' ? 'border-primary bg-primary-50/70' : 'border-neutral-200 hover:border-neutral-300 bg-white'"
-                                    class="sm:col-span-2 min-h-[84px] p-4 rounded-xl border-2 text-left transition-colors flex flex-col justify-between"
-                                >
-                                    <div class="flex items-center justify-between w-full">
-                                        <div class="flex items-center gap-2">
-                                            <span class="font-bold text-sm sm:text-base text-neutral-900">1 Minggu</span>
-                                            <span class="text-[11px] bg-neutral-100 text-neutral-700 border border-neutral-200 px-2 py-0.5 rounded-md font-semibold">Proyek Khusus</span>
+                            <!-- KASUS 1: HANYA MEMINJAM BAHAN HABIS PAKAI (SEKALI PAKAI / BHP) -->
+                            <div x-show="isOnlyBhp()" class="space-y-4 mb-5">
+                                <div class="flex items-center justify-between pb-3 border-b border-neutral-100">
+                                    <div class="flex items-center gap-2">
+                                        <div class="p-2 rounded-lg bg-amber-50 text-amber-700 border border-amber-200">
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                                            </svg>
                                         </div>
-                                        <span class="w-5 h-5 rounded-full border-2 border-primary flex items-center justify-center shrink-0" x-show="selectedDuration === '1_minggu'">
-                                            <span class="w-2.5 h-2.5 rounded-full bg-primary"></span>
+                                        <h3 class="text-base font-bold text-neutral-900">Bahan Sekali Pakai (BHP)</h3>
+                                    </div>
+                                    <span class="px-2 py-0.5 rounded font-mono text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                                        BEBAS PENGEMBALIAN
+                                    </span>
+                                </div>
+
+                                <div class="p-4 rounded-xl bg-amber-50/70 border border-amber-200 space-y-2.5">
+                                    <div class="flex items-center gap-2">
+                                        <svg class="w-4 h-4 text-amber-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <h4 class="text-xs font-bold uppercase tracking-wider text-amber-900">Tidak Memerlukan Waktu Peminjaman</h4>
+                                    </div>
+                                    <p class="text-xs text-amber-800 leading-relaxed">
+                                        Barang yang Anda pilih merupakan <strong>bahan habis pakai</strong> (seperti konektor RJ-45, kabel, atau fast connector). Bahan ini langsung digunakan untuk kegiatan praktikum dan <strong>tidak perlu dikembalikan</strong> ke laboratorium.
+                                    </p>
+                                    <div class="pt-2 border-t border-amber-200/80 flex items-center justify-between text-xs font-semibold text-amber-900">
+                                        <span class="font-mono text-[11px] uppercase tracking-wider text-amber-800">Status Pengembalian:</span>
+                                        <span class="px-2 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-300 font-mono text-[10px] font-bold">
+                                            TIDAK PERLU DIKEMBALIKAN
                                         </span>
                                     </div>
-                                    <span class="text-xs font-mono text-neutral-500">7 Hari Kalender, 23:59 WIB</span>
-                                </button>
+                                </div>
+                            </div>
+
+                            <!-- KASUS 2: MEMINJAM BARANG PRAKTIKUM (ASET / MIXED) -->
+                            <div x-show="!isOnlyBhp()">
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <div class="flex items-center gap-2">
+                                        <div class="p-2 rounded-lg bg-primary/10 text-primary-600">
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                        </div>
+                                        <h3 class="text-base font-bold text-neutral-900">Pilih Durasi Pemakaian</h3>
+                                    </div>
+                                    <span class="text-xs font-medium text-neutral-500">*Sentuh salah satu</span>
+                                </div>
+                                <p class="text-xs text-neutral-500 mb-3">
+                                    Batas waktu pengembalian otomatis dihitung dan dipantau sistem.
+                                </p>
+
+                                <div x-show="hasBhp()" class="text-[11px] text-amber-800 bg-amber-50 border border-amber-200 rounded-lg p-2.5 mb-3">
+                                    *Catatan: Batas waktu peminjaman di bawah hanya berlaku untuk unit alat praktikum (aset). Bahan sekali pakai tidak perlu dikembalikan.
+                                </div>
+
+                                <!-- Duration Grid -->
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
+                                    
+                                    <!-- Card 1: Pulang Sekolah -->
+                                    <button 
+                                        type="button"
+                                        @click="setDuration('pulang_sekolah')"
+                                        :class="selectedDuration === 'pulang_sekolah' ? 'border-primary bg-primary-50/70' : 'border-neutral-200 hover:border-neutral-300 bg-white'"
+                                        class="min-h-[84px] p-4 rounded-xl border-2 text-left transition-colors flex flex-col justify-between"
+                                    >
+                                        <div class="flex items-center justify-between w-full">
+                                            <span class="font-bold text-sm sm:text-base text-neutral-900">Pulang Sekolah</span>
+                                            <span class="w-5 h-5 rounded-full border-2 border-primary flex items-center justify-center shrink-0" x-show="selectedDuration === 'pulang_sekolah'">
+                                                <span class="w-2.5 h-2.5 rounded-full bg-primary"></span>
+                                            </span>
+                                        </div>
+                                        <span class="text-xs font-mono text-neutral-500">Hari ini, 16:00 WIB</span>
+                                    </button>
+
+                                    <!-- Card 2: 1 Hari -->
+                                    <button 
+                                        type="button"
+                                        @click="setDuration('1_hari')"
+                                        :class="selectedDuration === '1_hari' ? 'border-primary bg-primary-50/70' : 'border-neutral-200 hover:border-neutral-300 bg-white'"
+                                        class="min-h-[84px] p-4 rounded-xl border-2 text-left transition-colors flex flex-col justify-between"
+                                    >
+                                        <div class="flex items-center justify-between w-full">
+                                            <span class="font-bold text-sm sm:text-base text-neutral-900">1 Hari</span>
+                                            <span class="w-5 h-5 rounded-full border-2 border-primary flex items-center justify-center shrink-0" x-show="selectedDuration === '1_hari'">
+                                                <span class="w-2.5 h-2.5 rounded-full bg-primary"></span>
+                                            </span>
+                                        </div>
+                                        <span class="text-xs font-mono text-neutral-500">Besok, 23:59 WIB</span>
+                                    </button>
+
+                                    <!-- Card 3: 2 Hari -->
+                                    <button 
+                                        type="button"
+                                        @click="setDuration('2_hari')"
+                                        :class="selectedDuration === '2_hari' ? 'border-primary bg-primary-50/70' : 'border-neutral-200 hover:border-neutral-300 bg-white'"
+                                        class="min-h-[84px] p-4 rounded-xl border-2 text-left transition-colors flex flex-col justify-between"
+                                    >
+                                        <div class="flex items-center justify-between w-full">
+                                            <span class="font-bold text-sm sm:text-base text-neutral-900">2 Hari</span>
+                                            <span class="w-5 h-5 rounded-full border-2 border-primary flex items-center justify-center shrink-0" x-show="selectedDuration === '2_hari'">
+                                                <span class="w-2.5 h-2.5 rounded-full bg-primary"></span>
+                                            </span>
+                                        </div>
+                                        <span class="text-xs font-mono text-neutral-500">+2 Hari, 23:59 WIB</span>
+                                    </button>
+
+                                    <!-- Card 4: 3 Hari -->
+                                    <button 
+                                        type="button"
+                                        @click="setDuration('3_hari')"
+                                        :class="selectedDuration === '3_hari' ? 'border-primary bg-primary-50/70' : 'border-neutral-200 hover:border-neutral-300 bg-white'"
+                                        class="min-h-[84px] p-4 rounded-xl border-2 text-left transition-colors flex flex-col justify-between"
+                                    >
+                                        <div class="flex items-center justify-between w-full">
+                                            <span class="font-bold text-sm sm:text-base text-neutral-900">3 Hari</span>
+                                            <span class="w-5 h-5 rounded-full border-2 border-primary flex items-center justify-center shrink-0" x-show="selectedDuration === '3_hari'">
+                                                <span class="w-2.5 h-2.5 rounded-full bg-primary"></span>
+                                            </span>
+                                        </div>
+                                        <span class="text-xs font-mono text-neutral-500">+3 Hari, 23:59 WIB</span>
+                                    </button>
+
+                                    <!-- Card 5: 1 Minggu (Span 2) -->
+                                    <button 
+                                        type="button"
+                                        @click="setDuration('1_minggu')"
+                                        :class="selectedDuration === '1_minggu' ? 'border-primary bg-primary-50/70' : 'border-neutral-200 hover:border-neutral-300 bg-white'"
+                                        class="sm:col-span-2 min-h-[84px] p-4 rounded-xl border-2 text-left transition-colors flex flex-col justify-between"
+                                    >
+                                        <div class="flex items-center justify-between w-full">
+                                            <div class="flex items-center gap-2">
+                                                <span class="font-bold text-sm sm:text-base text-neutral-900">1 Minggu</span>
+                                                <span class="text-[11px] bg-neutral-100 text-neutral-700 border border-neutral-200 px-2 py-0.5 rounded-md font-semibold">Proyek Khusus</span>
+                                            </div>
+                                            <span class="w-5 h-5 rounded-full border-2 border-primary flex items-center justify-center shrink-0" x-show="selectedDuration === '1_minggu'">
+                                                <span class="w-2.5 h-2.5 rounded-full bg-primary"></span>
+                                            </span>
+                                        </div>
+                                        <span class="text-xs font-mono text-neutral-500">7 Hari Kalender, 23:59 WIB</span>
+                                    </button>
+                                </div>
                             </div>
 
                             <!-- Estimasi Due At Box -->
                             <div class="bg-neutral-50 rounded-xl p-4 border border-neutral-200 mb-5">
                                 <div class="text-[11px] font-semibold uppercase text-neutral-500 tracking-wider">Estimasi Batas Pengembalian</div>
-                                <div class="text-sm sm:text-base font-bold font-mono text-neutral-900 mt-1 flex items-center gap-2">
-                                    <svg class="w-4 h-4 text-primary-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                    </svg>
-                                    <span x-text="estimatedDueText">Pilih durasi pemakaian...</span>
+                                <div class="mt-1 flex items-center gap-2">
+                                    <template x-if="isOnlyBhp()">
+                                        <div class="text-xs sm:text-sm font-bold text-amber-800 flex items-center gap-2">
+                                            <span class="px-2.5 py-1 rounded-lg bg-amber-100 border border-amber-200 font-mono text-[11px] font-bold">
+                                                TIDAK PERLU DIKEMBALIKAN (HABIS PAKAI)
+                                            </span>
+                                        </div>
+                                    </template>
+                                    <template x-if="!isOnlyBhp()">
+                                        <div class="text-sm sm:text-base font-bold font-mono text-neutral-900 flex items-center gap-2">
+                                            <svg class="w-4 h-4 text-primary-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                            </svg>
+                                            <span x-text="estimatedDueText">Pilih durasi pemakaian...</span>
+                                        </div>
+                                    </template>
                                 </div>
                             </div>
                         </div>
@@ -783,7 +836,9 @@
 
                             <div>
                                 <div class="text-xs text-neutral-500">Batas Waktu Pengembalian</div>
-                                <div class="font-mono font-bold text-rose-700 text-xs sm:text-sm mt-0.5" x-text="estimatedDueText"></div>
+                                <div class="text-xs sm:text-sm mt-0.5"
+                                     :class="isOnlyBhp() ? 'font-bold text-amber-800 font-sans' : 'font-mono font-bold text-rose-700'"
+                                     x-text="isOnlyBhp() ? 'Tidak Perlu Dikembalikan (Bahan Habis Pakai)' : estimatedDueText"></div>
                             </div>
                         </div>
 
@@ -854,7 +909,9 @@
             </p>
             <div class="bg-white border border-neutral-200 rounded-xl px-6 py-4 mb-6">
                 <div class="text-[11px] uppercase font-bold tracking-wider text-neutral-500">Informasi Batas Pengembalian</div>
-                <div class="text-lg font-mono font-bold text-neutral-900 mt-1" x-text="successMessage.dueAt"></div>
+                <div class="text-base sm:text-lg font-bold mt-1"
+                     :class="successMessage.dueAt.includes('Tidak Perlu') || successMessage.dueAt.includes('Habis Pakai') ? 'text-amber-800 font-sans' : 'text-neutral-900 font-mono'"
+                     x-text="successMessage.dueAt"></div>
             </div>
             <div class="flex items-center gap-2 text-xs sm:text-sm text-neutral-500">
                 <span>Layar akan kembali ke menu awal dalam</span>
@@ -1448,12 +1505,27 @@
                     }
                 },
 
+                isOnlyBhp() {
+                    return this.selectedItems.length > 0 && this.selectedItems.every(i => i.type === 'bahan_habis_pakai');
+                },
+                hasAset() {
+                    return this.selectedItems.some(i => i.type !== 'bahan_habis_pakai');
+                },
+                hasBhp() {
+                    return this.selectedItems.some(i => i.type === 'bahan_habis_pakai');
+                },
+
                 setDuration(duration) {
                     this.selectedDuration = duration;
                     this.calculateEstimatedDue();
                 },
 
                 calculateEstimatedDue() {
+                    if (this.isOnlyBhp()) {
+                        this.estimatedDueText = 'Tidak Perlu Dikembalikan (Bahan Habis Pakai)';
+                        return;
+                    }
+
                     const now = new Date();
                     let due = new Date(now);
 
@@ -1527,6 +1599,7 @@
                         item.quantity = item.quantity || 1;
                         this.playAudioTone('beep');
                         this.selectedItems.push(item);
+                        this.calculateEstimatedDue();
                         this.scanInputs.itemCode = '';
                         this.showToast('success', 'Barang Ditambahkan', `"${item.name}" masuk ke daftar (${this.selectedItems.length} barang).`);
 
@@ -1545,12 +1618,14 @@
                     }
                     item.quantity = item.quantity || 1;
                     this.selectedItems.push(item);
+                    this.calculateEstimatedDue();
                     this.playAudioTone('beep');
                     this.showToast('success', 'Barang Ditambahkan', `"${item.name}" masuk ke daftar (${this.selectedItems.length} barang).`);
                 },
 
                 removeItem(itemId) {
                     this.selectedItems = this.selectedItems.filter(i => i.id !== itemId);
+                    this.calculateEstimatedDue();
                 },
 
                 proceedToSnapshotScreen() {
@@ -1732,7 +1807,7 @@
                                 user_id: this.currentUser.id,
                                 item_ids: itemIds,
                                 quantities: quantities,
-                                usage_duration: this.selectedDuration,
+                                usage_duration: this.isOnlyBhp() ? null : this.selectedDuration,
                                 photo: photoBase64
                             })
                         });
@@ -1749,10 +1824,11 @@
                         this.playAudioTone('success');
                         this.stopWebcam();
 
+                        const onlyBhp = this.isOnlyBhp();
                         this.successMessage = {
                             title: 'Peminjaman Berhasil!',
-                            body: `${this.selectedItems.length} Peralatan (${result.data.item_name}) berhasil dipinjam atas nama ${this.currentUser.name}.`,
-                            dueAt: this.estimatedDueText
+                            body: `${this.selectedItems.length} Barang (${result.data.item_name}) berhasil dicatat atas nama ${this.currentUser.name}.`,
+                            dueAt: onlyBhp ? 'Tidak Perlu Dikembalikan (Bahan Habis Pakai)' : this.estimatedDueText
                         };
 
                         this.screen = 'success';

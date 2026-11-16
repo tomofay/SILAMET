@@ -105,12 +105,22 @@
                 </div>
                 <div class="p-3.5 rounded-xl bg-neutral-50/70 border border-neutral-200/80">
                     <dt class="text-neutral-500 text-[11px] font-bold uppercase tracking-wider font-heading">Durasi Pemakaian</dt>
-                    <dd class="font-semibold text-neutral-900 text-xs mt-1.5">{{ $loan->usage_duration?->label() ?? '—' }}</dd>
+                    <dd class="font-semibold text-neutral-900 text-xs mt-1.5">
+                        @if($loan->usage_duration)
+                            {{ $loan->usage_duration->label() }}
+                        @else
+                            <span class="text-amber-800 font-medium font-sans">Sekali Pakai (Tidak Ada Durasi)</span>
+                        @endif
+                    </dd>
                 </div>
                 <div class="p-3.5 rounded-xl bg-neutral-50/70 border border-neutral-200/80">
                     <dt class="text-neutral-500 text-[11px] font-bold uppercase tracking-wider font-heading">Batas Jatuh Tempo</dt>
                     <dd class="font-semibold font-mono text-xs mt-1.5 {{ $loan->status->value === 'aktif' && $loan->due_at?->isPast() ? 'text-rose-700' : 'text-neutral-900' }}">
-                        {{ optional($loan->due_at)->format('d/m/Y H:i') ?? '—' }}
+                        @if($loan->due_at)
+                            {{ $loan->due_at->format('d/m/Y H:i') }}
+                        @else
+                            <span class="font-sans text-amber-800 font-medium">Tidak Ada (Sekali Pakai)</span>
+                        @endif
                     </dd>
                     @if($loan->status->value === 'aktif' && $loan->due_at?->isPast())
                         <dd class="text-[10px] font-semibold text-rose-700 mt-1 inline-flex items-center gap-1 font-mono">

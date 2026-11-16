@@ -149,7 +149,7 @@ class LoanController extends Controller
             'item_ids.*' => 'exists:items,id',
             'quantities' => 'nullable|array',
             'quantities.*' => 'nullable|integer|min:1|max:10000',
-            'usage_duration' => ['required', Rule::enum(LoanDuration::class)],
+            'usage_duration' => ['nullable', Rule::enum(LoanDuration::class)],
         ]);
 
         $itemIds = [];
@@ -163,6 +163,15 @@ class LoanController extends Controller
                 ->withInput();
         }
 
+        $items = Item::whereIn('id', $itemIds)->get();
+        $hasAset = $items->contains(fn ($it) => $it->type !== ItemType::BAHAN_HABIS_PAKAI);
+
+        if ($hasAset && empty($validated['usage_duration'])) {
+            return redirect()->back()
+                ->withErrors(['usage_duration' => 'Pilih durasi peminjaman untuk barang praktikum yang dipinjam.'])
+                ->withInput();
+        }
+
         $user = User::findOrFail($validated['user_id']);
 
         if (blank($user->phone)) {
@@ -172,9 +181,13 @@ class LoanController extends Controller
         }
 
         $borrowedAt = now();
+        $hasAsetDuration = ! empty($validated['usage_duration']);
+        $defaultDueAt = $hasAsetDuration
+            ? Loan::calculateDueAt($validated['usage_duration'], $borrowedAt)
+            : null;
         $count = 0;
 
-        DB::transaction(function () use ($validated, $itemIds, $borrowedAt, $user, &$count) {
+        DB::transaction(function () use ($validated, $itemIds, $borrowedAt, $user, $defaultDueAt, &$count) {
             foreach ($itemIds as $itemId) {
                 // Kunci baris item agar tidak terjadi double-borrow
                 $item = Item::query()->lockForUpdate()->findOrFail($itemId);
@@ -184,8 +197,9 @@ class LoanController extends Controller
                 }
 
                 $borrowedQty = isset($validated['quantities'][$itemId]) ? max(1, (int) $validated['quantities'][$itemId]) : 1;
+                $isBhp = $item->type === ItemType::BAHAN_HABIS_PAKAI;
 
-                if ($item->type === ItemType::BAHAN_HABIS_PAKAI) {
+                if ($isBhp) {
                     if ($item->stock < $borrowedQty) {
                         abort(422, sprintf('Stok barang "%s" tidak mencukupi (tersedia: %d pcs, diminta: %d pcs).', $item->name, $item->stock, $borrowedQty));
                     }
@@ -209,15 +223,18 @@ class LoanController extends Controller
                     $item->update(['status' => ItemStatus::DIPINJAM]);
                 }
 
+                $itemDuration = $isBhp ? null : ($validated['usage_duration'] ?? null);
+                $itemDueAt = ($isBhp || empty($itemDuration)) ? null : $defaultDueAt;
+
                 Loan::create([
                     'user_id' => $validated['user_id'],
                     'item_id' => $item->id,
                     'quantity_borrowed' => $borrowedQty,
                     'status' => 'aktif',
                     'borrowed_via' => 'manual',
-                    'usage_duration' => $validated['usage_duration'],
+                    'usage_duration' => $itemDuration,
                     'borrowed_at' => $borrowedAt,
-                    'due_at' => Loan::calculateDueAt($validated['usage_duration'], $borrowedAt),
+                    'due_at' => $itemDueAt,
                 ]);
 
                 $count++;

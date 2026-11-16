@@ -58,14 +58,16 @@
                         </div>
 
                         <div>
-                            <x-input-label for="usage_duration" value="Durasi Pemakaian *" />
-                            <select id="usage_duration" name="usage_duration" class="mt-1.5 w-full rounded-xl border-neutral-200 text-sm focus:border-neutral-900 focus:ring-neutral-900" required>
+                            <x-input-label for="usage_duration" value="Durasi Pemakaian" />
+                            <select id="usage_duration" name="usage_duration" class="mt-1.5 w-full rounded-xl border-neutral-200 text-sm focus:border-neutral-900 focus:ring-neutral-900">
+                                <option value="">— Pilih durasi pemakaian (Wajib untuk alat praktikum) —</option>
                                 @foreach(\App\Enums\LoanDuration::cases() as $duration)
                                     <option value="{{ $duration->value }}" @selected(old('usage_duration') === $duration->value)>
                                         {{ $duration->label() }}
                                     </option>
                                 @endforeach
                             </select>
+                            <p class="text-[11px] text-neutral-500 mt-1">Kosongkan jika hanya meminjam bahan habis pakai (konektor, kabel, fast connector).</p>
                             <x-input-error :messages="$errors->get('usage_duration')" class="mt-2" />
                         </div>
                     </div>

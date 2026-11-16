@@ -166,9 +166,15 @@
                                     <div class="text-[11px] text-neutral-500 font-mono mt-0.5">{{ $loan->item->item_code ?? '—' }}</div>
                                 </td>
                                 <td class="px-5 py-4 text-xs text-neutral-700 font-medium whitespace-nowrap">
-                                    <span class="inline-block px-2.5 py-0.5 rounded-full bg-neutral-100 border border-neutral-200 text-neutral-700 text-[11px] font-semibold">
-                                        {{ $loan->usage_duration?->label() ?? '—' }}
-                                    </span>
+                                    @if($loan->usage_duration)
+                                        <span class="inline-block px-2.5 py-0.5 rounded-full bg-neutral-100 border border-neutral-200 text-neutral-700 text-[11px] font-semibold">
+                                            {{ $loan->usage_duration->label() }}
+                                        </span>
+                                    @else
+                                        <span class="inline-block px-2.5 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-[11px] font-semibold">
+                                            Sekali Pakai
+                                        </span>
+                                    @endif
                                 </td>
                                 <td class="px-5 py-4 font-mono text-xs text-neutral-600 whitespace-nowrap">
                                     {{ optional($loan->borrowed_at)->format('d/m/Y H:i') }}

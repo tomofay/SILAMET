@@ -31,7 +31,7 @@ class LoanApiController extends Controller
             'item_id' => 'nullable|exists:items,id',
             'item_ids' => 'nullable|array|min:1',
             'item_ids.*' => 'exists:items,id',
-            'usage_duration' => ['required', Rule::enum(LoanDuration::class)],
+            'usage_duration' => ['nullable', Rule::enum(LoanDuration::class)],
             'quantities' => 'nullable|array',
             'quantities.*' => 'nullable|integer|min:1|max:10000',
             'photo' => 'nullable|string', // base64 dari webcam
@@ -46,6 +46,16 @@ class LoanApiController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Pilih minimal satu barang untuk dipinjam.',
+            ], 422);
+        }
+
+        $items = Item::whereIn('id', $itemIds)->get();
+        $hasAset = $items->contains(fn ($it) => $it->type !== ItemType::BAHAN_HABIS_PAKAI);
+
+        if ($hasAset && empty($validated['usage_duration'])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Pilih durasi peminjaman untuk barang praktikum yang dipinjam.',
             ], 422);
         }
 
@@ -70,7 +80,8 @@ class LoanApiController extends Controller
                 $photoPath = $cameraService->capture($imageData, 'photos/loans');
             }
 
-            $dueAt = Loan::calculateDueAt($validated['usage_duration'], $borrowedAt);
+            $hasDuration = ! empty($validated['usage_duration']);
+            $defaultDueAt = $hasDuration ? Loan::calculateDueAt($validated['usage_duration'], $borrowedAt) : null;
             $user = User::findOrFail($validated['user_id']);
             $createdLoans = [];
 
@@ -114,6 +125,10 @@ class LoanApiController extends Controller
                     $item->update(['status' => ItemStatus::DIPINJAM]);
                 }
 
+                $isBhp = $item->type === ItemType::BAHAN_HABIS_PAKAI;
+                $itemDuration = $isBhp ? null : ($validated['usage_duration'] ?? null);
+                $itemDueAt = ($isBhp || empty($itemDuration)) ? null : $defaultDueAt;
+
                 $loan = Loan::create([
                     'user_id' => $validated['user_id'],
                     'item_id' => $item->id,
@@ -121,9 +136,9 @@ class LoanApiController extends Controller
                     'status' => LoanStatus::AKTIF,
                     'borrowed_via' => 'kiosk',
                     'capture_image_path' => $photoPath,
-                    'usage_duration' => $validated['usage_duration'],
+                    'usage_duration' => $itemDuration,
                     'borrowed_at' => $borrowedAt,
-                    'due_at' => $dueAt,
+                    'due_at' => $itemDueAt,
                 ]);
 
                 $createdLoans[] = $loan;
@@ -239,6 +254,7 @@ class LoanApiController extends Controller
         $activeLoans = Loan::with('item')
             ->where('user_id', $user->id)
             ->where('status', LoanStatus::AKTIF)
+            ->whereHas('item', fn ($q) => $q->where('type', '!=', ItemType::BAHAN_HABIS_PAKAI))
             ->latest()
             ->get();
 

@@ -309,9 +309,15 @@
                                                 <span class="font-medium text-neutral-800 truncate max-w-[120px]" title="{{ $loan->user->name ?? 'Siswa' }}">
                                                     {{ $loan->user->name ?? 'Siswa' }}
                                                 </span>
-                                                <span class="font-mono text-[10px] text-sky-700 bg-sky-50 px-1.5 py-0.5 rounded border border-sky-100 shrink-0">
-                                                    Batas: {{ optional($loan->due_at)->format('d/m H:i') }}
-                                                </span>
+                                                @if($loan->due_at)
+                                                    <span class="font-mono text-[10px] text-sky-700 bg-sky-50 px-1.5 py-0.5 rounded border border-sky-100 shrink-0">
+                                                        Batas: {{ $loan->due_at->format('d/m H:i') }}
+                                                    </span>
+                                                @else
+                                                    <span class="font-mono text-[10px] text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 shrink-0">
+                                                        Sekali Pakai
+                                                    </span>
+                                                @endif
                                             </div>
                                         </div>
                                     @empty

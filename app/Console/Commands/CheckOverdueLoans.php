@@ -16,6 +16,8 @@ class CheckOverdueLoans extends Command
 
     public function handle(TelegramService $telegram): int
     {
+        Loan::autoArchiveExpiredBhp();
+
         if (! $telegram->isEnabled()) {
             $this->warn('Integrasi Telegram nonaktif atau token bot belum dikonfigurasi.');
 
@@ -84,4 +86,3 @@ class CheckOverdueLoans extends Command
         return self::SUCCESS;
     }
 }
-

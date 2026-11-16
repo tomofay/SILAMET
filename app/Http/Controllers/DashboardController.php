@@ -19,6 +19,8 @@ class DashboardController extends Controller
      */
     public function index()
     {
+        Loan::autoArchiveExpiredBhp();
+
         $today = today();
 
         // 1. Metrik Inventaris & Kesiapan Alat

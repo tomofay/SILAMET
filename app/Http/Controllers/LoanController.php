@@ -23,6 +23,8 @@ class LoanController extends Controller
      */
     public function index(Request $request)
     {
+        Loan::autoArchiveExpiredBhp();
+
         $search = trim((string) $request->query('q', ''));
         $statusFilter = $request->query('status', '');
 
@@ -69,6 +71,8 @@ class LoanController extends Controller
      */
     public function history(Request $request)
     {
+        Loan::autoArchiveExpiredBhp();
+
         $search = trim((string) $request->query('q', ''));
         $conditionFilter = $request->query('condition', '');
         $startDate = $request->query('start_date', '');

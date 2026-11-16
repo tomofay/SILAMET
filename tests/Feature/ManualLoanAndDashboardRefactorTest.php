@@ -353,4 +353,63 @@ class ManualLoanAndDashboardRefactorTest extends TestCase
             ->assertSee('Jadwal Pemeliharaan Preventif')
             ->assertSee('Riwayat Maintenance');
     }
+
+    public function test_expired_bhp_loan_is_automatically_archived_to_history(): void
+    {
+        $staff = $this->actingAsStaff();
+        $student = User::factory()->siswa()->create(['phone' => '081234567890']);
+
+        $bhpItem = Item::factory()->create([
+            'name' => 'RJ45 Pack 1',
+            'type' => ItemType::BAHAN_HABIS_PAKAI,
+            'stock' => 50,
+            'status' => ItemStatus::TERSEDIA,
+        ]);
+
+        // 1. Buat pinjaman BHP yang masih baru (< 24 jam)
+        $freshLoan = Loan::create([
+            'user_id' => $student->id,
+            'item_id' => $bhpItem->id,
+            'borrowed_at' => now()->subHours(2),
+            'status' => LoanStatus::AKTIF,
+            'borrowed_via' => 'manual',
+            'quantity_borrowed' => 5,
+        ]);
+
+        // 2. Buat pinjaman BHP yang sudah kadaluarsa (> 24 jam)
+        $expiredLoan = Loan::create([
+            'user_id' => $student->id,
+            'item_id' => $bhpItem->id,
+            'borrowed_at' => now()->subHours(25),
+            'status' => LoanStatus::AKTIF,
+            'borrowed_via' => 'manual',
+            'quantity_borrowed' => 10,
+        ]);
+
+        // Verifikasi awal
+        $this->assertEquals(LoanStatus::AKTIF, $expiredLoan->status);
+
+        // Kunjungi halaman index loans -> memicu Loan::autoArchiveExpiredBhp()
+        $indexResponse = $this->actingAs($staff)->get(route('loans.index'));
+        $indexResponse->assertOk()
+            ->assertSee('RJ45 Pack 1')
+            ->assertSee('Histori dlm')
+            ->assertSee('Auto-arsip 24 jam / ganti tanggal');
+
+        $freshLoan->refresh();
+        $expiredLoan->refresh();
+
+        // Fresh loan tetap aktif
+        $this->assertEquals(LoanStatus::AKTIF, $freshLoan->status);
+        // Expired loan otomatis berubah jadi selesai
+        $this->assertEquals(LoanStatus::SELESAI, $expiredLoan->status);
+        $this->assertNotNull($expiredLoan->returned_at);
+        $this->assertEquals('bagus', $expiredLoan->condition_in);
+
+        // Kunjungi halaman histori loans -> expired loan tampil dengan penanda otomatis dan Habis Terpakai
+        $historyResponse = $this->actingAs($staff)->get(route('loans.history'));
+        $historyResponse->assertOk()
+            ->assertSee('Selesai Otomatis (24 Jam)')
+            ->assertSee('Habis Terpakai');
+    }
 }

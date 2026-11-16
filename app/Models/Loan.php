@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ItemType;
 use App\Enums\LoanDuration;
 use App\Enums\LoanStatus;
 use Carbon\Carbon;
@@ -145,5 +146,76 @@ class Loan extends Model
     public function borrowedViaLabel(): string
     {
         return $this->isKiosk() ? 'Mandiri (Kiosk)' : 'Manual (Admin)';
+    }
+
+    /**
+     * Cek apakah pinjaman ini untuk barang habis pakai (BHP / sekali pakai).
+     */
+    public function isBhp(): bool
+    {
+        $item = $this->relationLoaded('item') ? $this->item : $this->item()->withTrashed()->first();
+
+        return $item?->type === ItemType::BAHAN_HABIS_PAKAI;
+    }
+
+    /**
+     * Waktu otomatis masuk ke histori (24 jam sejak peminjaman).
+     */
+    public function bhpAutoArchiveAt(): ?Carbon
+    {
+        if (! $this->borrowed_at) {
+            return null;
+        }
+
+        return $this->borrowed_at->copy()->addHours(24);
+    }
+
+    /**
+     * Waktu tersisa sebelum barang sekali pakai otomatis masuk ke histori.
+     */
+    public function bhpRemainingTime(): ?string
+    {
+        $archiveAt = $this->bhpAutoArchiveAt();
+        if (! $archiveAt || now()->greaterThanOrEqualTo($archiveAt) || now()->toDateString() > $this->borrowed_at->toDateString()) {
+            return null;
+        }
+
+        $diffSeconds = (int) now()->diffInSeconds($archiveAt);
+        $hours = intdiv($diffSeconds, 3600);
+        $minutes = intdiv($diffSeconds % 3600, 60);
+
+        if ($hours > 0) {
+            return "{$hours} jam {$minutes} mnt";
+        }
+
+        return "{$minutes} mnt";
+    }
+
+    /**
+     * Arsipkan secara otomatis peminjaman bahan sekali pakai yang telah melewati 24 jam atau berganti hari kalender.
+     */
+    public static function autoArchiveExpiredBhp(): int
+    {
+        $cutoff = now()->subHours(24);
+        $today = now()->toDateString();
+
+        $expiredLoans = self::with('item')
+            ->where('status', LoanStatus::AKTIF)
+            ->whereHas('item', fn ($q) => $q->where('type', ItemType::BAHAN_HABIS_PAKAI))
+            ->where(function ($q) use ($cutoff, $today) {
+                $q->where('borrowed_at', '<=', $cutoff)
+                    ->orWhereDate('borrowed_at', '<', $today);
+            })
+            ->get();
+
+        foreach ($expiredLoans as $loan) {
+            $loan->update([
+                'status' => LoanStatus::SELESAI,
+                'returned_at' => $loan->borrowed_at ? $loan->borrowed_at->copy()->addHours(24) : now(),
+                'condition_in' => 'bagus',
+            ]);
+        }
+
+        return $expiredLoans->count();
     }
 }

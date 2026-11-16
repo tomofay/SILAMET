@@ -181,7 +181,19 @@
                                     {{ optional($loan->borrowed_at)->format('d/m/Y H:i') }}
                                 </td>
                                 <td class="px-5 py-4 whitespace-nowrap">
-                                    @if($isOverdue)
+                                    @if($loan->isBhp())
+                                        <div x-data="loanCountdownTimer('{{ $loan->bhpAutoArchiveAt()?->toIso8601String() }}')" class="space-y-1">
+                                            <span class="inline-flex items-center gap-1.5 font-mono text-[11px] font-bold text-amber-800 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200 shadow-2xs">
+                                                <svg class="w-3.5 h-3.5 text-amber-600 animate-spin-slow shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                                <span x-text="timeText">{{ $loan->bhpRemainingTime() ? 'Histori dlm ' . $loan->bhpRemainingTime() : 'Otomatis Selesai 24 Jam' }}</span>
+                                            </span>
+                                            <div class="text-[10px] text-neutral-400 font-mono">
+                                                Auto-arsip 24 jam / ganti tanggal
+                                            </div>
+                                        </div>
+                                    @elseif($isOverdue)
                                         <span class="inline-flex items-center gap-1.5 font-mono text-[11px] font-semibold text-rose-700 px-2.5 py-0.5 rounded-full bg-rose-50 border border-rose-200">
                                             <svg class="w-3.5 h-3.5 text-rose-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -293,4 +305,40 @@
         </div>
 
     </div>
+
+    <script>
+        function loanCountdownTimer(targetIso) {
+            return {
+                target: targetIso ? new Date(targetIso).getTime() : 0,
+                timeText: 'Menghitung...',
+                timer: null,
+                init() {
+                    if (!this.target) {
+                        this.timeText = 'Otomatis Selesai (24 Jam)';
+                        return;
+                    }
+                    this.update();
+                    this.timer = setInterval(() => this.update(), 1000);
+                },
+                update() {
+                    const now = Date.now();
+                    const diff = this.target - now;
+                    if (diff <= 0) {
+                        this.timeText = 'Memindahkan ke histori...';
+                        if (this.timer) {
+                            clearInterval(this.timer);
+                        }
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 2500);
+                        return;
+                    }
+                    const hours = Math.floor(diff / (1000 * 60 * 60));
+                    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+                    this.timeText = `Histori dlm ${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                }
+            };
+        }
+    </script>
 </x-app-layout>

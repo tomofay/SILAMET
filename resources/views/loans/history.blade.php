@@ -181,9 +181,16 @@
                                 </td>
                                 <td class="px-5 py-4 font-mono text-xs text-neutral-600 whitespace-nowrap">
                                     {{ optional($loan->returned_at)->format('d/m/Y H:i') ?? '—' }}
+                                    @if($loan->isBhp())
+                                        <div class="text-[10px] text-amber-700 font-mono mt-0.5 font-medium">Selesai Otomatis (24 Jam)</div>
+                                    @endif
                                 </td>
                                 <td class="px-5 py-4">
-                                    @if($loan->condition_in)
+                                    @if($loan->isBhp())
+                                        <span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full border bg-amber-50 text-amber-800 border-amber-200">
+                                            Habis Terpakai
+                                        </span>
+                                    @elseif($loan->condition_in)
                                         <div>
                                             <span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full border {{ $loan->condition_in === 'bagus' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200' }}">
                                                 {{ $loan->condition_in === 'bagus' ? 'Kondisi Bagus' : 'Rusak / Kendala' }}

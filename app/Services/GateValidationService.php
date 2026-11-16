@@ -3,7 +3,9 @@
 namespace App\Services;
 
 use App\Enums\ItemStatus;
+use App\Enums\LoanStatus;
 use App\Models\Item;
+use App\Models\Loan;
 
 class GateValidationService
 {
@@ -17,13 +19,14 @@ class GateValidationService
         $item = Item::where('epc_tag', $epcTag)->first();
 
         // Jika tidak ketemu, cari partial match jika ada perbedaan prefix reader (misal 0700EE00)
-        if (!$item) {
+        if (! $item) {
             $item = Item::whereNotNull('epc_tag')
                 ->where('epc_tag', '!=', '')
                 ->get()
                 ->first(function ($it) use ($epcTag) {
                     $cleanDb = strtoupper((string) $it->epc_tag);
                     $cleanScan = strtoupper($epcTag);
+
                     return str_contains($cleanDb, $cleanScan) || str_contains($cleanScan, $cleanDb);
                 });
         }
@@ -91,7 +94,7 @@ class GateValidationService
      */
     private function formatItemResult(?Item $item): array
     {
-        if (!$item) {
+        if (! $item) {
             return [
                 'status' => 'denied',
                 'reason' => 'EPC tag tidak ditemukan di database.',
@@ -102,10 +105,15 @@ class GateValidationService
             ];
         }
 
-        if ($item->status === ItemStatus::DIPINJAM) {
+        $hasActiveLoan = Loan::query()
+            ->where('item_id', $item->id)
+            ->where('status', LoanStatus::AKTIF->value)
+            ->exists();
+
+        if ($item->status === ItemStatus::DIPINJAM || $hasActiveLoan) {
             return [
                 'status' => 'allowed',
-                'message' => 'Barang dengan status "dipinjam" — akses diizinkan.',
+                'message' => 'Barang dengan status peminjaman aktif — akses diizinkan.',
                 'item_name' => $item->name,
                 'item_id' => $item->id,
                 'item_code' => $item->item_code,

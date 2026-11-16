@@ -70,7 +70,24 @@
                         default => 'bg-neutral-100 text-neutral-600 border-neutral-200',
                     };
                 @endphp
-                <span class="text-xs font-semibold px-3 py-1 rounded-full border {{ $lbadge }}">{{ $loan->status->label() }}</span>
+                <div class="flex items-center gap-2">
+                    @if($loan->isKiosk())
+                        <span class="inline-flex items-center gap-1 text-xs font-mono font-bold text-emerald-800 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+                            <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                            Mandiri (Kiosk)
+                        </span>
+                    @else
+                        <span class="inline-flex items-center gap-1 text-xs font-mono font-bold text-neutral-700 bg-neutral-100 px-3 py-1 rounded-full border border-neutral-200">
+                            <svg class="w-3.5 h-3.5 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                            Manual (Admin)
+                        </span>
+                    @endif
+                    <span class="text-xs font-semibold px-3 py-1 rounded-full border {{ $lbadge }}">{{ $loan->status->label() }}</span>
+                </div>
             </div>
 
             <dl class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-5 text-sm">

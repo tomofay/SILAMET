@@ -38,13 +38,13 @@ class DashboardController extends Controller
             ->orderBy('due_at');
 
         $overdueCount = (clone $overdueLoansQuery)->count();
-        $overdueLoans = (clone $overdueLoansQuery)->limit(8)->get();
+        $overdueLoans = (clone $overdueLoansQuery)->limit(15)->get();
 
         $activeLoans = Loan::query()
             ->with(['user', 'item'])
             ->where('status', LoanStatus::AKTIF)
             ->latest('borrowed_at')
-            ->limit(8)
+            ->limit(15)
             ->get();
 
         $todayReturnedLoans = Loan::query()
@@ -52,7 +52,7 @@ class DashboardController extends Controller
             ->where('status', LoanStatus::SELESAI)
             ->whereDate('returned_at', $today)
             ->latest('returned_at')
-            ->limit(8)
+            ->limit(15)
             ->get();
 
         $todayLoansCount = Loan::query()->whereDate('borrowed_at', $today)->count();
@@ -85,11 +85,31 @@ class DashboardController extends Controller
             ? round(($gateAllowedHariIni / $gateTotalHariIni) * 100, 1)
             : 100.0;
 
+        // Ambil log gate hari ini yang valid (tidak terikat item yang sudah dihapus)
         $recentGateLogs = GateLog::query()
+            ->whereDate('created_at', $today)
+            ->where(function ($q) {
+                $q->whereDoesntHave('item')
+                    ->orWhereHas('item', function ($iq) {
+                        $iq->whereNull('deleted_at');
+                    });
+            })
             ->with(['item'])
             ->latest('id')
-            ->limit(5)
+            ->limit(10)
             ->get();
+
+        // Jika belum ada log gate hari ini, tampilkan log terbaru dari item aktif
+        if ($recentGateLogs->isEmpty()) {
+            $recentGateLogs = GateLog::query()
+                ->whereHas('item', function ($iq) {
+                    $iq->whereNull('deleted_at');
+                })
+                ->with(['item'])
+                ->latest('id')
+                ->limit(8)
+                ->get();
+        }
 
         // 5. Radar Stok Kritis (Bahan Habis Pakai <= 5 unit)
         $lowStockConsumables = Item::query()

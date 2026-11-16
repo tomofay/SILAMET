@@ -194,9 +194,26 @@
                                             default => 'bg-neutral-100 text-neutral-600 border-neutral-200',
                                         };
                                     @endphp
-                                    <span class="text-[11px] font-semibold px-3 py-0.5 rounded-full border {{ $lbadge }}">
-                                        {{ $loan->status->label() }}
-                                    </span>
+                                    <div class="flex flex-col gap-1">
+                                        <span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full border {{ $lbadge }} w-fit">
+                                            {{ $loan->status->label() }}
+                                        </span>
+                                        @if($loan->isKiosk())
+                                            <span class="inline-flex items-center gap-1 text-[10px] font-mono font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 w-fit">
+                                                <svg class="w-3 h-3 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                                </svg>
+                                                Mandiri (Kiosk)
+                                            </span>
+                                        @else
+                                            <span class="inline-flex items-center gap-1 text-[10px] font-mono font-bold text-neutral-700 bg-neutral-100 px-2 py-0.5 rounded-full border border-neutral-200 w-fit">
+                                                <svg class="w-3 h-3 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                                </svg>
+                                                Manual (Admin)
+                                            </span>
+                                        @endif
+                                    </div>
                                 </td>
                                 <td class="px-5 py-4 text-right whitespace-nowrap">
                                     <div class="inline-flex items-center justify-end gap-1.5">

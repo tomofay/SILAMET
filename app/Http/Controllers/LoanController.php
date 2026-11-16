@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Enums\ItemStatus;
+use App\Enums\ItemType;
 use App\Enums\LoanDuration;
 use App\Enums\LoanStatus;
+use App\Enums\StockMovementType;
 use App\Models\Item;
 use App\Models\Loan;
+use App\Models\StockMovement;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -122,7 +125,14 @@ class LoanController extends Controller
      */
     public function create()
     {
-        $items = Item::where('status', ItemStatus::TERSEDIA)->get();
+        $items = Item::where('status', ItemStatus::TERSEDIA)
+            ->where(function ($query) {
+                $query->where('type', '!=', ItemType::BAHAN_HABIS_PAKAI)
+                    ->orWhere('stock', '>', 0);
+            })
+            ->orderBy('category')
+            ->orderBy('name')
+            ->get();
 
         return view('loans.create', compact('items'));
     }
@@ -164,7 +174,7 @@ class LoanController extends Controller
         $borrowedAt = now();
         $count = 0;
 
-        DB::transaction(function () use ($validated, $itemIds, $borrowedAt, &$count) {
+        DB::transaction(function () use ($validated, $itemIds, $borrowedAt, $user, &$count) {
             foreach ($itemIds as $itemId) {
                 // Kunci baris item agar tidak terjadi double-borrow
                 $item = Item::query()->lockForUpdate()->findOrFail($itemId);
@@ -175,17 +185,41 @@ class LoanController extends Controller
 
                 $borrowedQty = isset($validated['quantities'][$itemId]) ? max(1, (int) $validated['quantities'][$itemId]) : 1;
 
+                if ($item->type === ItemType::BAHAN_HABIS_PAKAI) {
+                    if ($item->stock < $borrowedQty) {
+                        abort(422, sprintf('Stok barang "%s" tidak mencukupi (tersedia: %d pcs, diminta: %d pcs).', $item->name, $item->stock, $borrowedQty));
+                    }
+
+                    $stockBefore = (int) $item->stock;
+                    $stockAfter = max(0, $stockBefore - $borrowedQty);
+                    $item->stock = $stockAfter;
+                    $item->save();
+
+                    StockMovement::create([
+                        'item_id' => $item->id,
+                        'user_id' => auth()->id() ?? $user->id,
+                        'type' => StockMovementType::OUT,
+                        'quantity' => $borrowedQty,
+                        'stock_before' => $stockBefore,
+                        'stock_after' => $stockAfter,
+                        'recipient_name' => $user->name,
+                        'description' => sprintf('Peminjaman %d pcs oleh %s (%s)', $borrowedQty, $user->name, $user->nis_nip ?? '-'),
+                    ]);
+                } else {
+                    $item->update(['status' => ItemStatus::DIPINJAM]);
+                }
+
                 Loan::create([
                     'user_id' => $validated['user_id'],
                     'item_id' => $item->id,
                     'quantity_borrowed' => $borrowedQty,
                     'status' => 'aktif',
+                    'borrowed_via' => 'manual',
                     'usage_duration' => $validated['usage_duration'],
                     'borrowed_at' => $borrowedAt,
                     'due_at' => Loan::calculateDueAt($validated['usage_duration'], $borrowedAt),
                 ]);
 
-                $item->update(['status' => ItemStatus::DIPINJAM]);
                 $count++;
             }
         });
@@ -286,8 +320,27 @@ class LoanController extends Controller
         $loan = Loan::with('item')->findOrFail($id);
 
         DB::transaction(function () use ($loan) {
-            if ($loan->status !== LoanStatus::SELESAI && $loan->item && $loan->item->status === ItemStatus::DIPINJAM) {
-                $loan->item->update(['status' => ItemStatus::TERSEDIA]);
+            if ($loan->status !== LoanStatus::SELESAI && $loan->item) {
+                if ($loan->item->type === ItemType::BAHAN_HABIS_PAKAI) {
+                    $restoreQty = max(1, (int) ($loan->quantity_borrowed ?? 1));
+                    $stockBefore = (int) $loan->item->stock;
+                    $stockAfter = $stockBefore + $restoreQty;
+
+                    $loan->item->increment('stock', $restoreQty);
+
+                    StockMovement::create([
+                        'item_id' => $loan->item->id,
+                        'user_id' => auth()->id() ?? $loan->user_id,
+                        'type' => StockMovementType::IN,
+                        'quantity' => $restoreQty,
+                        'stock_before' => $stockBefore,
+                        'stock_after' => $stockAfter,
+                        'recipient_name' => 'Restorasi Pembatalan Peminjaman',
+                        'description' => sprintf('Pengembalian stok %d pcs dari pembatalan peminjaman #%d', $restoreQty, $loan->id),
+                    ]);
+                } elseif ($loan->item->status === ItemStatus::DIPINJAM) {
+                    $loan->item->update(['status' => ItemStatus::TERSEDIA]);
+                }
             }
             $loan->delete();
         });

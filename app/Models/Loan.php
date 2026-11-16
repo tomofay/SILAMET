@@ -19,6 +19,7 @@ class Loan extends Model
         'item_id',
         'quantity_borrowed',
         'status',
+        'borrowed_via',
         'condition_in',
         'damage_note',
         'capture_image_path',
@@ -120,5 +121,29 @@ class Loan extends Model
         }
 
         return null;
+    }
+
+    /**
+     * Cek apakah peminjaman dilakukan secara mandiri melalui Kiosk.
+     */
+    public function isKiosk(): bool
+    {
+        return $this->borrowed_via === 'kiosk' || $this->borrowed_via === 'mandiri' || filled($this->capture_image_path);
+    }
+
+    /**
+     * Cek apakah peminjaman dicatat secara manual oleh administrator/laboran.
+     */
+    public function isManual(): bool
+    {
+        return ! $this->isKiosk();
+    }
+
+    /**
+     * Label representatif asal peminjaman.
+     */
+    public function borrowedViaLabel(): string
+    {
+        return $this->isKiosk() ? 'Mandiri (Kiosk)' : 'Manual (Admin)';
     }
 }

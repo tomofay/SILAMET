@@ -4,59 +4,8 @@
 
     <div class="space-y-4">
 
-        <!-- Header Command Bar (Data-Dense SaaS Hero ala Orbix Studio Seller Admin UI) -->
-        <div class="bg-neutral-900 border border-neutral-800 rounded-xl p-5 sm:p-6 text-white shadow-sm">
-            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                <div class="space-y-1.5">
-                    <div class="flex items-center gap-2 flex-wrap">
-                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[11px] font-mono font-semibold bg-emerald-950/80 text-emerald-400 border border-emerald-800/60">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                            OPERASIONAL SIAGA
-                        </span>
-                        <span class="px-2 py-0.5 rounded-md text-[11px] font-mono text-neutral-400 bg-neutral-800/80 border border-neutral-700">
-                            {{ now()->format('d M Y') }} &middot; Lab SIJA SMKN 1 Cibinong
-                        </span>
-                    </div>
-                    <h2 class="text-xl sm:text-2xl font-bold tracking-tight font-heading text-white">
-                        Pusat Kendali Operasional Laboratorium
-                    </h2>
-                    <p class="text-neutral-400 text-xs sm:text-sm max-w-2xl">
-                        Selamat datang, <span class="text-white font-semibold">{{ auth()->user()?->name }}</span>. Pantau alur sirkulasi alat praktikum, pemeliharaan berkala, serta keamanan gerbang UHF RFID secara terintegrasi.
-                    </p>
-                </div>
-
-                <!-- Quick Action Buttons Hierarchy -->
-                <div class="flex items-center gap-2 flex-wrap">
-                    <a href="{{ route('items.create') }}" class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-primary hover:bg-primary-600 text-white text-xs font-semibold rounded-lg border border-primary/40 transition-colors shadow-sm">
-                        <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-                        </svg>
-                        <span>Tambah Aset</span>
-                    </a>
-                    <a href="{{ route('kiosk.home') }}" target="_blank" class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-semibold rounded-lg border border-emerald-600 transition-colors shadow-sm">
-                        <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                        </svg>
-                        <span>Buka Kiosk Siswa</span>
-                    </a>
-                    <a href="{{ route('gate-logs.index') }}" class="inline-flex items-center gap-1.5 px-3 py-2 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border border-neutral-700 text-xs font-semibold rounded-lg transition-colors">
-                        <svg class="w-4 h-4 text-rose-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                        </svg>
-                        <span>Log Gate RFID</span>
-                    </a>
-                    <a href="{{ route('reports.index') }}" class="inline-flex items-center gap-1.5 px-3 py-2 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border border-neutral-700 text-xs font-semibold rounded-lg transition-colors">
-                        <svg class="w-4 h-4 text-sky-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                        <span>Laporan</span>
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Metric Summary Cards Row (4 Grid Kartu Data-Dense ala Seller Center UI) -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        <!-- Metric Summary Cards Row (3 Grid Kartu Data-Dense) -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
 
             <!-- Card 1: Total Aset Terdata -->
             <div class="bg-white rounded-xl p-4 sm:p-5 border border-neutral-200 flex flex-col justify-between hover:border-neutral-300 transition-colors">
@@ -137,7 +86,7 @@
                                 Seluruhnya Tepat Waktu
                             </span>
                         @endif
-                        <span class="text-[11px] text-neutral-500 font-mono">Kiosk Mandiri</span>
+                        <span class="text-[11px] text-neutral-500 font-mono">Sirkulasi Lab</span>
                     </div>
 
                     <!-- Mini Segmented Breakdown -->
@@ -219,59 +168,6 @@
                 </div>
             </div>
 
-            <!-- Card 4: Insiden Gate Hari Ini -->
-            <div class="bg-white rounded-xl p-4 sm:p-5 border {{ $stats['gate_insiden_hari_ini'] > 0 ? 'border-rose-300 bg-rose-50/20' : 'border-neutral-200' }} flex flex-col justify-between hover:border-neutral-300 transition-colors">
-                <div>
-                    <div class="flex items-start justify-between gap-2">
-                        <div class="space-y-1">
-                            <span class="text-xs font-semibold uppercase tracking-wider text-neutral-500">Insiden Gate Hari Ini</span>
-                            <div class="text-2xl font-bold text-rose-700 font-mono tracking-tight flex items-center gap-2">
-                                <span>{{ number_format($stats['gate_insiden_hari_ini']) }}</span>
-                                @if($stats['gate_insiden_hari_ini'] > 0)
-                                    <span class="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-rose-100 text-rose-800 border border-rose-200 uppercase tracking-wider">
-                                        ALARM
-                                    </span>
-                                @endif
-                            </div>
-                        </div>
-                        <div class="p-2 rounded-xl {{ $stats['gate_insiden_hari_ini'] > 0 ? 'bg-rose-100 text-rose-700 border border-rose-200' : 'bg-emerald-50 text-emerald-600 border border-emerald-100' }} shrink-0">
-                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                            </svg>
-                        </div>
-                    </div>
-
-                    <div class="mt-3 flex items-center justify-between">
-                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-mono text-[11px] font-semibold {{ $stats['gate_insiden_hari_ini'] > 0 ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200' }}">
-                            Kepatuhan {{ $stats['gate_compliance_rate'] }}%
-                        </span>
-                        <span class="text-[11px] text-neutral-500 font-mono">{{ number_format($stats['gate_total_hari_ini']) }} scan</span>
-                    </div>
-
-                    <!-- Mini Segmented Breakdown -->
-                    <div class="mt-3 grid grid-cols-2 gap-1.5 text-center text-[10px] font-mono border-t border-neutral-100 pt-2.5">
-                        <div class="p-1 rounded bg-neutral-50 border border-neutral-100">
-                            <span class="text-neutral-500 block">Akses Sah</span>
-                            <span class="font-bold text-emerald-700">{{ max(0, $stats['gate_total_hari_ini'] - $stats['gate_insiden_hari_ini']) }} scan</span>
-                        </div>
-                        <div class="p-1 rounded bg-neutral-50 border border-neutral-100">
-                            <span class="text-neutral-500 block">Pelanggaran</span>
-                            <span class="font-bold text-rose-700">{{ $stats['gate_insiden_hari_ini'] }} alarm</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mt-3 pt-2.5 border-t border-neutral-100 flex items-center justify-between text-xs">
-                    <span class="text-neutral-500">Antena HW-VX6330</span>
-                    <a href="{{ route('gate-logs.index') }}" class="font-semibold text-rose-700 hover:text-rose-800 inline-flex items-center gap-1 group">
-                        <span>Log Kamera</span>
-                        <svg class="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                        </svg>
-                    </a>
-                </div>
-            </div>
-
         </div>
 
         <!-- Section 2: Stepper / Flow Alur Manajemen Laboratorium (Signature ala Orbix Studio Product Flow) -->
@@ -341,191 +237,212 @@
             <!-- Left / Main Operational Column (lg:col-span-8) -->
             <div class="lg:col-span-8 space-y-4">
 
-                <!-- Panel 1: Sirkulasi & Peminjaman Siswa (Interactive Filter Tabs) -->
-                <div class="bg-white rounded-xl border border-neutral-200 overflow-hidden shadow-sm" x-data="{ tab: 'overdue' }">
+                <!-- Panel 1: Sirkulasi & Peminjaman Siswa (3 Batas Kotak Status) -->
+                <div class="bg-white rounded-xl border border-neutral-200 overflow-hidden shadow-sm">
                     <div class="p-4 sm:p-5 border-b border-neutral-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-neutral-50/60">
                         <div>
                             <div class="flex items-center gap-2">
                                 <h3 class="font-bold text-neutral-900 text-sm tracking-tight font-heading">
-                                    Papan Sirkulasi Peminjaman Mandiri
+                                    Papan Sirkulasi Peminjaman Mandiri &amp; Manual
                                 </h3>
                                 <span class="px-2 py-0.5 rounded font-mono text-[11px] font-semibold bg-neutral-100 text-neutral-700 border border-neutral-200">
-                                    Kiosk Siswa
+                                    Live Sirkulasi
                                 </span>
                             </div>
-                            <p class="text-xs text-neutral-500 mt-0.5">Daftar transaksi aktif dan pemantauan batas pengembalian alat praktikum.</p>
+                            <p class="text-xs text-neutral-500 mt-0.5">Pemantauan real-time peminjaman sedang aktif, barang telah dikembalikan, dan keterlambatan pengembalian alat praktikum.</p>
                         </div>
 
-                        <!-- Tab Selector ala Seller Admin UI -->
-                        <div class="inline-flex p-1 rounded-lg bg-neutral-100 border border-neutral-200 text-xs font-semibold shrink-0">
-                            <button type="button"
-                                    @click="tab = 'overdue'"
-                                    :class="tab === 'overdue' ? 'bg-white text-rose-700 shadow-sm' : 'text-neutral-600 hover:text-neutral-900'"
-                                    class="px-2.5 py-1 rounded-md transition-all inline-flex items-center gap-1.5">
-                                <span>Terlambat</span>
-                                @if($stats['overdue_count'] > 0)
-                                    <span class="px-1.5 py-0.2 rounded font-mono text-[10px] font-bold bg-rose-100 text-rose-800">
-                                        {{ $stats['overdue_count'] }}
-                                    </span>
-                                @endif
-                            </button>
-
-                            <button type="button"
-                                    @click="tab = 'active'"
-                                    :class="tab === 'active' ? 'bg-white text-primary shadow-sm' : 'text-neutral-600 hover:text-neutral-900'"
-                                    class="px-2.5 py-1 rounded-md transition-all inline-flex items-center gap-1.5">
-                                <span>Aktif Hari Ini</span>
-                                <span class="px-1.5 py-0.2 rounded font-mono text-[10px] font-bold bg-neutral-200 text-neutral-800">
-                                    {{ $activeLoans->count() }}
-                                </span>
-                            </button>
-
-                            <button type="button"
-                                    @click="tab = 'returned'"
-                                    :class="tab === 'returned' ? 'bg-white text-emerald-700 shadow-sm' : 'text-neutral-600 hover:text-neutral-900'"
-                                    class="px-2.5 py-1 rounded-md transition-all inline-flex items-center gap-1.5">
-                                <span>Kembali Hari Ini</span>
-                                <span class="px-1.5 py-0.2 rounded font-mono text-[10px] font-bold bg-neutral-200 text-neutral-800">
-                                    {{ $todayReturnedLoans->count() }}
-                                </span>
-                            </button>
+                        <div class="flex items-center gap-2">
+                            <a href="{{ route('loans.index') }}" class="px-3 py-1.5 rounded-lg border border-neutral-200 bg-white hover:bg-neutral-50 text-xs font-semibold text-neutral-700 transition-colors shadow-2xs inline-flex items-center gap-1.5">
+                                <span>Lihat Seluruh Sirkulasi</span>
+                                <svg class="w-3.5 h-3.5 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </a>
                         </div>
                     </div>
 
-                    <!-- Tab 1: Overdue Loans -->
-                    <div x-show="tab === 'overdue'" class="divide-y divide-neutral-100">
-                        @forelse($overdueLoans as $loan)
-                            <div class="p-4 hover:bg-neutral-50/80 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                                <div class="min-w-0">
-                                    <div class="flex items-center gap-2 flex-wrap">
-                                        <span class="font-bold text-neutral-900 text-sm">{{ $loan->item->name ?? '-' }}</span>
-                                        @if($loan->item?->item_code)
-                                            <span class="font-mono text-[11px] px-1.5 py-0.5 rounded bg-neutral-100 text-neutral-700 border border-neutral-200">
-                                                {{ $loan->item->item_code }}
-                                            </span>
-                                        @endif
-                                        @if($loan->item?->category)
-                                            <span class="text-[10px] px-1.5 py-0.5 rounded font-semibold bg-primary-50 text-primary-700 border border-indigo-200">
-                                                {{ $loan->item->category }}
-                                            </span>
-                                        @endif
-                                    </div>
-                                    <div class="flex items-center gap-2 mt-1.5 text-xs text-neutral-600 flex-wrap">
-                                        <span class="font-semibold text-neutral-800">{{ $loan->user->name ?? 'Siswa' }}</span>
-                                        @if($loan->user?->nis_nip)
-                                            <span class="font-mono text-neutral-400">({{ $loan->user->nis_nip }})</span>
-                                        @endif
-                                        @if($loan->user?->phone)
-                                            <span class="text-neutral-300">|</span>
-                                            <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $loan->user->phone) }}" target="_blank" class="font-mono text-[11px] font-semibold text-emerald-700 hover:underline inline-flex items-center gap-1">
-                                                <span>WA: {{ $loan->user->phone }}</span>
-                                            </a>
-                                        @endif
-                                        <span class="text-neutral-300">|</span>
-                                        <span class="text-neutral-500 font-mono text-[11px]">Pinjam: {{ optional($loan->borrowed_at)->format('d/m H:i') }}</span>
-                                    </div>
-                                </div>
+                    <!-- 3 Batas Kotak: Kotak 1 (Sedang Dipinjam), Kotak 2 (Sudah Dikembalikan), Kotak 3 (Terlambat Dikembalikan) -->
+                    <div class="p-4 sm:p-5 bg-neutral-50/30">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
 
-                                <div class="flex items-center justify-between sm:justify-end gap-3 shrink-0">
-                                    <div class="text-right">
-                                        <span class="inline-block font-mono text-xs font-bold text-rose-700 px-2 py-0.5 rounded-md bg-rose-50 border border-rose-200">
-                                            Jatuh Tempo: {{ optional($loan->due_at)->format('d/m H:i') }}
-                                        </span>
-                                        <div class="text-[10px] text-rose-600 font-semibold mt-0.5">Melewati batas pinjam</div>
+                            <!-- KOTAK 1: SEDANG DIPINJAM -->
+                            <div class="rounded-xl border border-sky-200 bg-white overflow-hidden flex flex-col shadow-2xs">
+                                <div class="p-3 bg-sky-50/80 border-b border-sky-100 flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-2 h-2 rounded-full bg-sky-500 animate-pulse"></span>
+                                        <h4 class="font-bold text-xs text-sky-950 uppercase tracking-wider font-heading">1. Sedang Dipinjam</h4>
                                     </div>
-                                    <a href="{{ route('loans.index') }}" class="px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-white hover:bg-neutral-50 text-xs font-semibold text-neutral-700 transition-colors shadow-sm">
-                                        Cek Sirkulasi
-                                    </a>
-                                </div>
-                            </div>
-                        @empty
-                            <div class="p-8 text-center text-neutral-500">
-                                <div class="p-2.5 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100 inline-flex items-center justify-center mb-2">
-                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                                    </svg>
-                                </div>
-                                <p class="text-sm font-semibold text-neutral-800">Tidak Ada Peminjaman Terlambat</p>
-                                <p class="text-xs text-neutral-500 mt-0.5">Seluruh peminjaman saat ini berada dalam batas waktu penggunaan resmi.</p>
-                            </div>
-                        @endforelse
-                    </div>
-
-                    <!-- Tab 2: Active Loans -->
-                    <div x-show="tab === 'active'" style="display: none;" class="divide-y divide-neutral-100">
-                        @forelse($activeLoans as $loan)
-                            <div class="p-4 hover:bg-neutral-50/80 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                                <div class="min-w-0">
-                                    <div class="flex items-center gap-2 flex-wrap">
-                                        <span class="font-bold text-neutral-900 text-sm">{{ $loan->item->name ?? '-' }}</span>
-                                        @if($loan->item?->item_code)
-                                            <span class="font-mono text-[11px] px-1.5 py-0.5 rounded bg-neutral-100 text-neutral-700 border border-neutral-200">
-                                                {{ $loan->item->item_code }}
-                                            </span>
-                                        @endif
-                                    </div>
-                                    <div class="flex items-center gap-2 mt-1.5 text-xs text-neutral-600 flex-wrap">
-                                        <span class="font-semibold text-neutral-800">{{ $loan->user->name ?? 'Siswa' }}</span>
-                                        @if($loan->user?->nis_nip)
-                                            <span class="font-mono text-neutral-400">({{ $loan->user->nis_nip }})</span>
-                                        @endif
-                                        <span class="text-neutral-300">|</span>
-                                        <span class="text-neutral-500 font-mono text-[11px]">Durasi: {{ $loan->usage_duration?->label() ?? 'Standar' }}</span>
-                                    </div>
-                                </div>
-
-                                <div class="flex items-center justify-between sm:justify-end gap-3 shrink-0">
-                                    <div class="text-right font-mono text-xs">
-                                        <span class="text-neutral-500">Kembali:</span>
-                                        <span class="font-semibold text-neutral-800">{{ optional($loan->due_at)->format('d/m H:i') }}</span>
-                                    </div>
-                                    <span class="px-2 py-0.5 rounded font-mono text-[11px] font-semibold bg-sky-50 text-sky-700 border border-sky-200">
-                                        Sedang Digunakan
+                                    <span class="px-2 py-0.5 rounded-full font-mono text-[11px] font-bold bg-white text-sky-800 border border-sky-200 shadow-2xs">
+                                        {{ $activeLoans->count() }}
                                     </span>
                                 </div>
-                            </div>
-                        @empty
-                            <div class="p-8 text-center text-neutral-500">
-                                <p class="text-sm font-semibold text-neutral-800">Belum Ada Peminjaman Aktif</p>
-                                <p class="text-xs text-neutral-500 mt-0.5">Siswa dapat meminjam alat melalui Kiosk Layanan Mandiri.</p>
-                            </div>
-                        @endforelse
-                    </div>
 
-                    <!-- Tab 3: Today Returned Loans -->
-                    <div x-show="tab === 'returned'" style="display: none;" class="divide-y divide-neutral-100">
-                        @forelse($todayReturnedLoans as $loan)
-                            <div class="p-4 hover:bg-neutral-50/80 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                                <div class="min-w-0">
-                                    <div class="flex items-center gap-2 flex-wrap">
-                                        <span class="font-bold text-neutral-900 text-sm">{{ $loan->item->name ?? '-' }}</span>
-                                        @if($loan->item?->item_code)
-                                            <span class="font-mono text-[11px] px-1.5 py-0.5 rounded bg-neutral-100 text-neutral-700 border border-neutral-200">
-                                                {{ $loan->item->item_code }}
-                                            </span>
-                                        @endif
+                                <div class="divide-y divide-neutral-100 overflow-y-auto max-h-[380px] min-h-[260px] flex-1">
+                                    @forelse($activeLoans as $loan)
+                                        <div class="p-3 hover:bg-neutral-50 transition-colors space-y-1.5">
+                                            <div class="flex items-start justify-between gap-1.5">
+                                                <div class="min-w-0">
+                                                    <span class="font-bold text-neutral-900 text-xs truncate block" title="{{ $loan->item->name ?? '-' }}">
+                                                        {{ $loan->item->name ?? '-' }}
+                                                    </span>
+                                                    <div class="flex items-center gap-1.5 mt-0.5">
+                                                        <span class="font-mono text-[10px] text-neutral-500">{{ $loan->item->item_code ?? '—' }}</span>
+                                                        @if(($loan->quantity_borrowed ?? 1) > 1 || optional($loan->item)->type?->value === 'bahan_habis_pakai')
+                                                            <span class="px-1.5 py-0.2 rounded font-mono text-[9px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                                                                {{ $loan->quantity_borrowed ?? 1 }} pcs
+                                                            </span>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                                @if($loan->isKiosk())
+                                                    <span class="px-1.5 py-0.5 rounded font-mono text-[9px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 shrink-0">
+                                                        Mandiri
+                                                    </span>
+                                                @else
+                                                    <span class="px-1.5 py-0.5 rounded font-mono text-[9px] font-bold bg-neutral-100 text-neutral-700 border border-neutral-200 shrink-0">
+                                                        Manual
+                                                    </span>
+                                                @endif
+                                            </div>
+                                            <div class="flex items-center justify-between text-[11px] text-neutral-600 pt-1 border-t border-neutral-50">
+                                                <span class="font-medium text-neutral-800 truncate max-w-[120px]" title="{{ $loan->user->name ?? 'Siswa' }}">
+                                                    {{ $loan->user->name ?? 'Siswa' }}
+                                                </span>
+                                                <span class="font-mono text-[10px] text-sky-700 bg-sky-50 px-1.5 py-0.5 rounded border border-sky-100 shrink-0">
+                                                    Batas: {{ optional($loan->due_at)->format('d/m H:i') }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    @empty
+                                        <div class="p-6 text-center text-neutral-400 my-auto">
+                                            <p class="text-xs font-semibold text-neutral-600">Belum Ada Peminjaman Aktif</p>
+                                            <p class="text-[11px] text-neutral-400 mt-0.5">Semua unit alat praktikum berada di lab.</p>
+                                        </div>
+                                    @endforelse
+                                </div>
+                            </div>
+
+                            <!-- KOTAK 2: SUDAH DIKEMBALIKAN -->
+                            <div class="rounded-xl border border-emerald-200 bg-white overflow-hidden flex flex-col shadow-2xs">
+                                <div class="p-3 bg-emerald-50/80 border-b border-emerald-100 flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                        <h4 class="font-bold text-xs text-emerald-950 uppercase tracking-wider font-heading">2. Sudah Dikembalikan</h4>
                                     </div>
-                                    <div class="flex items-center gap-2 mt-1.5 text-xs text-neutral-600">
-                                        <span class="font-semibold text-neutral-800">{{ $loan->user->name ?? 'Siswa' }}</span>
-                                        <span class="text-neutral-300">|</span>
-                                        <span class="text-neutral-500 font-mono text-[11px]">Kembali: {{ optional($loan->returned_at)->format('H:i') }} WIB</span>
-                                    </div>
+                                    <span class="px-2 py-0.5 rounded-full font-mono text-[11px] font-bold bg-white text-emerald-800 border border-emerald-200 shadow-2xs">
+                                        {{ $todayReturnedLoans->count() }}
+                                    </span>
                                 </div>
 
-                                <span class="px-2 py-0.5 rounded font-mono text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                    Selesai Dikembalikan
-                                </span>
+                                <div class="divide-y divide-neutral-100 overflow-y-auto max-h-[380px] min-h-[260px] flex-1">
+                                    @forelse($todayReturnedLoans as $loan)
+                                        <div class="p-3 hover:bg-neutral-50 transition-colors space-y-1.5">
+                                            <div class="flex items-start justify-between gap-1.5">
+                                                <div class="min-w-0">
+                                                    <span class="font-bold text-neutral-900 text-xs truncate block" title="{{ $loan->item->name ?? '-' }}">
+                                                        {{ $loan->item->name ?? '-' }}
+                                                    </span>
+                                                    <div class="flex items-center gap-1.5 mt-0.5">
+                                                        <span class="font-mono text-[10px] text-neutral-500">{{ $loan->item->item_code ?? '—' }}</span>
+                                                        @if(($loan->quantity_borrowed ?? 1) > 1 || optional($loan->item)->type?->value === 'bahan_habis_pakai')
+                                                            <span class="px-1.5 py-0.2 rounded font-mono text-[9px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                                                                {{ $loan->quantity_borrowed ?? 1 }} pcs
+                                                            </span>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                                @if($loan->isKiosk())
+                                                    <span class="px-1.5 py-0.5 rounded font-mono text-[9px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 shrink-0">
+                                                        Mandiri
+                                                    </span>
+                                                @else
+                                                    <span class="px-1.5 py-0.5 rounded font-mono text-[9px] font-bold bg-neutral-100 text-neutral-700 border border-neutral-200 shrink-0">
+                                                        Manual
+                                                    </span>
+                                                @endif
+                                            </div>
+                                            <div class="flex items-center justify-between text-[11px] text-neutral-600 pt-1 border-t border-neutral-50">
+                                                <span class="font-medium text-neutral-800 truncate max-w-[120px]" title="{{ $loan->user->name ?? 'Siswa' }}">
+                                                    {{ $loan->user->name ?? 'Siswa' }}
+                                                </span>
+                                                <span class="font-mono text-[10px] text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-100 shrink-0">
+                                                    {{ optional($loan->returned_at)->format('H:i') }} WIB
+                                                </span>
+                                            </div>
+                                        </div>
+                                    @empty
+                                        <div class="p-6 text-center text-neutral-400 my-auto">
+                                            <p class="text-xs font-semibold text-neutral-600">Belum Ada Pengembalian</p>
+                                            <p class="text-[11px] text-neutral-400 mt-0.5">Pengembalian hari ini akan tercatat di sini.</p>
+                                        </div>
+                                    @endforelse
+                                </div>
                             </div>
-                        @empty
-                            <div class="p-8 text-center text-neutral-500">
-                                <p class="text-sm font-semibold text-neutral-800">Belum Ada Pengembalian Hari Ini</p>
-                                <p class="text-xs text-neutral-500 mt-0.5">Riwayat pengembalian yang disetujui hari ini akan muncul di sini.</p>
+
+                            <!-- KOTAK 3: TERLAMBAT DIKEMBALIKAN -->
+                            <div class="rounded-xl border border-rose-200 bg-white overflow-hidden flex flex-col shadow-2xs">
+                                <div class="p-3 bg-rose-50/80 border-b border-rose-100 flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+                                        <h4 class="font-bold text-xs text-rose-950 uppercase tracking-wider font-heading">3. Terlambat</h4>
+                                    </div>
+                                    <span class="px-2 py-0.5 rounded-full font-mono text-[11px] font-bold bg-white text-rose-800 border border-rose-200 shadow-2xs">
+                                        {{ $overdueLoans->count() }}
+                                    </span>
+                                </div>
+
+                                <div class="divide-y divide-neutral-100 overflow-y-auto max-h-[380px] min-h-[260px] flex-1">
+                                    @forelse($overdueLoans as $loan)
+                                        <div class="p-3 hover:bg-rose-50/30 transition-colors space-y-1.5 bg-rose-50/10">
+                                            <div class="flex items-start justify-between gap-1.5">
+                                                <div class="min-w-0">
+                                                    <span class="font-bold text-neutral-900 text-xs truncate block" title="{{ $loan->item->name ?? '-' }}">
+                                                        {{ $loan->item->name ?? '-' }}
+                                                    </span>
+                                                    <span class="font-mono text-[10px] text-neutral-500 block">{{ $loan->item->item_code ?? '—' }}</span>
+                                                </div>
+                                                @if($loan->isKiosk())
+                                                    <span class="px-1.5 py-0.5 rounded font-mono text-[9px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 shrink-0">
+                                                        Mandiri
+                                                    </span>
+                                                @else
+                                                    <span class="px-1.5 py-0.5 rounded font-mono text-[9px] font-bold bg-neutral-100 text-neutral-700 border border-neutral-200 shrink-0">
+                                                        Manual
+                                                    </span>
+                                                @endif
+                                            </div>
+                                            <div class="flex items-center justify-between text-[11px] text-neutral-600 pt-1 border-t border-neutral-100">
+                                                <span class="font-medium text-neutral-800 truncate max-w-[120px]" title="{{ $loan->user->name ?? 'Siswa' }}">
+                                                    {{ $loan->user->name ?? 'Siswa' }}
+                                                </span>
+                                                <span class="font-mono text-[10px] font-bold text-rose-700 bg-rose-100 px-1.5 py-0.5 rounded border border-rose-200 shrink-0">
+                                                    Terlambat
+                                                </span>
+                                            </div>
+                                            <div class="text-[10px] font-mono text-rose-600">
+                                                Batas: {{ optional($loan->due_at)->format('d/m H:i') }} ({{ $loan->formattedOverdueDuration() }})
+                                            </div>
+                                        </div>
+                                    @empty
+                                        <div class="p-6 text-center text-neutral-400 my-auto">
+                                            <div class="p-2 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-100 inline-flex items-center justify-center mb-1.5">
+                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                                </svg>
+                                            </div>
+                                            <p class="text-xs font-semibold text-neutral-700">Peminjaman Tertib</p>
+                                            <p class="text-[11px] text-neutral-400 mt-0.5">Tidak ada peminjaman yang melewati batas waktu.</p>
+                                        </div>
+                                    @endforelse
+                                </div>
                             </div>
-                        @endforelse
+
+                        </div>
                     </div>
 
                     <div class="p-3 bg-neutral-50 border-t border-neutral-100 flex items-center justify-between text-xs">
-                        <span class="text-neutral-500 font-mono text-[11px]">Sinkronisasi Kiosk Mandiri Real-Time</span>
+                        <span class="text-neutral-500 font-mono text-[11px]">Sirkulasi Terintegrasi Kiosk Mandiri &amp; Manual Admin</span>
                         <a href="{{ route('loans.index') }}" class="font-semibold text-primary hover:text-primary-700 inline-flex items-center gap-1">
                             <span>Buka Manajemen Sirkulasi Lengkap</span>
                             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -647,7 +564,7 @@
                         </span>
                     </div>
 
-                    <div class="divide-y divide-neutral-100 max-h-72 overflow-y-auto">
+                    <div class="divide-y divide-neutral-100 max-h-[360px] overflow-y-auto">
                         @forelse($recentGateLogs as $log)
                             <div class="p-3 hover:bg-neutral-50/80 transition-colors flex items-start justify-between gap-2.5">
                                 <div class="min-w-0">
@@ -754,58 +671,6 @@
                         <a href="{{ route('items.index') }}" class="font-semibold text-primary hover:text-primary-700 inline-flex items-center gap-1">
                             <span>Katalog Aset</span>
                             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                            </svg>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Widget 3: Pintasan Cepat Operasional Laboratorium (Quick Launcher) -->
-                <div class="bg-neutral-900 rounded-xl p-4 sm:p-5 border border-neutral-800 text-white shadow-sm space-y-3">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-bold uppercase tracking-wider text-neutral-400 font-heading">Pintasan Cepat</span>
-                        <span class="w-2 h-2 rounded-full bg-primary-400"></span>
-                    </div>
-
-                    <div class="space-y-2">
-                        <a href="{{ route('kiosk.home') }}" target="_blank" class="w-full flex items-center justify-between p-2.5 rounded-lg bg-neutral-800/90 hover:bg-neutral-800 border border-neutral-700 text-xs font-semibold text-neutral-100 transition-colors group">
-                            <div class="flex items-center gap-2.5">
-                                <div class="p-1 rounded bg-emerald-950 text-emerald-400 border border-emerald-800/60">
-                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                    </svg>
-                                </div>
-                                <span>Buka Layar Kiosk Siswa</span>
-                            </div>
-                            <svg class="w-3.5 h-3.5 text-neutral-400 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                            </svg>
-                        </a>
-
-                        <a href="{{ route('maintenance.schedules.index') }}" class="w-full flex items-center justify-between p-2.5 rounded-lg bg-neutral-800/90 hover:bg-neutral-800 border border-neutral-700 text-xs font-semibold text-neutral-100 transition-colors group">
-                            <div class="flex items-center gap-2.5">
-                                <div class="p-1 rounded bg-amber-950 text-amber-400 border border-amber-800/60">
-                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                    </svg>
-                                </div>
-                                <span>Jadwal Maintenance Preventif</span>
-                            </div>
-                            <svg class="w-3.5 h-3.5 text-neutral-400 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-                            </svg>
-                        </a>
-
-                        <a href="{{ route('reports.index') }}" class="w-full flex items-center justify-between p-2.5 rounded-lg bg-neutral-800/90 hover:bg-neutral-800 border border-neutral-700 text-xs font-semibold text-neutral-100 transition-colors group">
-                            <div class="flex items-center gap-2.5">
-                                <div class="p-1 rounded bg-sky-950 text-sky-400 border border-sky-800/60">
-                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                    </svg>
-                                </div>
-                                <span>Cetak Laporan PDF / Excel</span>
-                            </div>
-                            <svg class="w-3.5 h-3.5 text-neutral-400 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
                             </svg>
                         </a>

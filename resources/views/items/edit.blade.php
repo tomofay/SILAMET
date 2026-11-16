@@ -186,8 +186,11 @@
                             <x-input-label for="category" value="Kelompok / Kategori Barang" />
                             <select id="category"
                                     name="category"
-                                    class="mt-1.5 w-full text-xs font-bold uppercase rounded-xl border-neutral-200 focus:border-primary focus:ring-primary text-neutral-800">
-                                <option value="">— TANPA KELOMPOK —</option>
+                                    class="mt-1.5 w-full text-xs font-bold uppercase rounded-xl border-neutral-200 focus:border-primary focus:ring-primary text-neutral-800"
+                                    required>
+                                @if(!filled(old('category', $item->category)))
+                                    <option value="" disabled selected>— PILIH KELOMPOK BARANG —</option>
+                                @endif
                                 @foreach(($categorySuggestions ?? []) as $cat)
                                     <option value="{{ $cat }}" @selected(strtoupper(old('category', $item->category ?? '')) === strtoupper($cat))>
                                         {{ strtoupper($cat) }}

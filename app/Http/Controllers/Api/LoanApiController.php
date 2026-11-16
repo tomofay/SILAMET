@@ -3,13 +3,16 @@
 namespace App\Http\Controllers\Api;
 
 use App\Enums\ItemStatus;
+use App\Enums\ItemType;
 use App\Enums\LoanDuration;
 use App\Enums\LoanStatus;
+use App\Enums\StockMovementType;
 use App\Http\Controllers\Controller;
 use App\Jobs\SendMaintenanceTicketTelegramJob;
 use App\Models\Item;
 use App\Models\Loan;
 use App\Models\MaintenanceTicket;
+use App\Models\StockMovement;
 use App\Models\User;
 use App\Services\CameraService;
 use Illuminate\Http\Request;
@@ -68,6 +71,7 @@ class LoanApiController extends Controller
             }
 
             $dueAt = Loan::calculateDueAt($validated['usage_duration'], $borrowedAt);
+            $user = User::findOrFail($validated['user_id']);
             $createdLoans = [];
 
             foreach ($itemIds as $itemId) {
@@ -77,27 +81,51 @@ class LoanApiController extends Controller
                     abort(422, sprintf('Barang "%s" tidak tersedia (status: %s).', $item->name, $item->status->value));
                 }
 
-                if (Loan::query()
-                    ->where('item_id', $item->id)
-                    ->where('status', LoanStatus::AKTIF)
-                    ->exists()) {
-                    abort(422, sprintf('Barang "%s" sedang memiliki peminjaman aktif.', $item->name));
-                }
-
                 $borrowedQty = isset($validated['quantities'][$itemId]) ? max(1, (int) $validated['quantities'][$itemId]) : 1;
+
+                if ($item->type === ItemType::BAHAN_HABIS_PAKAI) {
+                    if ($item->stock < $borrowedQty) {
+                        abort(422, sprintf('Stok barang "%s" tidak mencukupi (tersedia: %d pcs, diminta: %d pcs).', $item->name, $item->stock, $borrowedQty));
+                    }
+
+                    $stockBefore = (int) $item->stock;
+                    $stockAfter = max(0, $stockBefore - $borrowedQty);
+                    $item->stock = $stockAfter;
+                    $item->save();
+
+                    StockMovement::create([
+                        'item_id' => $item->id,
+                        'user_id' => $user->id,
+                        'type' => StockMovementType::OUT,
+                        'quantity' => $borrowedQty,
+                        'stock_before' => $stockBefore,
+                        'stock_after' => $stockAfter,
+                        'recipient_name' => $user->name,
+                        'description' => sprintf('Peminjaman Kiosk %d pcs oleh %s (%s)', $borrowedQty, $user->name, $user->nis_nip ?? '-'),
+                    ]);
+                } else {
+                    if (Loan::query()
+                        ->where('item_id', $item->id)
+                        ->where('status', LoanStatus::AKTIF)
+                        ->exists()) {
+                        abort(422, sprintf('Barang "%s" sedang memiliki peminjaman aktif.', $item->name));
+                    }
+
+                    $item->update(['status' => ItemStatus::DIPINJAM]);
+                }
 
                 $loan = Loan::create([
                     'user_id' => $validated['user_id'],
                     'item_id' => $item->id,
                     'quantity_borrowed' => $borrowedQty,
                     'status' => LoanStatus::AKTIF,
+                    'borrowed_via' => 'kiosk',
                     'capture_image_path' => $photoPath,
                     'usage_duration' => $validated['usage_duration'],
                     'borrowed_at' => $borrowedAt,
                     'due_at' => $dueAt,
                 ]);
 
-                $item->update(['status' => ItemStatus::DIPINJAM]);
                 $createdLoans[] = $loan;
             }
 

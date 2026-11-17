@@ -22,6 +22,7 @@ class Item extends Model
         'category',
         'type',
         'stock',
+        'min_stock',
         'status',
         'barcode_token',
         'location',
@@ -42,7 +43,18 @@ class Item extends Model
             'type' => ItemType::class,
             'status' => ItemStatus::class,
             'stock' => 'integer',
+            'min_stock' => 'integer',
         ];
+    }
+
+    public function minStockThreshold(): int
+    {
+        return (int) ($this->min_stock ?? 20);
+    }
+
+    public function isLowStock(): bool
+    {
+        return $this->type === ItemType::BAHAN_HABIS_PAKAI && $this->stock <= $this->minStockThreshold();
     }
 
     // Relationships

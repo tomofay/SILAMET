@@ -88,10 +88,10 @@
                 <span class="text-xs font-semibold px-3 py-1 rounded-full border {{ $badge }}">{{ $item->status->label() }}</span>
             </div>
 
-            <dl class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-5 text-sm">
+            <dl class="grid grid-cols-2 {{ $item->type === \App\Enums\ItemType::BAHAN_HABIS_PAKAI ? 'md:grid-cols-5' : 'md:grid-cols-4' }} gap-4 mt-5 text-sm">
                 <div class="p-3.5 rounded-xl bg-neutral-50/70 border border-neutral-200/80">
-                    <dt class="text-neutral-500 text-[11px] font-bold uppercase tracking-wider">EPC Tag UHF RFID</dt>
-                    <dd class="font-semibold text-neutral-900 font-mono text-xs mt-1.5 break-all">{{ $item->epc_tag ?? '—' }}</dd>
+                    <dt class="text-neutral-500 text-[11px] font-bold uppercase tracking-wider">{{ $item->type === \App\Enums\ItemType::BAHAN_HABIS_PAKAI ? 'Barcode Kemasan' : 'EPC Tag UHF RFID' }}</dt>
+                    <dd class="font-semibold text-neutral-900 font-mono text-xs mt-1.5 break-all">{{ $item->type === \App\Enums\ItemType::BAHAN_HABIS_PAKAI ? $item->item_code : ($item->epc_tag ?? '—') }}</dd>
                 </div>
                 <div class="p-3.5 rounded-xl bg-neutral-50/70 border border-neutral-200/80">
                     <dt class="text-neutral-500 text-[11px] font-bold uppercase tracking-wider">Tipe Barang</dt>
@@ -99,8 +99,25 @@
                 </div>
                 <div class="p-3.5 rounded-xl bg-neutral-50/70 border border-neutral-200/80">
                     <dt class="text-neutral-500 text-[11px] font-bold uppercase tracking-wider">Stok Tersedia</dt>
-                    <dd class="font-semibold text-neutral-900 font-mono text-xs mt-1.5">{{ $item->stock }} unit</dd>
+                    <dd class="font-semibold text-neutral-900 font-mono text-xs mt-1.5 flex items-center gap-1.5 flex-wrap">
+                        <span>{{ $item->stock }} {{ $item->type === \App\Enums\ItemType::BAHAN_HABIS_PAKAI ? 'pcs' : 'unit' }}</span>
+                        @if($item->type === \App\Enums\ItemType::BAHAN_HABIS_PAKAI)
+                            @if($item->stock <= 0)
+                                <span class="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-rose-50 text-rose-700 border border-rose-200">Habis</span>
+                            @elseif($item->isLowStock())
+                                <span class="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-amber-50 text-amber-800 border border-amber-200">Menipis</span>
+                            @else
+                                <span class="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">Aman</span>
+                            @endif
+                        @endif
+                    </dd>
                 </div>
+                @if($item->type === \App\Enums\ItemType::BAHAN_HABIS_PAKAI)
+                    <div class="p-3.5 rounded-xl bg-neutral-50/70 border border-neutral-200/80">
+                        <dt class="text-neutral-500 text-[11px] font-bold uppercase tracking-wider">Batas Alert Stok</dt>
+                        <dd class="font-semibold text-neutral-900 font-mono text-xs mt-1.5">{{ $item->minStockThreshold() }} pcs</dd>
+                    </div>
+                @endif
                 <div class="p-3.5 rounded-xl bg-neutral-50/70 border border-neutral-200/80">
                     <dt class="text-neutral-500 text-[11px] font-bold uppercase tracking-wider">Lokasi / Rak</dt>
                     <dd class="font-semibold text-neutral-900 font-mono text-xs mt-1.5">{{ $item->location ?? '—' }}</dd>

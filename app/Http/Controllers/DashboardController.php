@@ -117,12 +117,12 @@ class DashboardController extends Controller
                 ->get();
         }
 
-        // 5. Radar Stok Kritis (Bahan Habis Pakai <= 5 unit)
+        // 5. Radar Stok Kritis (Bahan Habis Pakai <= batas minimum alert)
         $lowStockConsumables = Item::query()
             ->where('type', ItemType::BAHAN_HABIS_PAKAI)
-            ->where('stock', '<=', 5)
+            ->whereRaw('stock <= COALESCE(min_stock, 20)')
             ->orderBy('stock')
-            ->limit(5)
+            ->limit(10)
             ->get();
 
         $stats = [

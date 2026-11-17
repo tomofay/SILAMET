@@ -203,6 +203,45 @@
                         </div>
                     </div>
 
+                    @if($item->type->value === 'bahan_habis_pakai')
+                        <!-- Card 4: Kuantitas Stok & Batas Alert (KHUSUS BAHAN HABIS PAKAI) -->
+                        <div x-show="itemType === 'bahan_habis_pakai'" class="bg-white rounded-2xl border border-neutral-200 p-5 sm:p-6 shadow-sm space-y-4">
+                            <div class="border-b border-neutral-100 pb-3">
+                                <h2 class="text-sm font-bold uppercase tracking-wider text-neutral-900 font-heading">Kuantitas Stok &amp; Batas Alert Peringatan</h2>
+                                <p class="text-xs text-neutral-500 mt-0.5">Kelola sisa stok fisik saat ini dan ambang batas minimum untuk memicu peringatan stok di dashboard.</p>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <x-input-label for="stock" value="Jumlah Kuantitas Stok Saat Ini (Pcs / Roll / Pack) *" />
+                                    <x-text-input id="stock"
+                                                  name="stock"
+                                                  type="number"
+                                                  min="0"
+                                                  class="mt-1.5 w-full font-mono text-sm font-bold rounded-xl border-neutral-200 focus:border-primary focus:ring-primary"
+                                                  value="{{ old('stock', $item->stock) }}"
+                                                  x-bind:disabled="itemType !== 'bahan_habis_pakai'"
+                                                  x-bind:required="itemType === 'bahan_habis_pakai'" />
+                                    <p class="text-[11px] text-neutral-400 mt-1">Perubahan angka stok di sini akan otomatis dicatat pada buku riwayat mutasi stok.</p>
+                                    <x-input-error :messages="$errors->get('stock')" class="mt-1.5" />
+                                </div>
+                                <div>
+                                    <x-input-label for="min_stock" value="Batas Minimum Stok (Alert Peringatan) *" />
+                                    <x-text-input id="min_stock"
+                                                  name="min_stock"
+                                                  type="number"
+                                                  min="0"
+                                                  class="mt-1.5 w-full font-mono text-sm font-bold rounded-xl border-neutral-200 focus:border-primary focus:ring-primary"
+                                                  value="{{ old('min_stock', $item->min_stock ?? 20) }}"
+                                                  x-bind:disabled="itemType !== 'bahan_habis_pakai'"
+                                                  x-bind:required="itemType === 'bahan_habis_pakai'" />
+                                    <p class="text-[11px] text-neutral-400 mt-1">Dashboard akan menampilkan peringatan jika stok &le; angka ini (default: 20 pcs).</p>
+                                    <x-input-error :messages="$errors->get('min_stock')" class="mt-1.5" />
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+
                 </div>
 
                 <!-- Right Column (Sidebar Cards: Status, Organization, Location) -->

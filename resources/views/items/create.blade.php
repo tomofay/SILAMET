@@ -172,18 +172,26 @@
                             </div>
                         </div>
 
-                        <!-- Card 3: Kuantitas Stok Awal -->
-                        <div class="bg-white rounded-2xl border border-neutral-200 p-5 sm:p-6 shadow-sm space-y-3">
+                        <!-- Card 3: Kuantitas Stok Awal & Batas Alert -->
+                        <div class="bg-white rounded-2xl border border-neutral-200 p-5 sm:p-6 shadow-sm space-y-4">
                             <div class="border-b border-neutral-100 pb-2.5">
-                                <h3 class="text-xs font-bold uppercase tracking-wider text-neutral-900 font-heading">Kuantitas Stok Awal</h3>
-                                <p class="text-[11px] text-neutral-500 mt-0.5">Tentukan jumlah unit/pcs bahan sekali pakai yang dimasukkan ke lab.</p>
+                                <h3 class="text-xs font-bold uppercase tracking-wider text-neutral-900 font-heading">Kuantitas Stok &amp; Batas Alert Peringatan</h3>
+                                <p class="text-[11px] text-neutral-500 mt-0.5">Tentukan jumlah unit/pcs bahan sekali pakai yang dimasukkan ke lab dan batas minimal untuk peringatan stok.</p>
                             </div>
 
-                            <div class="max-w-md">
-                                <x-input-label for="bhp_stock" value="Jumlah Kuantitas Stok Awal (Pcs / Roll / Pack) *" />
-                                <x-text-input id="bhp_stock" name="stock" type="number" min="1" class="mt-1.5 w-full font-mono text-sm font-bold rounded-xl border-neutral-200 focus:border-primary focus:ring-primary" value="{{ old('stock', 1) }}" required />
-                                <p class="text-[11px] text-neutral-400 mt-1">Setiap peminjaman/pengambilan bahan akan otomatis memotong sisa stok di sistem.</p>
-                                <x-input-error :messages="$errors->get('stock')" class="mt-1.5" />
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <x-input-label for="bhp_stock" value="Jumlah Kuantitas Stok Awal (Pcs / Roll / Pack) *" />
+                                    <x-text-input id="bhp_stock" name="stock" type="number" min="1" class="mt-1.5 w-full font-mono text-sm font-bold rounded-xl border-neutral-200 focus:border-primary focus:ring-primary" value="{{ old('stock', 1) }}" required />
+                                    <p class="text-[11px] text-neutral-400 mt-1">Setiap peminjaman/pengambilan bahan akan otomatis memotong sisa stok di sistem.</p>
+                                    <x-input-error :messages="$errors->get('stock')" class="mt-1.5" />
+                                </div>
+                                <div>
+                                    <x-input-label for="bhp_min_stock" value="Batas Minimum Stok (Alert Peringatan) *" />
+                                    <x-text-input id="bhp_min_stock" name="min_stock" type="number" min="0" class="mt-1.5 w-full font-mono text-sm font-bold rounded-xl border-neutral-200 focus:border-primary focus:ring-primary" value="{{ old('min_stock', 20) }}" required />
+                                    <p class="text-[11px] text-neutral-400 mt-1">Dashboard akan menampilkan peringatan stok menipis jika stok &le; angka ini (default: 20 pcs).</p>
+                                    <x-input-error :messages="$errors->get('min_stock')" class="mt-1.5" />
+                                </div>
                             </div>
                         </div>
                     </div>

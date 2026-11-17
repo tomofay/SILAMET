@@ -281,6 +281,7 @@ class MasterController extends Controller
             'category' => 'nullable|string|max:80',
             'type' => 'required|in:aset,bahan_habis_pakai',
             'stock' => 'nullable|integer|min:0',
+            'min_stock' => 'nullable|integer|min:0',
             'status' => 'nullable|in:tersedia,dipinjam,under_maintenance',
             'location' => 'required|string|max:100',
             'preventive_interval_months' => 'nullable|integer|min:1|max:60',
@@ -292,14 +293,20 @@ class MasterController extends Controller
             'name.required' => 'Nama barang wajib diisi.',
             'type.required' => 'Tipe barang wajib dipilih.',
             'location.required' => 'Lokasi penempatan barang wajib diisi.',
+            'min_stock.integer' => 'Batas minimum stok harus berupa angka bulat.',
+            'min_stock.min' => 'Batas minimum stok tidak boleh bernilai negatif.',
         ]);
 
         $validated['status'] = $validated['status'] ?? 'tersedia';
 
         if ($validated['type'] === 'aset') {
             $validated['stock'] = 1;
+            $validated['min_stock'] = null;
         } else {
             $validated['stock'] = max(1, (int) ($validated['stock'] ?? 1));
+            $validated['min_stock'] = isset($validated['min_stock']) && $validated['min_stock'] !== null && $validated['min_stock'] !== ''
+                ? max(0, (int) $validated['min_stock'])
+                : 20;
         }
 
         $validated['category'] = $this->itemGroupService->cleanCategory($validated['category'] ?? null);
@@ -311,6 +318,7 @@ class MasterController extends Controller
             'category',
             'type',
             'stock',
+            'min_stock',
             'status',
             'location',
         ]);
@@ -447,6 +455,7 @@ class MasterController extends Controller
             'category' => 'nullable|string|max:80',
             'type' => 'required|in:aset,bahan_habis_pakai',
             'stock' => 'nullable|integer|min:0',
+            'min_stock' => 'nullable|integer|min:0',
             'status' => 'required|in:tersedia,dipinjam,under_maintenance',
             'location' => 'required|string|max:100',
         ], [
@@ -457,6 +466,8 @@ class MasterController extends Controller
             'type.required' => 'Tipe barang wajib dipilih.',
             'status.required' => 'Status barang wajib dipilih.',
             'location.required' => 'Lokasi penempatan barang wajib diisi.',
+            'min_stock.integer' => 'Batas minimum stok harus berupa angka bulat.',
+            'min_stock.min' => 'Batas minimum stok tidak boleh bernilai negatif.',
         ]);
 
         // Prevent updating item_code to match a trashed item (different item)
@@ -483,8 +494,16 @@ class MasterController extends Controller
 
                 if ($validated['type'] === 'aset') {
                     $validated['stock'] = 1;
-                } elseif (! array_key_exists('stock', $validated) || $validated['stock'] === null) {
-                    $validated['stock'] = $oldStock;
+                    $validated['min_stock'] = null;
+                } else {
+                    if (! array_key_exists('stock', $validated) || $validated['stock'] === null) {
+                        $validated['stock'] = $oldStock;
+                    }
+                    if (array_key_exists('min_stock', $validated)) {
+                        $validated['min_stock'] = ($validated['min_stock'] !== null && $validated['min_stock'] !== '')
+                            ? max(0, (int) $validated['min_stock'])
+                            : ($item->min_stock ?? 20);
+                    }
                 }
 
                 $item->update($validated);

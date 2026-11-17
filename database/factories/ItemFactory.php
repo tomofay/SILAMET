@@ -16,7 +16,7 @@ class ItemFactory extends Factory
     public function definition(): array
     {
         return [
-            'item_code' => 'ITM-' . strtoupper(uniqid()),
+            'item_code' => 'ITM-'.strtoupper(uniqid()),
             'epc_tag' => null,
             'name' => $this->faker->words(3, true),
             'type' => ItemType::ASET,
@@ -31,6 +31,7 @@ class ItemFactory extends Factory
         return $this->state(fn () => [
             'type' => ItemType::BAHAN_HABIS_PAKAI,
             'stock' => $this->faker->numberBetween(5, 50),
+            'min_stock' => 20,
         ]);
     }
 

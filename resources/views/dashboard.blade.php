@@ -441,7 +441,7 @@
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                                                 </svg>
                                             </div>
-                                            <p class="text-xs font-semibold text-neutral-700">Peminjaman Tertib</p>
+                                            <p class="text-xs font-semibold text-neutral-700">Tidak Ada yang Terlambat</p>
                                             <p class="text-[11px] text-neutral-400 mt-0.5">Tidak ada peminjaman yang melewati batas waktu.</p>
                                         </div>
                                     @endforelse
@@ -642,7 +642,7 @@
                             </div>
                             <div>
                                 <h3 class="font-bold text-neutral-900 text-xs tracking-tight font-heading">Peringatan Stok &amp; Bahan Praktikum</h3>
-                                <p class="text-[10px] text-neutral-500">Bahan habis pakai dengan stok kritis (&le; 5 unit)</p>
+                                <p class="text-[10px] text-neutral-500">Bahan sekali pakai dengan stok menipis (&le; batas alert)</p>
                             </div>
                         </div>
                     </div>
@@ -651,16 +651,31 @@
                         @forelse($lowStockConsumables as $consumable)
                             <div class="p-3 hover:bg-neutral-50/80 transition-colors flex items-center justify-between gap-3">
                                 <div class="min-w-0">
-                                    <div class="text-xs font-semibold text-neutral-900 truncate">{{ $consumable->name }}</div>
-                                    <div class="text-[10px] text-neutral-500 font-mono mt-0.5">
-                                        {{ $consumable->item_code }} &middot; {{ $consumable->location ?? 'Ruang Alat' }}
+                                    <div class="flex items-center gap-2">
+                                        <div class="text-xs font-semibold text-neutral-900 truncate">{{ $consumable->name }}</div>
+                                        <span class="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-amber-50 text-amber-800 border border-amber-200 shrink-0">BHP</span>
+                                    </div>
+                                    <div class="text-[10px] text-neutral-500 font-mono mt-0.5 flex items-center gap-2">
+                                        <span>{{ $consumable->item_code }} &middot; {{ $consumable->location ?? 'Ruang Alat' }}</span>
+                                        <span class="text-neutral-300">&vert;</span>
+                                        <span class="text-neutral-400">Batas alert: {{ $consumable->minStockThreshold() }} pcs</span>
                                     </div>
                                 </div>
 
                                 <div class="text-right shrink-0">
-                                    <span class="inline-block px-2 py-0.5 rounded font-mono text-xs font-bold {{ $consumable->stock <= 2 ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-amber-50 text-amber-800 border border-amber-200' }}">
-                                        Sisa: {{ $consumable->stock }}
-                                    </span>
+                                    @if($consumable->stock <= 0)
+                                        <span class="inline-block px-2.5 py-1 rounded font-mono text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                                            Habis (0 pcs)
+                                        </span>
+                                    @elseif($consumable->stock <= 5)
+                                        <span class="inline-block px-2.5 py-1 rounded font-mono text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                                            Kritis: {{ $consumable->stock }} pcs
+                                        </span>
+                                    @else
+                                        <span class="inline-block px-2.5 py-1 rounded font-mono text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                                            Peringatan: Sisa {{ $consumable->stock }} pcs
+                                        </span>
+                                    @endif
                                 </div>
                             </div>
                         @empty
@@ -671,7 +686,7 @@
                                     </svg>
                                 </div>
                                 <p class="text-xs font-semibold text-neutral-800">Stok Bahan Praktikum Aman</p>
-                                <p class="text-[10px] text-neutral-500 mt-0.5">Tidak ada bahan habis pakai di bawah batas minimum.</p>
+                                <p class="text-[10px] text-neutral-500 mt-0.5">Semua bahan habis pakai berada di atas batas minimum stok.</p>
                             </div>
                         @endforelse
                     </div>

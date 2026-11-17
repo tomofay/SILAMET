@@ -114,7 +114,7 @@
                 </div>
                 @if($item->type === \App\Enums\ItemType::BAHAN_HABIS_PAKAI)
                     <div class="p-3.5 rounded-xl bg-neutral-50/70 border border-neutral-200/80">
-                        <dt class="text-neutral-500 text-[11px] font-bold uppercase tracking-wider">Batas Alert Stok</dt>
+                        <dt class="text-neutral-500 text-[11px] font-bold uppercase tracking-wider">Batas Minimum Stok</dt>
                         <dd class="font-semibold text-neutral-900 font-mono text-xs mt-1.5">{{ $item->minStockThreshold() }} pcs</dd>
                     </div>
                 @endif

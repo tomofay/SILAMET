@@ -153,8 +153,9 @@ class ConsumableMinStockAlertTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('RJ45 PACK 2');
-        $response->assertSee('Batas alert: 20 pcs');
-        $response->assertSee('Peringatan: Sisa 10 pcs');
+        $response->assertSee('Sisa 10 pcs');
+        $response->assertDontSee('Batas alert:');
+        $response->assertDontSee('Peringatan: Sisa');
         $response->assertDontSee('Stok Bahan Praktikum Aman');
     }
 
@@ -175,6 +176,6 @@ class ConsumableMinStockAlertTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('Stok Bahan Praktikum Aman');
-        $response->assertSee('Semua bahan habis pakai berada di atas batas minimum stok.');
+        $response->assertSee('Semua bahan habis pakai dalam kondisi stok cukup.');
     }
 }

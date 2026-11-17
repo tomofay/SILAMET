@@ -631,7 +631,7 @@
                     </div>
                 </div>
 
-                <!-- Widget 2: Radar Bahan & Kesehatan Inventaris (Low Stock Alert ala Seller Inventory) -->
+                <!-- Widget 2: Stok Bahan Praktikum (BHP Menipis) -->
                 <div class="bg-white rounded-xl border border-neutral-200 overflow-hidden shadow-sm">
                     <div class="p-4 border-b border-neutral-200 bg-neutral-50/60 flex items-center justify-between">
                         <div class="flex items-center gap-2">
@@ -641,8 +641,8 @@
                                 </svg>
                             </div>
                             <div>
-                                <h3 class="font-bold text-neutral-900 text-xs tracking-tight font-heading">Peringatan Stok &amp; Bahan Praktikum</h3>
-                                <p class="text-[10px] text-neutral-500">Bahan sekali pakai dengan stok menipis (&le; batas alert)</p>
+                                <h3 class="font-bold text-neutral-900 text-xs tracking-tight font-heading">Stok Bahan Praktikum</h3>
+                                <p class="text-[10px] text-neutral-500">Bahan sekali pakai dengan stok menipis</p>
                             </div>
                         </div>
                     </div>
@@ -653,27 +653,25 @@
                                 <div class="min-w-0">
                                     <div class="flex items-center gap-2">
                                         <div class="text-xs font-semibold text-neutral-900 truncate">{{ $consumable->name }}</div>
-                                        <span class="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-amber-50 text-amber-800 border border-amber-200 shrink-0">BHP</span>
+                                        <span class="px-1.5 py-0.5 rounded text-[9px] font-mono font-medium bg-neutral-100 text-neutral-600 border border-neutral-200 shrink-0">BHP</span>
                                     </div>
-                                    <div class="text-[10px] text-neutral-500 font-mono mt-0.5 flex items-center gap-2">
-                                        <span>{{ $consumable->item_code }} &middot; {{ $consumable->location ?? 'Ruang Alat' }}</span>
-                                        <span class="text-neutral-300">&vert;</span>
-                                        <span class="text-neutral-400">Batas alert: {{ $consumable->minStockThreshold() }} pcs</span>
+                                    <div class="text-[10px] text-neutral-500 font-mono mt-0.5">
+                                        {{ $consumable->item_code }} &middot; {{ $consumable->location ?? 'Ruang Alat' }}
                                     </div>
                                 </div>
 
                                 <div class="text-right shrink-0">
                                     @if($consumable->stock <= 0)
-                                        <span class="inline-block px-2.5 py-1 rounded font-mono text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                                        <span class="inline-block px-2.5 py-1 rounded-md font-mono text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">
                                             Habis (0 pcs)
                                         </span>
                                     @elseif($consumable->stock <= 5)
-                                        <span class="inline-block px-2.5 py-1 rounded font-mono text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200">
-                                            Kritis: {{ $consumable->stock }} pcs
+                                        <span class="inline-block px-2.5 py-1 rounded-md font-mono text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">
+                                            Sisa {{ $consumable->stock }} pcs
                                         </span>
                                     @else
-                                        <span class="inline-block px-2.5 py-1 rounded font-mono text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200">
-                                            Peringatan: Sisa {{ $consumable->stock }} pcs
+                                        <span class="inline-block px-2.5 py-1 rounded-md font-mono text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200">
+                                            Sisa {{ $consumable->stock }} pcs
                                         </span>
                                     @endif
                                 </div>
@@ -686,7 +684,7 @@
                                     </svg>
                                 </div>
                                 <p class="text-xs font-semibold text-neutral-800">Stok Bahan Praktikum Aman</p>
-                                <p class="text-[10px] text-neutral-500 mt-0.5">Semua bahan habis pakai berada di atas batas minimum stok.</p>
+                                <p class="text-[10px] text-neutral-500 mt-0.5">Semua bahan habis pakai dalam kondisi stok cukup.</p>
                             </div>
                         @endforelse
                     </div>

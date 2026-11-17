@@ -534,8 +534,8 @@
                                                 <div class="inline-flex items-center gap-1.5 justify-center">
                                                     <span>{{ $item->stock }}</span>
                                                     @if($item->isLowStock())
-                                                        <span class="inline-block px-1.5 py-0.5 rounded text-[9px] font-bold {{ $item->stock <= 5 ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-amber-50 text-amber-800 border border-amber-200' }}" title="Di bawah batas alert ({{ $item->minStockThreshold() }} pcs)">
-                                                            Alert
+                                                        <span class="inline-block px-1.5 py-0.5 rounded text-[9px] font-bold {{ $item->stock <= 5 ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-amber-50 text-amber-800 border border-amber-200' }}" title="Stok menipis di bawah kuota minimum ({{ $item->minStockThreshold() }} pcs)">
+                                                            Menipis
                                                         </span>
                                                     @endif
                                                 </div>

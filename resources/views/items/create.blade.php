@@ -172,11 +172,11 @@
                             </div>
                         </div>
 
-                        <!-- Card 3: Kuantitas Stok Awal & Batas Alert -->
+                        <!-- Card 3: Kuantitas & Batas Minimum Stok -->
                         <div class="bg-white rounded-2xl border border-neutral-200 p-5 sm:p-6 shadow-sm space-y-4">
                             <div class="border-b border-neutral-100 pb-2.5">
-                                <h3 class="text-xs font-bold uppercase tracking-wider text-neutral-900 font-heading">Kuantitas Stok &amp; Batas Alert Peringatan</h3>
-                                <p class="text-[11px] text-neutral-500 mt-0.5">Tentukan jumlah unit/pcs bahan sekali pakai yang dimasukkan ke lab dan batas minimal untuk peringatan stok.</p>
+                                <h3 class="text-xs font-bold uppercase tracking-wider text-neutral-900 font-heading">Kuantitas &amp; Batas Minimum Stok</h3>
+                                <p class="text-[11px] text-neutral-500 mt-0.5">Tentukan jumlah stok awal bahan sekali pakai serta ambang batas minimumnya.</p>
                             </div>
 
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -187,9 +187,9 @@
                                     <x-input-error :messages="$errors->get('stock')" class="mt-1.5" />
                                 </div>
                                 <div>
-                                    <x-input-label for="bhp_min_stock" value="Batas Minimum Stok (Alert Peringatan) *" />
+                                    <x-input-label for="bhp_min_stock" value="Batas Minimum Stok *" />
                                     <x-text-input id="bhp_min_stock" name="min_stock" type="number" min="0" class="mt-1.5 w-full font-mono text-sm font-bold rounded-xl border-neutral-200 focus:border-primary focus:ring-primary" value="{{ old('min_stock', 20) }}" required />
-                                    <p class="text-[11px] text-neutral-400 mt-1">Dashboard akan menampilkan peringatan stok menipis jika stok &le; angka ini (default: 20 pcs).</p>
+                                    <p class="text-[11px] text-neutral-400 mt-1">Peringatan stok menipis muncul di dashboard jika stok mencapai atau di bawah angka ini (default: 20 pcs).</p>
                                     <x-input-error :messages="$errors->get('min_stock')" class="mt-1.5" />
                                 </div>
                             </div>

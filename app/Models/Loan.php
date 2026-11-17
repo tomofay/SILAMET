@@ -103,6 +103,16 @@ class Loan extends Model
     }
 
     /**
+     * Format durasi keterlambatan untuk tampilan antarmuka (misal: "+2 jam 15 menit" atau "terlambat").
+     */
+    public function formattedOverdueDuration(?Carbon $now = null): string
+    {
+        $label = $this->latenessLabel($now);
+
+        return $label ? "+{$label}" : 'terlambat';
+    }
+
+    /**
      * Dapatkan keterangan kerusakan saat pengembalian barang.
      */
     public function damageNote(): ?string

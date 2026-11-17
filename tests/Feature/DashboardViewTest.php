@@ -86,4 +86,30 @@ class DashboardViewTest extends TestCase
 
         $response->assertForbidden();
     }
+
+    public function test_dashboard_page_renders_with_overdue_loans_without_errors(): void
+    {
+        $user = $this->actingAsStaff();
+        $student = User::factory()->siswa()->create(['name' => 'Siswa Terlambat']);
+        $item = Item::factory()->borrowed()->create(['name' => 'Router Terlambat']);
+
+        $overdueLoan = Loan::factory()->create([
+            'user_id' => $student->id,
+            'item_id' => $item->id,
+            'status' => \App\Enums\LoanStatus::AKTIF,
+            'due_at' => now()->subHours(5),
+            'borrowed_at' => now()->subDays(1),
+        ]);
+
+        $this->assertTrue($overdueLoan->isOverdue());
+        $this->assertStringContainsString('5 jam', $overdueLoan->formattedOverdueDuration());
+
+        $response = $this->actingAs($user)->get('/dashboard');
+
+        $response->assertOk()
+            ->assertSee('Siswa Terlambat')
+            ->assertSee('Router Terlambat')
+            ->assertSee('Terlambat')
+            ->assertSee($overdueLoan->formattedOverdueDuration());
+    }
 }

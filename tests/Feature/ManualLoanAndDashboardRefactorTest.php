@@ -177,6 +177,22 @@ class ManualLoanAndDashboardRefactorTest extends TestCase
         $response->assertSee('Pilih Alat Praktikum *');
     }
 
+    public function test_loans_create_displays_serial_tag_and_omits_static_uhf_rfid_label(): void
+    {
+        $staff = $this->actingAsStaff();
+        Item::factory()->create([
+            'name' => 'MikroTik Router RB750',
+            'item_code' => 'RB-750-01',
+            'epc_tag' => 'E280689400004001',
+            'status' => ItemStatus::TERSEDIA,
+        ]);
+
+        $response = $this->actingAs($staff)->get(route('loans.create'));
+        $response->assertOk();
+        $response->assertSee('TAG: E280689400004001');
+        $response->assertDontSee('>UHF RFID<', false);
+    }
+
     public function test_dashboard_renders_3_boxes_and_no_black_bar_or_pintasan_cepat(): void
     {
         $staff = $this->actingAsStaff();

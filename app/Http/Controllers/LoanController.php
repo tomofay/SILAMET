@@ -129,6 +129,10 @@ class LoanController extends Controller
      */
     public function create()
     {
+        $students = User::where('role', 'siswa')
+            ->orderBy('name')
+            ->get(['id', 'name', 'nis_nip', 'phone']);
+
         $items = Item::where('status', ItemStatus::TERSEDIA)
             ->where(function ($query) {
                 $query->where('type', '!=', ItemType::BAHAN_HABIS_PAKAI)
@@ -138,7 +142,7 @@ class LoanController extends Controller
             ->orderBy('name')
             ->get();
 
-        return view('loans.create', compact('items'));
+        return view('loans.create', compact('items', 'students'));
     }
 
     /**

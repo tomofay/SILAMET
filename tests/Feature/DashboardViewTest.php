@@ -90,26 +90,51 @@ class DashboardViewTest extends TestCase
     public function test_dashboard_page_renders_with_overdue_loans_without_errors(): void
     {
         $user = $this->actingAsStaff();
-        $student = User::factory()->siswa()->create(['name' => 'Siswa Terlambat']);
-        $item = Item::factory()->borrowed()->create(['name' => 'Router Terlambat']);
+        $studentOnTime = User::factory()->siswa()->create(['name' => 'Siswa Tepat Waktu']);
+        $itemOnTime = Item::factory()->borrowed()->create(['name' => 'PC Lab 10']);
+
+        $onTimeLoan = Loan::factory()->create([
+            'user_id' => $studentOnTime->id,
+            'item_id' => $itemOnTime->id,
+            'status' => \App\Enums\LoanStatus::AKTIF,
+            'due_at' => now()->addDays(2),
+            'borrowed_at' => now(),
+        ]);
+
+        $studentLate = User::factory()->siswa()->create(['name' => 'Siswa Terlambat']);
+        $itemLate = Item::factory()->borrowed()->create(['name' => 'Router Terlambat']);
 
         $overdueLoan = Loan::factory()->create([
-            'user_id' => $student->id,
-            'item_id' => $item->id,
+            'user_id' => $studentLate->id,
+            'item_id' => $itemLate->id,
             'status' => \App\Enums\LoanStatus::AKTIF,
             'due_at' => now()->subHours(5),
             'borrowed_at' => now()->subDays(1),
         ]);
 
         $this->assertTrue($overdueLoan->isOverdue());
+        $this->assertFalse($onTimeLoan->isOverdue());
         $this->assertStringContainsString('5 jam', $overdueLoan->formattedOverdueDuration());
 
         $response = $this->actingAs($user)->get('/dashboard');
 
         $response->assertOk()
+            ->assertSee('Siswa Tepat Waktu')
+            ->assertSee('PC Lab 10')
             ->assertSee('Siswa Terlambat')
             ->assertSee('Router Terlambat')
             ->assertSee('Terlambat')
             ->assertSee($overdueLoan->formattedOverdueDuration());
+
+        // Pastikan activeLoans (Kotak 1) hanya berisi pinjaman yang belum terlambat
+        $activeLoans = $response->viewData('activeLoans');
+        $overdueLoans = $response->viewData('overdueLoans');
+
+        $this->assertCount(1, $activeLoans);
+        $this->assertTrue($activeLoans->contains('id', $onTimeLoan->id));
+        $this->assertFalse($activeLoans->contains('id', $overdueLoan->id));
+
+        $this->assertCount(1, $overdueLoans);
+        $this->assertTrue($overdueLoans->contains('id', $overdueLoan->id));
     }
 }

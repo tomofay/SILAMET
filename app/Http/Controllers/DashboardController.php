@@ -45,6 +45,10 @@ class DashboardController extends Controller
         $activeLoans = Loan::query()
             ->with(['user', 'item'])
             ->where('status', LoanStatus::AKTIF)
+            ->where(function ($q) {
+                $q->whereNull('due_at')
+                    ->orWhere('due_at', '>=', now());
+            })
             ->latest('borrowed_at')
             ->limit(15)
             ->get();

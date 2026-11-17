@@ -469,9 +469,17 @@
                                                     <div class="flex items-center gap-1.5 flex-wrap">
                                                         <span class="text-sm font-bold text-neutral-900 truncate" x-text="item.name"></span>
                                                         <span x-show="item.type === 'bahan_habis_pakai'" class="px-1.5 py-0.2 rounded font-mono text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200">BHP</span>
+                                                        <span x-show="item.type === 'bahan_habis_pakai'" class="px-2 py-0.5 rounded-full font-mono text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                                                            Sisa Pack: <span x-text="item.stock"></span> pcs
+                                                        </span>
                                                     </div>
                                                     <div class="text-xs text-neutral-500 font-mono mt-0.5">
                                                         <span class="font-semibold text-neutral-800" x-text="item.item_code"></span> · Rak: <span x-text="item.location"></span>
+                                                        <template x-if="item.type === 'bahan_habis_pakai'">
+                                                            <span class="text-emerald-700 font-semibold font-sans ml-1">
+                                                                · Sisa di pack ini: <span class="font-mono font-bold" x-text="item.stock"></span> pcs
+                                                            </span>
+                                                        </template>
                                                     </div>
                                                 </div>
                                             </div>
@@ -491,12 +499,14 @@
                                             <div class="pt-2 border-t border-neutral-200 flex items-center justify-between text-xs">
                                                 <div>
                                                     <span class="font-bold text-neutral-800">Jumlah konektor/unit dipakai:</span>
-                                                    <p class="text-[10px] text-neutral-500">Isi jumlah pcs yang diambil</p>
+                                                    <p class="text-[10px] text-neutral-500">
+                                                        Isi jumlah pcs yang diambil (Maks. <span class="font-bold text-emerald-700 font-mono" x-text="item.stock"></span> pcs)
+                                                    </p>
                                                 </div>
                                                 <div class="flex items-center gap-1.5">
                                                     <button type="button" @click="item.quantity = Math.max(1, (item.quantity || 1) - 1)" class="w-7 h-7 rounded-lg bg-neutral-200 hover:bg-neutral-300 text-neutral-800 font-bold flex items-center justify-center cursor-pointer">-</button>
-                                                    <input type="number" x-model.number="item.quantity" min="1" max="10000" class="w-16 text-center font-mono font-bold text-xs py-1 rounded-lg border border-neutral-300">
-                                                    <button type="button" @click="item.quantity = (item.quantity || 1) + 1" class="w-7 h-7 rounded-lg bg-neutral-200 hover:bg-neutral-300 text-neutral-800 font-bold flex items-center justify-center cursor-pointer">+</button>
+                                                    <input type="number" x-model.number="item.quantity" min="1" :max="item.stock" @input="if(item.quantity > item.stock) item.quantity = item.stock; if(item.quantity < 1) item.quantity = 1" class="w-16 text-center font-mono font-bold text-xs py-1 rounded-lg border border-neutral-300">
+                                                    <button type="button" @click="item.quantity = Math.min(item.stock, (item.quantity || 1) + 1)" class="w-7 h-7 rounded-lg bg-neutral-200 hover:bg-neutral-300 text-neutral-800 font-bold flex items-center justify-center cursor-pointer">+</button>
                                                     <span class="font-mono text-[11px] text-neutral-600 font-semibold">pcs</span>
                                                 </div>
                                             </div>
@@ -775,8 +785,16 @@
                             <!-- Hidden Canvas for Capture -->
                             <canvas x-ref="captureCanvas" class="hidden"></canvas>
 
-                            <!-- Clean Face Frame Overlay -->
-                            <div class="absolute inset-8 border border-dashed border-white/50 rounded-lg pointer-events-none flex items-end justify-center pb-3">
+                            <!-- Clean Face Frame Overlay with Real-time Detection Status -->
+                            <div class="absolute inset-8 rounded-lg pointer-events-none flex flex-col items-center justify-between p-3 border-2 transition-all duration-300"
+                                 :class="faceDetected ? 'border-emerald-400 bg-emerald-500/10 shadow-[0_0_20px_rgba(16,185,129,0.25)]' : 'border-dashed border-rose-400 bg-rose-950/20'">
+                                <div class="w-full flex items-center justify-between pointer-events-none">
+                                    <span class="font-mono text-[10px] font-bold px-2 py-0.5 rounded shadow-sm transition-colors"
+                                          :class="faceDetected ? 'bg-emerald-600 text-white' : 'bg-rose-600 text-white'">
+                                        <span x-text="faceDetected ? '✓ WAJAH TERDETEKSI' : '! WAJAH BELUM TERDETEKSI'"></span>
+                                    </span>
+                                    <span class="font-mono text-[10px] text-white/90 bg-neutral-900/80 px-2 py-0.5 rounded border border-neutral-700" x-text="faceStatusMessage"></span>
+                                </div>
                                 <span class="font-mono text-[11px] font-semibold tracking-wider text-white bg-neutral-900/80 border border-neutral-700 px-2.5 py-0.5 rounded">
                                     AREA WAJAH
                                 </span>
@@ -826,7 +844,14 @@
                                         <div class="flex items-center justify-between text-xs bg-white p-2 rounded-lg border border-neutral-200">
                                             <div class="min-w-0 pr-2">
                                                 <div class="font-semibold text-neutral-900 truncate" x-text="(idx + 1) + '. ' + item.name"></div>
-                                                <div class="text-[11px] text-neutral-500 font-mono" x-text="item.item_code"></div>
+                                                <div class="flex items-center gap-1.5 flex-wrap text-[11px] text-neutral-500 font-mono mt-0.5">
+                                                    <span x-text="item.item_code"></span>
+                                                    <template x-if="item.type === 'bahan_habis_pakai'">
+                                                        <span class="text-amber-800 font-semibold font-sans">
+                                                            · Ambil <span class="font-mono font-bold" x-text="item.quantity || 1"></span> pcs (sisa pack: <span class="font-mono" x-text="item.stock"></span> pcs)
+                                                        </span>
+                                                    </template>
+                                                </div>
                                             </div>
                                             <span class="font-mono text-[11px] text-neutral-500 shrink-0" x-text="item.location"></span>
                                         </div>
@@ -843,12 +868,13 @@
                         </div>
 
                         <div class="space-y-2.5">
-                            <!-- Confirm Button -->
+                            <!-- Confirm Button (Only active when face detected or non-webrtc) -->
                             <button 
                                 @click="confirmLoan()"
-                                :disabled="isSubmitting"
+                                :disabled="isSubmitting || (!faceDetected && cameraMode === 'webrtc')"
                                 type="button" 
-                                class="min-h-[54px] w-full bg-emerald-700 hover:bg-emerald-600 text-white font-bold text-base py-3.5 px-5 rounded-xl border border-emerald-600 transition-colors flex items-center justify-center gap-2.5 cursor-pointer disabled:opacity-50"
+                                class="min-h-[54px] w-full font-bold text-base py-3.5 px-5 rounded-xl border transition-colors flex items-center justify-center gap-2.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                :class="(!faceDetected && cameraMode === 'webrtc') ? 'bg-neutral-800 text-neutral-400 border-neutral-700 shadow-none' : 'bg-emerald-700 hover:bg-emerald-600 text-white border-emerald-600 shadow-sm'"
                             >
                                 <template x-if="!isSubmitting">
                                     <div class="flex items-center gap-2">
@@ -1314,6 +1340,10 @@
                 cameraProbeSeq: 0,
                 cameraStatus: 'pending',
                 cameraStatusMessage: 'Menyiapkan kamera Kiosk...',
+                faceDetected: false,
+                faceStatusMessage: 'Mendeteksi wajah...',
+                faceCheckInterval: null,
+                nativeFaceDetector: null,
 
                 toast: {
                     visible: false,
@@ -1681,6 +1711,8 @@
                 onDaemonStreamLoad() {
                     if (this.cameraMode === 'daemon' && this.daemonStreamUrl !== '') {
                         this.cameraStatus = 'ready';
+                        this.faceDetected = true;
+                        this.faceStatusMessage = 'Kamera Gate Siaga';
                     }
                 },
 
@@ -1726,6 +1758,7 @@
                             this.$refs.videoElement.srcObject = stream;
                         }
                         this.cameraStatus = 'ready';
+                        this.startFaceDetectionLoop();
                     } catch (err) {
                         console.warn('Webcam error:', err);
                         this.cameraStatus = 'error';
@@ -1733,7 +1766,131 @@
                     }
                 },
 
+                startFaceDetectionLoop() {
+                    this.stopFaceDetectionLoop();
+                    if ('FaceDetector' in window) {
+                        try {
+                            this.nativeFaceDetector = new window.FaceDetector({ fastMode: true, maxDetectedFaces: 2 });
+                        } catch (e) {
+                            this.nativeFaceDetector = null;
+                        }
+                    }
+
+                    this.faceCheckInterval = setInterval(async () => {
+                        await this.evaluateFaceInFrame();
+                    }, 350);
+                },
+
+                stopFaceDetectionLoop() {
+                    if (this.faceCheckInterval) {
+                        clearInterval(this.faceCheckInterval);
+                        this.faceCheckInterval = null;
+                    }
+                },
+
+                async evaluateFaceInFrame() {
+                    if (this.screen !== 'snapshot_confirm') {
+                        return;
+                    }
+
+                    if (this.cameraMode === 'daemon') {
+                        this.faceDetected = true;
+                        this.faceStatusMessage = 'Kamera Siaga';
+                        return;
+                    }
+
+                    const video = this.$refs.videoElement;
+                    if (!video || video.readyState < 2 || video.paused || video.ended) {
+                        return;
+                    }
+
+                    // 1. Cek Native FaceDetector API jika didukung oleh browser
+                    if (this.nativeFaceDetector) {
+                        try {
+                            const faces = await this.nativeFaceDetector.detect(video);
+                            if (faces && faces.length > 0) {
+                                this.faceDetected = true;
+                                this.faceStatusMessage = 'Wajah terdeteksi';
+                                return;
+                            }
+                        } catch (e) {
+                            // Lanjut ke fallback analisis frame
+                        }
+                    }
+
+                    // 2. Analisis Frame Video (Luminance, Obstruction & YCbCr Skin-Chroma)
+                    const canvas = this.$refs.captureCanvas;
+                    if (!canvas) return;
+
+                    const width = 160;
+                    const height = 120;
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+                    ctx.drawImage(video, 0, 0, width, height);
+
+                    // Crop area tengah (area wajah)
+                    const cropX = Math.floor(width * 0.25);
+                    const cropY = Math.floor(height * 0.15);
+                    const cropW = Math.floor(width * 0.50);
+                    const cropH = Math.floor(height * 0.70);
+
+                    const frameData = ctx.getImageData(cropX, cropY, cropW, cropH);
+                    const pixels = frameData.data;
+                    const totalPixels = pixels.length / 4;
+
+                    let totalBrightness = 0;
+                    let skinPixels = 0;
+                    const brightnessList = [];
+
+                    for (let i = 0; i < pixels.length; i += 4) {
+                        const r = pixels[i];
+                        const g = pixels[i + 1];
+                        const b = pixels[i + 2];
+
+                        const y = 0.299 * r + 0.587 * g + 0.114 * b;
+                        totalBrightness += y;
+                        brightnessList.push(y);
+
+                        // Model YCbCr Skin-Chroma
+                        const cb = 128 - 0.168736 * r - 0.331264 * g + 0.5 * b;
+                        const cr = 128 + 0.5 * r - 0.418688 * g - 0.081312 * b;
+
+                        // Deteksi rona warna kulit manusia
+                        if (cr >= 133 && cr <= 173 && cb >= 77 && cb <= 127 && y > 35) {
+                            skinPixels++;
+                        }
+                    }
+
+                    const avgBrightness = totalBrightness / totalPixels;
+
+                    // Hitung standar deviasi kontras
+                    let varianceSum = 0;
+                    for (let j = 0; j < brightnessList.length; j++) {
+                        varianceSum += Math.pow(brightnessList[j] - avgBrightness, 2);
+                    }
+                    const stdDev = Math.sqrt(varianceSum / brightnessList.length);
+
+                    // Jika kamera ditutup (gelap gulita / flat / silau putih penuh)
+                    if (avgBrightness < 20 || avgBrightness > 245 || stdDev < 8) {
+                        this.faceDetected = false;
+                        this.faceStatusMessage = 'Kamera tertutup atau terlalu gelap';
+                        return;
+                    }
+
+                    // Rasio pixel kulit minimal 10% di area tengah
+                    const skinRatio = skinPixels / totalPixels;
+                    if (skinRatio >= 0.10) {
+                        this.faceDetected = true;
+                        this.faceStatusMessage = 'Wajah terdeteksi';
+                    } else {
+                        this.faceDetected = false;
+                        this.faceStatusMessage = 'Posisikan wajah di dalam kotak';
+                    }
+                },
+
                 stopWebcam() {
+                    this.stopFaceDetectionLoop();
                     this.cameraProbeSeq++;
                     this.daemonStreamUrl = '';
                     if (this.$refs.daemonVideo) {
@@ -1747,6 +1904,7 @@
                         this.$refs.videoElement.srcObject = null;
                     }
                     this.cameraMode = 'detecting';
+                    this.faceDetected = false;
                 },
 
                 async captureSnapshot() {
@@ -1786,6 +1944,13 @@
 
                 async confirmLoan() {
                     if (this.isSubmitting || this.selectedItems.length === 0) return;
+
+                    if (!this.faceDetected && this.cameraMode === 'webrtc') {
+                        this.playAudioTone('error');
+                        this.showToast('warning', 'Wajah Belum Terdeteksi', 'Posisikan wajah Anda tepat di dalam area kotak sebelum melakukan konfirmasi.');
+                        return;
+                    }
+
                     this.isSubmitting = true;
 
                     const photoBase64 = await this.captureSnapshot();

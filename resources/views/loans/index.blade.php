@@ -56,28 +56,28 @@
                     </svg>
                 </div>
                 <div>
-                    <div class="text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Sudah Dikembalikan</div>
+                    <div class="text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Total Pengembalian</div>
                     <div class="flex items-baseline gap-1.5 mt-0.5">
                         <span class="text-xl font-extrabold text-neutral-900 font-heading">{{ $returnedTotal ?? 0 }}</span>
-                        <span class="text-xs text-neutral-400">unit telah kembali</span>
+                        <span class="text-xs text-neutral-400">unit tuntas dikembalikan</span>
                     </div>
                 </div>
             </a>
 
-            <div class="bg-white rounded-2xl border border-neutral-200 p-4 shadow-sm flex items-center gap-3.5">
+            <a href="{{ route('loans.index', array_filter(['status' => 'terlambat', 'q' => $search])) }}" class="bg-white rounded-2xl border border-neutral-200 p-4 shadow-sm flex items-center gap-3.5 hover:border-neutral-300 transition-colors">
                 <div class="w-10 h-10 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-600 shrink-0">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
                 </div>
                 <div>
-                    <div class="text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Terlambat (Overdue)</div>
+                    <div class="text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Melebihi Waktu Peminjaman</div>
                     <div class="flex items-baseline gap-1.5 mt-0.5">
                         <span class="text-xl font-extrabold text-rose-600 font-heading">{{ $overdueTotal }}</span>
                         <span class="text-xs text-neutral-400">lewat jatuh tempo</span>
                     </div>
                 </div>
-            </div>
+            </a>
         </div>
 
         <!-- Filter & Search Capsule Bar -->
@@ -93,9 +93,14 @@
                        class="px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors {{ $statusFilter === 'aktif' ? 'bg-neutral-900 text-white shadow-2xs' : 'text-neutral-600 hover:text-neutral-900' }}">
                         Sedang Dipinjam
                     </a>
-                    <a href="{{ route('loans.history') }}"
-                       class="px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors text-neutral-600 hover:text-neutral-900">
-                        Sudah Dikembalikan
+                    <a href="{{ route('loans.index', array_filter(['status' => 'terlambat', 'q' => $search])) }}"
+                       class="px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors inline-flex items-center gap-1.5 {{ $statusFilter === 'terlambat' ? 'bg-neutral-900 text-white shadow-2xs' : 'text-neutral-600 hover:text-neutral-900' }}">
+                        <span>Melebihi Waktu Peminjaman</span>
+                        @if($overdueTotal > 0)
+                            <span class="px-1.5 py-0.5 rounded-full font-mono text-[10px] font-bold {{ $statusFilter === 'terlambat' ? 'bg-rose-500 text-white' : 'bg-rose-100 text-rose-700' }}">
+                                {{ $overdueTotal }}
+                            </span>
+                        @endif
                     </a>
                 </div>
 
@@ -272,13 +277,15 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                             </svg>
                                         </div>
-                                        <h3 class="font-heading font-bold text-neutral-900 text-sm">Tidak Ada Peminjaman Sedang Berlangsung</h3>
+                                        <h3 class="font-heading font-bold text-neutral-900 text-sm">
+                                            {{ $statusFilter === 'terlambat' ? 'Tidak Ada Peminjaman Melebihi Waktu' : 'Tidak Ada Peminjaman Sedang Berlangsung' }}
+                                        </h3>
                                         <p class="text-xs text-neutral-500 mt-1 text-center">
-                                            Semua alat praktikum lab SIJA saat ini berada di ruang penyimpanan dan siap digunakan.
+                                            {{ $statusFilter === 'terlambat' ? 'Seluruh peminjaman aktif saat ini masih berada dalam batas durasi peminjaman.' : 'Semua alat praktikum lab SIJA saat ini berada di ruang penyimpanan dan siap digunakan.' }}
                                         </p>
                                         <div class="mt-4 flex items-center gap-2">
                                             <a href="{{ route('loans.history') }}" class="px-3.5 py-1.5 rounded-full border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-700 text-xs font-semibold transition-colors shadow-2xs">
-                                                Lihat Histori Selesai
+                                                Lihat Pengembalian Selesai
                                             </a>
                                             <a href="{{ route('loans.create') }}" class="px-3.5 py-1.5 rounded-full bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-semibold transition-colors shadow-2xs">
                                                 Catat Pinjam

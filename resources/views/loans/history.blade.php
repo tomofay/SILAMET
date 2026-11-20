@@ -1,6 +1,6 @@
 <x-app-layout>
-    <x-slot name="heading">Histori Peminjaman Alat</x-slot>
-    <x-slot name="title">Histori Peminjaman — SILAMET</x-slot>
+    <x-slot name="heading">Pengembalian Alat</x-slot>
+    <x-slot name="title">Pengembalian Alat — SILAMET</x-slot>
 
     <div class="space-y-6 max-w-7xl mx-auto">
         
@@ -9,7 +9,7 @@
             <div>
                 <div class="flex items-center gap-2.5">
                     <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-neutral-900 font-heading">
-                        Histori Peminjaman Alat
+                        Pengembalian Alat
                     </h1>
                     <span class="px-2.5 py-0.5 rounded-full text-xs font-mono font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
                         {{ $completedTotal }} Riwayat Selesai

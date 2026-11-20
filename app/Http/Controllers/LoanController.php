@@ -31,8 +31,13 @@ class LoanController extends Controller
         $query = Loan::with(['user', 'item'])
             ->whereIn('status', [LoanStatus::AKTIF->value, LoanStatus::MENUNGGU_APPROVAL_KEMBALI->value]);
 
-        if ($statusFilter !== '' && in_array($statusFilter, [LoanStatus::AKTIF->value, LoanStatus::MENUNGGU_APPROVAL_KEMBALI->value], true)) {
-            $query->where('status', $statusFilter);
+        if ($statusFilter === LoanStatus::AKTIF->value) {
+            $query->where('status', LoanStatus::AKTIF->value);
+        } elseif ($statusFilter === 'terlambat' || $statusFilter === 'overdue') {
+            $query->where('status', LoanStatus::AKTIF->value)
+                ->where('due_at', '<', now());
+        } elseif ($statusFilter === LoanStatus::MENUNGGU_APPROVAL_KEMBALI->value) {
+            $query->where('status', LoanStatus::MENUNGGU_APPROVAL_KEMBALI->value);
         }
 
         if ($search !== '') {

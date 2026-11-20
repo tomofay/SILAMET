@@ -91,9 +91,9 @@
 
                                 <x-sidebar-link :href="route('loans.history')" :active="request()->routeIs('loans.history') || (request()->routeIs('loans.show') && isset($loan) && $loan->status?->value === 'selesai')">
                                     <svg class="w-4 h-4 mr-2.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
-                                    <span>Histori Peminjaman</span>
+                                    <span>Pengembalian</span>
                                 </x-sidebar-link>
                             @endif
 

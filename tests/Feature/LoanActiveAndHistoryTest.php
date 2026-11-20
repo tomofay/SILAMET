@@ -50,6 +50,8 @@ class LoanActiveAndHistoryTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('Peminjaman Alat');
+        $response->assertSee('Sedang Dipinjam');
+        $response->assertSee('Melebihi Waktu Peminjaman');
         $response->assertSee('Budi Siswa Aktif');
         $response->assertSee('MikroTik RB750Gr3');
         $response->assertSee('SLM-RTR-01');
@@ -83,11 +85,12 @@ class LoanActiveAndHistoryTest extends TestCase
             'condition_in' => 'bagus',
         ]);
 
-        // Kunjungi halaman Histori Peminjaman (loans.history)
+        // Kunjungi halaman Pengembalian (loans.history)
         $response = $this->actingAs($teknisi)->get(route('loans.history'));
 
         $response->assertOk();
-        $response->assertSee('Histori Peminjaman Alat');
+        $response->assertSee('Pengembalian Alat');
+        $response->assertSee('Pengembalian');
         $response->assertSee('Siti Siswa Selesai');
         $response->assertSee('Switch D-Link 24P');
         $response->assertSee('Kondisi Bagus');
@@ -95,6 +98,39 @@ class LoanActiveAndHistoryTest extends TestCase
         // Peminjaman yang masih aktif tidak masuk di histori selesai
         $response->assertDontSee('Budi Siswa Aktif');
         $response->assertDontSee('MikroTik RB750Gr3');
+    }
+
+    public function test_loans_index_filter_by_overdue_only_shows_loans_past_due_date(): void
+    {
+        $teknisi = User::factory()->teknisi()->create();
+        $studentOnTime = User::factory()->siswa()->create(['name' => 'Siswa Tepat Waktu']);
+        $studentLate = User::factory()->siswa()->create(['name' => 'Siswa Terlambat']);
+
+        $item1 = Item::factory()->borrowed()->create(['name' => 'Router On Time']);
+        $item2 = Item::factory()->borrowed()->create(['name' => 'Switch Terlambat']);
+
+        // Pinjaman tepat waktu (due masih nanti)
+        Loan::factory()->create([
+            'user_id' => $studentOnTime->id,
+            'item_id' => $item1->id,
+            'status' => LoanStatus::AKTIF,
+            'due_at' => now()->addDays(2),
+        ]);
+
+        // Pinjaman lewat waktu jatuh tempo
+        Loan::factory()->create([
+            'user_id' => $studentLate->id,
+            'item_id' => $item2->id,
+            'status' => LoanStatus::AKTIF,
+            'due_at' => now()->subHours(5),
+        ]);
+
+        $res = $this->actingAs($teknisi)->get(route('loans.index', ['status' => 'terlambat']));
+        $res->assertOk();
+        $res->assertSee('Siswa Terlambat');
+        $res->assertSee('Switch Terlambat');
+        $res->assertDontSee('Siswa Tepat Waktu');
+        $res->assertDontSee('Router On Time');
     }
 
     public function test_student_cannot_access_loans_index_or_history(): void

@@ -100,9 +100,6 @@
                                placeholder="Cari kelompok, nama, kode, EPC..."
                                class="w-full pl-9 pr-4 py-2 rounded-full border border-neutral-300 bg-white text-xs font-medium text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary shadow-sm transition-all" />
                     </div>
-                    <button type="submit" class="px-4 py-2 rounded-full bg-white hover:bg-neutral-50 text-neutral-800 text-xs font-bold border border-neutral-300 shadow-sm transition-colors shrink-0">
-                        Cari
-                    </button>
                 </form>
 
                 @if($viewMode === 'groups')

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\GateLog;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 
 class GateLogController extends Controller
@@ -22,10 +23,11 @@ class GateLogController extends Controller
         $logs = $query->paginate(20)->withQueryString();
 
         $stats = $this->computeStats();
+        $hardware = $this->getHardwareStatus();
         $latestLogId = (int) (GateLog::max('id') ?? 0);
         $latestDeniedId = (int) (GateLog::where('action_status', 'denied')->max('id') ?? 0);
 
-        return view('gate-logs.index', compact('logs', 'stats', 'latestLogId', 'latestDeniedId'));
+        return view('gate-logs.index', compact('logs', 'stats', 'hardware', 'latestLogId', 'latestDeniedId'));
     }
 
     /**
@@ -40,6 +42,7 @@ class GateLogController extends Controller
         $latestId = (int) (GateLog::max('id') ?? 0);
         $latestDeniedId = (int) (GateLog::where('action_status', 'denied')->max('id') ?? 0);
         $stats = $this->computeStats();
+        $hardware = $this->getHardwareStatus();
 
         $changed = $latestId !== $afterId || $request->boolean('force');
         $tbodyHtml = null;
@@ -80,9 +83,49 @@ class GateLogController extends Controller
             'latest_id' => $latestId,
             'latest_denied_id' => $latestDeniedId,
             'stats' => $stats,
+            'hardware' => $hardware,
             'tbody_html' => $tbodyHtml,
             'latest_denied_alert' => $latestDeniedAlert,
         ]);
+    }
+
+    /**
+     * Probe status hardware Gate Security (UHF Reader & Arduino Relay) via daemon lokal.
+     *
+     * @return array{daemon_online: bool, reader_connected: bool, reader_port: string, relay_connected: bool, relay_port: string}
+     */
+    private function getHardwareStatus(): array
+    {
+        $default = [
+            'daemon_online' => false,
+            'reader_connected' => false,
+            'reader_port' => 'COM2',
+            'relay_connected' => false,
+            'relay_port' => 'COM4',
+        ];
+
+        if (app()->runningUnitTests()) {
+            return $default;
+        }
+
+        try {
+            $response = Http::timeout(0.35)->get('http://127.0.0.1:8765/health');
+            if ($response->successful()) {
+                $data = $response->json();
+
+                return [
+                    'daemon_online' => true,
+                    'reader_connected' => (bool) ($data['reader_connected'] ?? false),
+                    'reader_port' => (string) ($data['reader_port'] ?? 'COM2'),
+                    'relay_connected' => (bool) ($data['relay_connected'] ?? false),
+                    'relay_port' => (string) ($data['relay_port'] ?? 'COM4'),
+                ];
+            }
+        } catch (\Throwable $e) {
+            // Daemon tidak aktif / timeout
+        }
+
+        return $default;
     }
 
     /**
@@ -134,7 +177,7 @@ class GateLogController extends Controller
             }
         }
 
-        $publicFallback = public_path('storage/' . $path);
+        $publicFallback = public_path('storage/'.$path);
         if (is_file($publicFallback)) {
             $contents = @file_get_contents($publicFallback);
             if ($contents !== false && $contents !== '') {

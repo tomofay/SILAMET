@@ -36,14 +36,24 @@ class GateLogViewTest extends TestCase
 
         $photoUrl = route('gate-logs.photo', $log->id);
 
-        $this->actingAs($teknisi)
-            ->get('/gate-logs')
-            ->assertOk()
+        $indexRes = $this->actingAs($teknisi)
+            ->get('/gate-logs');
+
+        $indexRes->assertOk()
+            ->assertSee('Gate Security RFID')
             ->assertSee('MikroTik RB450Gx4')
             ->assertSee($photoUrl);
 
+        // Pastikan urutan tab: Akses Sah (Allowed) muncul sebelum Hanya Pelanggaran (Denied)
+        $content = $indexRes->getContent();
+        $posAllowed = strpos($content, 'Akses Sah (Allowed)');
+        $posDenied = strpos($content, 'Hanya Pelanggaran (Denied)');
+        $this->assertNotFalse($posAllowed);
+        $this->assertNotFalse($posDenied);
+        $this->assertTrue($posAllowed < $posDenied, 'Tab Akses Sah (Allowed) harus berada sebelum Hanya Pelanggaran (Denied)');
+
         $this->actingAs($teknisi)
-            ->get('/gate-logs/' . $log->id)
+            ->get('/gate-logs/'.$log->id)
             ->assertOk()
             ->assertSee('MikroTik RB450Gx4')
             ->assertSee($photoUrl);
@@ -108,7 +118,7 @@ class GateLogViewTest extends TestCase
             ->assertSee('DIHAPUS');
 
         $this->actingAs($kabeng)
-            ->get('/gate-logs/' . $log->id)
+            ->get('/gate-logs/'.$log->id)
             ->assertOk()
             ->assertSee('Switch Lama Dihapus')
             ->assertSee('DIHAPUS');
@@ -147,7 +157,8 @@ class GateLogViewTest extends TestCase
             ->assertJsonPath('tbody_html', null)
             ->assertJsonPath('stats.total', 1)
             ->assertJsonPath('stats.allowed', 1)
-            ->assertJsonPath('stats.denied', 0);
+            ->assertJsonPath('stats.denied', 0)
+            ->assertJsonPath('hardware.daemon_online', false);
 
         // Pelanggaran baru masuk
         $deniedLog = GateLog::create([
@@ -175,4 +186,3 @@ class GateLogViewTest extends TestCase
         $this->assertStringContainsString('Switch Manageable 24G', (string) $res->json('tbody_html'));
     }
 }
-

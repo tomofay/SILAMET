@@ -72,9 +72,6 @@
                        value="{{ $search }}"
                        placeholder="Cari nama / kode barang..."
                        class="w-full sm:w-56 rounded-lg border-neutral-300 text-xs focus:border-primary focus:ring-primary" />
-                <button type="submit" class="px-3 py-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-800 text-xs font-semibold rounded-lg border border-neutral-200 transition-colors">
-                    Cari
-                </button>
             </form>
         </div>
 

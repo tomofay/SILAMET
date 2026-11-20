@@ -1,6 +1,6 @@
 <x-app-layout>
-    <x-slot name="heading">Monitoring Gate Security RFID</x-slot>
-    <x-slot name="title">Gate Logs RFID — SILAMET</x-slot>
+    <x-slot name="heading">Gate Security RFID</x-slot>
+    <x-slot name="title">Gate Security RFID — SILAMET</x-slot>
 
     <div class="space-y-6 max-w-7xl mx-auto">
 
@@ -8,21 +8,11 @@
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-neutral-200">
             <div>
                 <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-neutral-900 font-heading">
-                    Monitoring Gate Security RFID
+                    Gate Security RFID
                 </h1>
                 <p class="text-xs text-neutral-500 mt-0.5">
                     Pemantauan antena UHF RFID HW-VX6330, snapshot kamera pelanggar, dan status relay sirine 12V.
                 </p>
-            </div>
-            <div class="flex items-center gap-2">
-                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-neutral-200 font-mono text-[11px] shadow-sm text-neutral-700">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                    HW-VX6330 [COM2]
-                </span>
-                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-neutral-200 font-mono text-[11px] shadow-sm text-neutral-700">
-                    <span class="w-2 h-2 rounded-full bg-amber-500"></span>
-                    Relay [COM4]
-                </span>
             </div>
         </div>
 
@@ -103,13 +93,6 @@
                         class="px-4 py-2 rounded-full text-xs font-semibold border transition-all duration-150 {{ !$currentStatus ? 'bg-neutral-900 text-white border-neutral-900 shadow-sm' : 'bg-white text-neutral-600 hover:bg-neutral-50 border-neutral-200' }}">
                         Semua Aktivitas
                     </a>
-                    <a href="{{ route('gate-logs.index', ['status' => 'denied']) }}"
-                        class="px-4 py-2 rounded-full text-xs font-semibold border transition-all duration-150 inline-flex items-center gap-1.5 {{ $currentStatus === 'denied' ? 'bg-rose-600 text-white border-rose-600 shadow-sm' : 'bg-white text-rose-700 hover:bg-rose-50 border-rose-200' }}">
-                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                        </svg>
-                        <span>Hanya Pelanggaran (Denied)</span>
-                    </a>
                     <a href="{{ route('gate-logs.index', ['status' => 'allowed']) }}"
                         class="px-4 py-2 rounded-full text-xs font-semibold border transition-all duration-150 inline-flex items-center gap-1.5 {{ $currentStatus === 'allowed' ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm' : 'bg-white text-emerald-700 hover:bg-emerald-50 border-emerald-200' }}">
                         <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -117,9 +100,37 @@
                         </svg>
                         <span>Akses Sah (Allowed)</span>
                     </a>
+                    <a href="{{ route('gate-logs.index', ['status' => 'denied']) }}"
+                        class="px-4 py-2 rounded-full text-xs font-semibold border transition-all duration-150 inline-flex items-center gap-1.5 {{ $currentStatus === 'denied' ? 'bg-rose-600 text-white border-rose-600 shadow-sm' : 'bg-white text-rose-700 hover:bg-rose-50 border-rose-200' }}">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        <span>Hanya Pelanggaran (Denied)</span>
+                    </a>
                 </div>
 
                 <div class="flex items-center gap-2 text-xs text-neutral-600 flex-wrap">
+                    @php
+                        $uhfConnected = (bool) ($hardware['reader_connected'] ?? false);
+                        $relayConnected = (bool) ($hardware['relay_connected'] ?? false);
+                        $daemonOnline = (bool) ($hardware['daemon_online'] ?? false);
+                    @endphp
+
+                    <!-- HW-VX6330 UHF RFID Status Badge -->
+                    <span id="hw-uhf-badge"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full {{ $uhfConnected ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : ($daemonOnline ? 'bg-amber-50 text-amber-800 border-amber-200' : 'bg-neutral-100 text-neutral-600 border-neutral-200') }} border font-mono text-[11px] shadow-sm"
+                        title="{{ $uhfConnected ? 'UHF Reader HW-VX6330 terhubung di ' . ($hardware['reader_port'] ?? 'COM2') : ($daemonOnline ? 'Daemon aktif, reader belum terdeteksi' : 'Hardware / Daemon UHF belum aktif (Offline)') }}">
+                        <span id="hw-uhf-dot" class="w-2 h-2 rounded-full {{ $uhfConnected ? 'bg-emerald-500 animate-pulse' : ($daemonOnline ? 'bg-amber-500' : 'bg-neutral-400') }}"></span>
+                        <span id="hw-uhf-text">HW-VX6330 {{ $uhfConnected ? '[' . ($hardware['reader_port'] ?? 'COM2') . ']' : ($daemonOnline ? '[Terputus]' : '[Offline]') }}</span>
+                    </span>
+
+                    <!-- Arduino Relay Status Badge -->
+                    <span id="hw-relay-badge"
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full {{ $relayConnected ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : ($daemonOnline ? 'bg-amber-50 text-amber-800 border-amber-200' : 'bg-neutral-100 text-neutral-600 border-neutral-200') }} border font-mono text-[11px] shadow-sm"
+                        title="{{ $relayConnected ? 'Arduino Uno Relay 12V terhubung di ' . ($hardware['relay_port'] ?? 'COM4') : ($daemonOnline ? 'Daemon aktif, relay belum terdeteksi' : 'Hardware / Daemon Relay belum aktif (Offline)') }}">
+                        <span id="hw-relay-dot" class="w-2 h-2 rounded-full {{ $relayConnected ? 'bg-emerald-500' : ($daemonOnline ? 'bg-amber-500' : 'bg-neutral-400') }}"></span>
+                        <span id="hw-relay-text">Relay {{ $relayConnected ? '[' . ($hardware['relay_port'] ?? 'COM4') . ']' : ($daemonOnline ? '[Terputus]' : '[Offline]') }}</span>
+                    </span>
                     <button type="button" id="toggle-live-poll"
                         class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-mono text-[11px] font-semibold transition-colors shadow-sm"
                         title="Aktifkan/jeda pembaruan otomatis tiap 3 detik">
@@ -400,16 +411,40 @@
                 });
             }
 
+            function playTestTone() {
+                try {
+                    const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
+                    if (!AudioContextCtor) return;
+                    if (!audioCtx) audioCtx = new AudioContextCtor();
+                    if (audioCtx.state === 'suspended') audioCtx.resume();
+
+                    const now = audioCtx.currentTime;
+                    // Chime dua nada lembut (C5 = 523.25Hz, E5 = 659.25Hz) sebagai konfirmasi speaker/audio aktif
+                    [523.25, 659.25].forEach(function (freq, idx) {
+                        const osc = audioCtx.createOscillator();
+                        const gain = audioCtx.createGain();
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(freq, now + idx * 0.1);
+                        gain.gain.setValueAtTime(0.08, now + idx * 0.1);
+                        gain.gain.exponentialRampToValueAtTime(0.0001, now + idx * 0.1 + 0.18);
+                        osc.connect(gain);
+                        gain.connect(audioCtx.destination);
+                        osc.start(now + idx * 0.1);
+                        osc.stop(now + idx * 0.1 + 0.19);
+                    });
+                } catch (e) {}
+            }
+
             function updateLiveUi() {
                 if (!toggleLiveBtn) return;
                 if (liveEnabled) {
-                    toggleLiveBtn.className = 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 font-mono text-[11px] font-semibold transition-colors';
+                    toggleLiveBtn.className = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-mono text-[11px] font-semibold transition-colors shadow-sm';
                     liveDot.className = 'w-2 h-2 rounded-full bg-emerald-500 animate-pulse';
                     liveLabel.textContent = 'LIVE 3s';
                 } else {
-                    toggleLiveBtn.className = 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-neutral-100 text-neutral-600 border border-neutral-200 font-mono text-[11px] font-semibold transition-colors';
+                    toggleLiveBtn.className = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-neutral-100 text-neutral-600 border border-neutral-300 font-mono text-[11px] font-semibold transition-colors shadow-sm';
                     liveDot.className = 'w-2 h-2 rounded-full bg-neutral-400';
-                    liveLabel.textContent = currentPage > 1 ? 'JEDA (Hal >1)' : 'LIVE JEDA';
+                    liveLabel.textContent = currentPage > 1 ? 'JEDA (Hal >1)' : 'LIVE: JEDA';
                 }
             }
 
@@ -457,6 +492,54 @@
                         }
                     }
 
+                    if (data.hardware) {
+                        const hw = data.hardware;
+                        const uhfBadge = document.getElementById('hw-uhf-badge');
+                        const uhfDot = document.getElementById('hw-uhf-dot');
+                        const uhfText = document.getElementById('hw-uhf-text');
+                        const relayBadge = document.getElementById('hw-relay-badge');
+                        const relayDot = document.getElementById('hw-relay-dot');
+                        const relayText = document.getElementById('hw-relay-text');
+
+                        if (uhfBadge && uhfDot && uhfText) {
+                            if (hw.reader_connected) {
+                                uhfBadge.className = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 font-mono text-[11px] shadow-sm';
+                                uhfDot.className = 'w-2 h-2 rounded-full bg-emerald-500 animate-pulse';
+                                uhfText.textContent = 'HW-VX6330 [' + (hw.reader_port || 'COM2') + ']';
+                                uhfBadge.title = 'UHF Reader HW-VX6330 terhubung di ' + (hw.reader_port || 'COM2');
+                            } else if (hw.daemon_online) {
+                                uhfBadge.className = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 font-mono text-[11px] shadow-sm';
+                                uhfDot.className = 'w-2 h-2 rounded-full bg-amber-500';
+                                uhfText.textContent = 'HW-VX6330 [Terputus]';
+                                uhfBadge.title = 'Daemon aktif, reader belum terdeteksi';
+                            } else {
+                                uhfBadge.className = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-neutral-100 text-neutral-600 border border-neutral-200 font-mono text-[11px] shadow-sm';
+                                uhfDot.className = 'w-2 h-2 rounded-full bg-neutral-400';
+                                uhfText.textContent = 'HW-VX6330 [Offline]';
+                                uhfBadge.title = 'Hardware / Daemon UHF belum aktif (Offline)';
+                            }
+                        }
+
+                        if (relayBadge && relayDot && relayText) {
+                            if (hw.relay_connected) {
+                                relayBadge.className = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 font-mono text-[11px] shadow-sm';
+                                relayDot.className = 'w-2 h-2 rounded-full bg-emerald-500';
+                                relayText.textContent = 'Relay [' + (hw.relay_port || 'COM4') + ']';
+                                relayBadge.title = 'Arduino Uno Relay 12V terhubung di ' + (hw.relay_port || 'COM4');
+                            } else if (hw.daemon_online) {
+                                relayBadge.className = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 font-mono text-[11px] shadow-sm';
+                                relayDot.className = 'w-2 h-2 rounded-full bg-amber-500';
+                                relayText.textContent = 'Relay [Terputus]';
+                                relayBadge.title = 'Daemon aktif, relay belum terdeteksi';
+                            } else {
+                                relayBadge.className = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-neutral-100 text-neutral-600 border border-neutral-200 font-mono text-[11px] shadow-sm';
+                                relayDot.className = 'w-2 h-2 rounded-full bg-neutral-400';
+                                relayText.textContent = 'Relay [Offline]';
+                                relayBadge.title = 'Hardware / Daemon Relay belum aktif (Offline)';
+                            }
+                        }
+                    }
+
                     if (data.changed && data.tbody_html && tbody) {
                         tbody.innerHTML = data.tbody_html;
                     }
@@ -492,15 +575,11 @@
                 toggleSoundBtn.addEventListener('click', function () {
                     soundEnabled = !soundEnabled;
                     if (soundEnabled) {
-                        toggleSoundBtn.className = 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-rose-50 text-rose-700 border border-rose-200 font-mono text-[11px] font-semibold transition-colors';
+                        toggleSoundBtn.className = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200 font-mono text-[11px] font-semibold transition-colors shadow-sm';
                         soundLabel.textContent = 'Suara: ON';
-                        try {
-                            const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
-                            if (AudioContextCtor && !audioCtx) audioCtx = new AudioContextCtor();
-                            if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-                        } catch (e) {}
+                        playTestTone();
                     } else {
-                        toggleSoundBtn.className = 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white text-neutral-600 hover:bg-neutral-100 border border-neutral-200 font-mono text-[11px] font-semibold transition-colors';
+                        toggleSoundBtn.className = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white text-neutral-600 hover:bg-neutral-50 border border-neutral-200 font-mono text-[11px] font-semibold transition-colors shadow-sm';
                         soundLabel.textContent = 'Suara: OFF';
                     }
                 });

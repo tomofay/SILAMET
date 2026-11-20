@@ -94,9 +94,6 @@
                            placeholder="Cari kode, nama, alasan..."
                            class="w-full pl-9 pr-4 py-2 rounded-full border border-neutral-200 bg-white text-xs focus:ring-1 focus:ring-primary focus:border-primary shadow-sm" />
                 </div>
-                <button type="submit" class="px-4 py-2 rounded-full bg-white hover:bg-neutral-50 text-neutral-700 text-xs font-semibold border border-neutral-200 shadow-sm transition-colors shrink-0">
-                    Cari
-                </button>
             </form>
         </div>
 

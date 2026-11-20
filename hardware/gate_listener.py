@@ -90,11 +90,17 @@ class SharedCameraRequestHandler(BaseHTTPRequestHandler):
 
         if path == "/health":
             ready, frame_age_ms = daemon.get_camera_status()
+            reader_connected = bool(daemon.ser and daemon.ser.is_open)
+            relay_connected = bool(daemon.relay_ser and daemon.relay_ser.is_open)
             self._send_json(200, {
                 "success": True,
                 "camera_index": daemon.camera_index,
                 "camera_ready": ready,
                 "frame_age_ms": frame_age_ms,
+                "reader_connected": reader_connected,
+                "reader_port": getattr(daemon, "port", "COM2"),
+                "relay_connected": relay_connected,
+                "relay_port": getattr(daemon, "relay_port", "COM4"),
             })
             return
 

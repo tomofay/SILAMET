@@ -7,12 +7,12 @@
         <!-- Metric Summary Cards Row (3 Grid Kartu Data-Dense) -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
 
-            <!-- Card 1: Total Aset Terdata -->
+            <!-- Card 1: Total Barang Terdata -->
             <div class="bg-white rounded-xl p-4 sm:p-5 border border-neutral-200 flex flex-col justify-between hover:border-neutral-300 transition-colors">
                 <div>
                     <div class="flex items-start justify-between gap-2">
                         <div class="space-y-1">
-                            <span class="text-xs font-semibold uppercase tracking-wider text-neutral-500">Total Aset Terdata</span>
+                            <span class="text-xs font-semibold uppercase tracking-wider text-neutral-500">Total Barang Terdata</span>
                             <div class="text-2xl font-bold text-neutral-900 font-mono tracking-tight">
                                 {{ number_format($stats['total_aset']) }}
                             </div>
@@ -692,7 +692,7 @@
                     <div class="p-3 bg-neutral-50 border-t border-neutral-100 flex items-center justify-between text-xs">
                         <span class="text-neutral-500 font-mono text-[11px]">Buku Stok Bahan Praktikum</span>
                         <a href="{{ route('items.index') }}" class="font-semibold text-primary hover:text-primary-700 inline-flex items-center gap-1">
-                            <span>Katalog Aset</span>
+                            <span>Katalog Barang</span>
                             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
                             </svg>

@@ -1,5 +1,5 @@
 <x-app-layout>
-    <x-slot name="heading">Detail Aset — {{ $item->item_code }}</x-slot>
+    <x-slot name="heading">Detail Barang — {{ $item->item_code }}</x-slot>
     <x-slot name="title">Detail {{ $item->name }} — SILAMET</x-slot>
 
     @php

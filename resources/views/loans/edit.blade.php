@@ -15,7 +15,7 @@
                     <h1 class="text-xl font-bold tracking-tight text-neutral-900 font-heading">
                         Ubah Status Peminjaman <span class="font-mono">#{{ $loan->id }}</span>
                     </h1>
-                    <p class="text-xs text-neutral-500 mt-0.5">Penyesuaian status sirkulasi peminjaman alat secara administratif.</p>
+                    <p class="text-xs text-neutral-500 mt-0.5">Penyesuaian status peminjaman alat secara administratif.</p>
                 </div>
             </div>
             <div class="flex items-center gap-2">
@@ -44,16 +44,18 @@
                 <div class="lg:col-span-8 space-y-6">
                     <div class="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm space-y-5">
                         <div class="border-b border-neutral-100 pb-3">
-                            <h2 class="text-sm font-bold text-neutral-900 tracking-tight">Status Sirkulasi</h2>
+                            <h2 class="text-sm font-bold text-neutral-900 tracking-tight">Status Peminjaman</h2>
                             <p class="text-xs text-neutral-500 mt-0.5">Ubah status peminjaman alat.</p>
                         </div>
 
                         <div>
                             <x-input-label for="status" value="Status Peminjaman *" />
                             <select id="status" name="status" x-model="loanStatus" class="mt-1.5 w-full rounded-xl border-neutral-200 text-sm focus:border-neutral-900 focus:ring-neutral-900" required>
-                                <option value="aktif">Aktif (Sedang Dipinjam)</option>
-                                <option value="menunggu_approval_kembali">Menunggu Approval Kembali</option>
-                                <option value="selesai">Selesai (Sudah Dikembalikan)</option>
+                                <option value="aktif">Sedang Dipinjam</option>
+                                @if($loan->status->value === 'menunggu_approval_kembali')
+                                    <option value="menunggu_approval_kembali">Menunggu Approval Kembali</option>
+                                @endif
+                                <option value="selesai">Sudah Dikembalikan</option>
                             </select>
                             <x-input-error :messages="$errors->get('status')" class="mt-2" />
                         </div>

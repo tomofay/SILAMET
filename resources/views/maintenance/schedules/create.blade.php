@@ -69,9 +69,9 @@
                         </div>
 
                         <div>
-                            <x-input-label for="item_id" value="Nama Alat / Barang (Master Aset) *" />
+                            <x-input-label for="item_id" value="Nama Alat / Barang *" />
                             <select id="item_id" name="item_id" x-model="selectedItemId" @change="applySuggestedTitle()" class="mt-1.5 w-full rounded-xl border-neutral-200 text-sm focus:border-neutral-900 focus:ring-neutral-900" required>
-                                <option value="">— Pilih nama alat / barang dari Master Aset —</option>
+                                <option value="">— Pilih nama alat / barang —</option>
                                 @foreach($items as $item)
                                     @php
                                         $activeCount = $item->preventiveSchedules->where('status', 'scheduled')->count();

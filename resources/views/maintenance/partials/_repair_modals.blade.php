@@ -206,7 +206,7 @@
                         <input type="radio" name="outcome" value="broken" class="peer sr-only complete-outcome-radio" {{ $completeOutcomeOld === 'broken' ? 'checked' : '' }}>
                         <div class="p-2.5 rounded-lg border border-neutral-200 bg-white hover:bg-neutral-50 peer-checked:border-rose-500 peer-checked:bg-rose-50/70 transition-colors h-full">
                             <div class="text-xs font-bold text-neutral-900">Rusak Permanen</div>
-                            <p class="text-[11px] text-neutral-500 mt-0.5">Masuk daftar Barang Rusak &amp; kurangi Master Aset.</p>
+                            <p class="text-[11px] text-neutral-500 mt-0.5">Masuk daftar Barang Rusak &amp; kurangi stok barang.</p>
                         </div>
                     </label>
                 </div>
@@ -222,7 +222,7 @@
                        max="{{ max(1, (int) old('_modal_item_stock', 1)) }}"
                        value="{{ $oldModalMode === 'complete' ? old('broken_quantity', old('_modal_default_broken_qty', 1)) : 1 }}"
                        class="w-full rounded-lg border-rose-300 bg-white text-xs font-mono focus:border-rose-500 focus:ring-rose-500">
-                <p class="text-[11px] text-rose-800 leading-snug">Stok di Master Aset akan langsung berkurang sesuai jumlah unit ini (dihapus otomatis bila stok menjadi 0).</p>
+                <p class="text-[11px] text-rose-800 leading-snug">Stok barang akan langsung berkurang sesuai jumlah unit ini (dihapus otomatis bila stok menjadi 0).</p>
             </div>
 
             <!-- Metode Penanganan -->
@@ -453,7 +453,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         if (completeSubtitleEl) {
             completeSubtitleEl.textContent = isBroken
-                ? 'Barang dicatat ke daftar Barang Rusak dan stok Master Aset otomatis berkurang/dihapus.'
+                ? 'Barang dicatat ke daftar Barang Rusak dan stok barang otomatis berkurang/dihapus.'
                 : 'Status barang otomatis kembali TERSEDIA setelah laporan disimpan.';
         }
         if (completeActionLabel) {
@@ -468,7 +468,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         if (completeSubmitBtn) {
             if (isBroken) {
-                completeSubmitBtn.textContent = 'Catat Rusak & Kurangi Master Aset';
+                completeSubmitBtn.textContent = 'Catat Rusak & Kurangi Stok Barang';
                 completeSubmitBtn.className = 'px-4 py-2 bg-rose-700 hover:bg-rose-600 text-white text-xs font-semibold rounded-lg border border-rose-700 transition-colors';
             } else {
                 completeSubmitBtn.textContent = 'Simpan Laporan & Selesaikan';

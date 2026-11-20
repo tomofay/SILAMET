@@ -118,7 +118,7 @@
                                            class="rounded border-neutral-300 text-primary focus:ring-primary" />
                                 </th>
                             @endif
-                            <th class="px-4 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">Barang (Master Aset)</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">Barang</th>
                             <th class="px-4 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">Kegiatan &amp; Catatan</th>
                             <th class="px-4 py-3 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider">Tanggal Maintenance</th>
                             <th class="px-4 py-3 text-center text-xs font-semibold text-neutral-500 uppercase tracking-wider">Jumlah</th>
@@ -297,7 +297,7 @@
                                     <input type="radio" name="damage_disposition" value="broken" x-model="damageDisposition" class="peer sr-only" />
                                     <div class="p-2.5 rounded-lg border border-neutral-200 bg-white hover:bg-neutral-50 peer-checked:border-rose-600 peer-checked:bg-rose-50/70 transition-colors h-full">
                                         <div class="text-xs font-bold text-rose-900">Rusak Permanen</div>
-                                        <p class="text-[11px] text-rose-700 mt-0.5">Langsung masuk Barang Rusak &amp; kurangi Master Aset.</p>
+                                        <p class="text-[11px] text-rose-700 mt-0.5">Langsung masuk Barang Rusak &amp; kurangi stok barang.</p>
                                     </div>
                                 </label>
                             </div>

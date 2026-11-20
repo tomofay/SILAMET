@@ -59,11 +59,6 @@
                 <button type="submit" class="px-5 py-2 bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-semibold rounded-full shadow-sm transition-colors" title="Terapkan Filter" aria-label="Terapkan Filter">
                     Terapkan
                 </button>
-                @if(request('search') || request('role'))
-                    <a href="{{ route('users.index') }}" class="px-4 py-2 text-xs font-semibold text-neutral-600 hover:text-neutral-900 border border-neutral-200 rounded-full hover:bg-neutral-50 flex items-center justify-center transition-colors" title="Reset Filter" aria-label="Reset Filter">
-                        Reset
-                    </a>
-                @endif
             </form>
         </div>
 

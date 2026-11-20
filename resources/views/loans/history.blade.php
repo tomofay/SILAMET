@@ -114,12 +114,6 @@
                             Filter
                         </button>
                     </div>
-
-                    @if(filled($search) || filled($conditionFilter) || filled($startDate) || filled($endDate))
-                        <a href="{{ route('loans.history') }}" class="px-3 py-1.5 rounded-xl border border-neutral-200 text-xs font-semibold text-neutral-500 hover:text-neutral-800 bg-white transition-colors whitespace-nowrap">
-                            Reset
-                        </a>
-                    @endif
                 </div>
             </form>
         </div>

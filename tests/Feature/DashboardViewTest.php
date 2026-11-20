@@ -33,7 +33,7 @@ class DashboardViewTest extends TestCase
         $response = $this->actingAs($user)->get('/dashboard');
 
         $response->assertOk()
-            ->assertSee('Total Aset')
+            ->assertSee('Total Barang')
             ->assertSee('Sedang Dipinjam')
             ->assertSee('Dalam Perbaikan');
     }

@@ -1,6 +1,6 @@
 <x-app-layout>
-    <x-slot name="heading">Maintenance &amp; Repair (M&amp;R)</x-slot>
-    <x-slot name="title">Modul Maintenance — SILAMET</x-slot>
+    <x-slot name="heading">Kerusakan &amp; Perawatan</x-slot>
+    <x-slot name="title">Kerusakan &amp; Perawatan — SILAMET</x-slot>
 
     @php
         $activeTab = request('status', 'open');
@@ -18,10 +18,10 @@
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-neutral-200">
             <div>
                 <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-neutral-900 font-heading">
-                    Tiket Kerusakan &amp; Perawatan Aset
+                    Kerusakan &amp; Perawatan
                 </h1>
                 <p class="text-xs text-neutral-500 mt-0.5">
-                    Kelola laporan kerusakan dari siswa di Kiosk dan jadwal maintenance seluruh barang Master Aset.
+                    Kelola laporan kerusakan dari siswa di Kiosk dan jadwal maintenance seluruh barang laboratorium.
                 </p>
             </div>
             <div class="flex items-center gap-2.5 flex-wrap">
@@ -77,7 +77,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     <span>
-                        <span class="font-bold">{{ $unscheduledMasterItemsCount }} dari {{ $totalMasterItemsCount }} barang di Master Aset</span> belum memiliki jadwal maintenance berkala.
+                        <span class="font-bold">{{ $unscheduledMasterItemsCount }} dari {{ $totalMasterItemsCount }} barang di Barang &amp; Alat</span> belum memiliki jadwal maintenance berkala.
                     </span>
                 </div>
                 <a href="{{ route('maintenance.schedules.index') }}" class="inline-flex items-center justify-center gap-1.5 px-4 py-1.5 bg-white hover:bg-amber-100/70 text-amber-900 border border-amber-300 text-xs font-semibold rounded-full whitespace-nowrap transition-colors shadow-sm">

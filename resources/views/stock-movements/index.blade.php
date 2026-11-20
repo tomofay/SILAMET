@@ -22,7 +22,7 @@
                     <svg class="w-4 h-4 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                     </svg>
-                    <span>Katalog Master Aset</span>
+                    <span>Katalog Barang &amp; Alat</span>
                 </a>
                 <a href="{{ route('items.create') }}"
                    class="px-5 py-2 rounded-full bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-semibold transition-colors shadow-sm inline-flex items-center gap-1.5">
@@ -108,7 +108,7 @@
 
             @if($consumables->isEmpty())
                 <div class="mt-4 p-5 rounded-2xl bg-neutral-50 border border-neutral-200 text-xs text-neutral-600 flex items-center justify-between gap-3 flex-wrap">
-                    <span>Belum ada barang bertipe <span class="font-mono font-semibold">bahan_habis_pakai</span> di Master Aset (mis. Konektor RJ45, Kabel UTP, Timah Solder).</span>
+                    <span>Belum ada barang bertipe <span class="font-mono font-semibold">bahan_habis_pakai</span> di data Barang &amp; Alat (mis. Konektor RJ45, Kabel UTP, Timah Solder).</span>
                     <a href="{{ route('items.create') }}" class="px-4 py-2 rounded-full bg-neutral-900 text-white font-semibold hover:bg-neutral-800 transition-colors shadow-sm">Tambah Bahan Baru</a>
                 </div>
             @else
@@ -188,11 +188,6 @@
                     <button type="submit" class="px-4 py-1.5 rounded-full bg-white hover:bg-neutral-50 text-neutral-700 text-xs font-semibold border border-neutral-200 shadow-sm transition-colors">
                         Filter
                     </button>
-                    @if(request('item_id') || request('type'))
-                        <a href="{{ route('stock-movements.index') }}" class="px-3 py-1.5 text-xs font-semibold text-neutral-500 hover:text-neutral-800">
-                            Reset
-                        </a>
-                    @endif
                 </form>
             </div>
 

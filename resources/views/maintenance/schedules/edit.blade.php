@@ -82,7 +82,7 @@
                         </div>
 
                         <div>
-                            <x-input-label for="item_id" value="Nama Alat / Barang (Master Aset) *" />
+                            <x-input-label for="item_id" value="Nama Alat / Barang *" />
                             <select id="item_id" name="item_id" class="mt-1.5 w-full rounded-xl border-neutral-200 text-sm focus:border-neutral-900 focus:ring-neutral-900" required>
                                 @foreach($items as $item)
                                     <option value="{{ $item->id }}" @selected(old('item_id', $schedule->item_id) == $item->id)>

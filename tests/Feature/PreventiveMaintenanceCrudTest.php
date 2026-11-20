@@ -106,7 +106,7 @@ class PreventiveMaintenanceCrudTest extends TestCase
             ->assertOk()
             ->assertSee('Jadwal Maintenance Barang')
             ->assertSee('2 belum terjadwal')
-            ->assertSee('2 dari 3 barang di Master Aset')
+            ->assertSee('2 dari 3 barang di Barang & Alat')
             ->assertSee('belum memiliki jadwal maintenance berkala');
 
         // /maintenance/schedules menampilkan paket barang Master Aset aktif & tidak menampilkan item terhapus

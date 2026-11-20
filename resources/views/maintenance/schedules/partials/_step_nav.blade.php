@@ -54,7 +54,7 @@
             Penjadwalan Perawatan Preventif Berkala
         </h1>
         <p class="text-xs text-neutral-500 mt-0.5">
-            Alur maintenance terstruktur: jadwalkan paket barang Master Aset, pilah kondisi saat dicek, lalu ajukan kerusakan ke tiket.
+            Alur maintenance terstruktur: jadwalkan paket barang, pilah kondisi saat dicek, lalu ajukan kerusakan ke tiket.
         </p>
     </div>
 </div>

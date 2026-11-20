@@ -68,7 +68,7 @@
             <div class="p-4 rounded-2xl bg-rose-50 border border-rose-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-rose-900">
                 <div>
                     <span class="font-bold">Barang Dinyatakan Rusak Permanen.</span>
-                    <span class="text-rose-800">Unit tidak layak pakai telah dipindahkan ke daftar Barang Rusak dan stok Master Aset otomatis disesuaikan.</span>
+                    <span class="text-rose-800">Unit tidak layak pakai telah dipindahkan ke daftar Barang Rusak dan stok barang otomatis disesuaikan.</span>
                 </div>
                 <a href="{{ route('maintenance.damaged.index') }}" class="inline-flex items-center gap-1 px-3.5 py-1.5 bg-white hover:bg-rose-100 text-rose-800 border border-rose-300 rounded-full font-semibold shadow-2xs whitespace-nowrap transition-colors">
                     Lihat Daftar Barang Rusak

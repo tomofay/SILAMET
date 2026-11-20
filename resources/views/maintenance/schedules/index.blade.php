@@ -83,12 +83,12 @@
             'workflowCounts' => $workflowCounts,
         ])
 
-        <!-- Form Penjadwalan Paket Barang (List Menu ala Master Aset) -->
+        <!-- Form Penjadwalan Paket Barang (List Menu Barang & Alat) -->
         <div class="bg-white rounded-2xl border border-neutral-200 p-5 sm:p-6 shadow-sm space-y-6">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-neutral-100">
                 <div>
                     <h3 class="text-base font-bold text-neutral-900 tracking-tight font-heading">Jadwalkan Maintenance Paket Barang</h3>
-                    <p class="text-xs text-neutral-500 mt-0.5">Pilih paket kelompok barang praktikum dari Master Aset, lalu atur tanggal dan siklus berkala perawatannya.</p>
+                    <p class="text-xs text-neutral-500 mt-0.5">Pilih paket kelompok barang praktikum dari Barang &amp; Alat, lalu atur tanggal dan siklus berkala perawatannya.</p>
                 </div>
                 <span class="px-3 py-1 rounded-full font-mono text-xs font-semibold bg-neutral-100 text-neutral-700 border border-neutral-200 self-start sm:self-auto shrink-0">
                     {{ $nameGroups->count() }} Paket &middot; {{ $masterItems->count() }} Unit
@@ -113,9 +113,9 @@
 
             @if($masterItems->isEmpty())
                 <div class="rounded-2xl border border-neutral-200 bg-neutral-50 p-6 text-xs text-neutral-600 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <span>Belum ada barang atau paket kelompok di Master Aset. Tambahkan terlebih dahulu melalui menu Master Aset.</span>
+                    <span>Belum ada barang atau paket kelompok di Barang &amp; Alat. Tambahkan terlebih dahulu melalui menu Barang &amp; Alat.</span>
                     <a href="{{ route('items.create') }}" class="inline-flex items-center justify-center px-4 py-2 bg-neutral-900 text-white font-semibold rounded-full hover:bg-neutral-800 transition-colors whitespace-nowrap shadow-sm">
-                        Tambah Barang Master Aset
+                        Tambah Barang
                     </a>
                 </div>
             @else
@@ -143,7 +143,7 @@
                             class="sr-only">
                         <option value="">— Pilih paket barang (misal: TPLINK, PC, MIKROTIK) —</option>
                         @if($nameGroups->isNotEmpty())
-                            <optgroup label="Paket Kelompok Barang (Master Aset)">
+                            <optgroup label="Paket Kelompok Barang">
                                 @foreach($nameGroups as $grp)
                                     <option value="{{ $grp['key'] }}" @selected($initialGroupKey === $grp['key'])>
                                         {{ $grp['label'] }} — {{ $grp['item_count'] }} barang ({{ $grp['total_units'] }} unit)
@@ -167,7 +167,7 @@
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                             <div>
                                 <h4 class="text-xs font-bold uppercase tracking-wider text-neutral-900 font-heading">
-                                    1. Pilih Kelompok Barang (Master Aset) *
+                                    1. Pilih Kelompok Barang *
                                 </h4>
                                 <p class="text-[11px] text-neutral-500 mt-0.5">
                                     Klik salah satu kelompok di bawah untuk memilih paket barang yang akan di-maintenance.
@@ -270,7 +270,7 @@
                                    :href="activeGroup?.master_url"
                                    target="_blank"
                                    class="inline-flex items-center gap-1 text-[11px] font-semibold text-neutral-800 hover:text-neutral-900 hover:underline shrink-0">
-                                    <span>Buka di Master Aset</span>
+                                    <span>Buka di Barang &amp; Alat</span>
                                     <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                                     </svg>

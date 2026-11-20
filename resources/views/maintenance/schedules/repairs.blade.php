@@ -76,7 +76,7 @@
                 <table class="min-w-full divide-y divide-neutral-200 text-sm">
                     <thead class="bg-neutral-50/70 border-b border-neutral-200/80">
                         <tr>
-                            <th class="px-5 py-3.5 text-left text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Barang (Master Aset)</th>
+                            <th class="px-5 py-3.5 text-left text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Barang</th>
                             <th class="px-5 py-3.5 text-left text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Temuan Kerusakan</th>
                             <th class="px-5 py-3.5 text-center text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Jumlah Rusak</th>
                             <th class="px-5 py-3.5 text-left text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Tanggal Pengecekan</th>
@@ -139,7 +139,7 @@
                                                     data-damaged-qty="{{ $damagedCount }}"
                                                     data-default-reason="{{ trim((string) $schedule->damage_notes) !== '' ? $schedule->damage_notes : 'Rusak permanen dan tidak layak pakai hasil pemeriksaan maintenance.' }}"
                                                     class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-semibold transition-colors shadow-sm"
-                                                    title="Tandai rusak permanen, masuk bar Barang Rusak &amp; kurangi Master Aset">
+                                                    title="Tandai rusak permanen, masuk bar Barang Rusak &amp; kurangi stok barang">
                                                 <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5m6 4.125l2.25 2.25m0 0l2.25 2.25M12 13.875l2.25-2.25M12 13.875l-2.25 2.25M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
                                                 </svg>
@@ -294,7 +294,7 @@
                                       required
                                       class="w-full rounded-xl border-neutral-200 text-xs focus:border-rose-500 focus:ring-rose-500"></textarea>
                             <p class="text-[11px] text-rose-800 bg-rose-50 border border-rose-200 rounded-xl px-3 py-2 mt-2 leading-snug">
-                                Barang akan langsung dipindahkan ke bar <strong>Barang Rusak</strong> dan stok pada <strong>Master Aset</strong> berkurang otomatis sebesar <span class="font-mono font-bold" x-text="damagedQty + ' unit'"></span>.
+                                Barang akan langsung dipindahkan ke bar <strong>Barang Rusak</strong> dan stok barang berkurang otomatis sebesar <span class="font-mono font-bold" x-text="damagedQty + ' unit'"></span>.
                             </p>
                         </div>
 

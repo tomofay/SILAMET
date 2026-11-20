@@ -83,7 +83,7 @@
                         <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
                         </svg>
-                        <span>Barang Praktikum (Aset)</span>
+                        <span>Barang Praktikum</span>
                     </button>
                     <button type="button"
                             @click="itemType = 'bahan_habis_pakai'"
@@ -202,7 +202,7 @@
                         <div class="bg-white rounded-2xl border border-neutral-200 p-5 shadow-sm space-y-3.5">
                             <div class="border-b border-neutral-100 pb-2.5">
                                 <h3 class="text-xs font-bold uppercase tracking-wider text-neutral-900 font-heading">Kelompok Bahan</h3>
-                                <p class="text-[11px] text-neutral-500 mt-0.5">Kelompok barang sekali pakai di Master Aset.</p>
+                                <p class="text-[11px] text-neutral-500 mt-0.5">Kelompok barang sekali pakai di data Barang &amp; Alat.</p>
                             </div>
 
                             <div>
@@ -324,7 +324,7 @@
                             </div>
                         </div>
 
-                        <!-- Card 3: Informasi Kuantitas Aset (Fixed 1 Unit) -->
+                        <!-- Card 3: Informasi Kuantitas Barang (Fixed 1 Unit) -->
                         <div class="p-4 rounded-2xl bg-neutral-50 border border-neutral-200 flex items-center gap-3 text-xs text-neutral-600">
                             <input type="hidden" name="stock" value="1">
                             <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
@@ -334,7 +334,7 @@
                             </div>
                             <div>
                                 <span class="font-bold text-neutral-800">Unit Berseri Tunggal (1 Unit per Rekaman)</span>
-                                <p class="text-[11px] text-neutral-500 mt-0.5">Setiap barang praktikum dicatat 1 unit dengan kode aset dan RFID unik agar sirkulasi peminjaman dapat diawasi per alat.</p>
+                                <p class="text-[11px] text-neutral-500 mt-0.5">Setiap barang praktikum dicatat 1 unit dengan kode barang dan RFID unik agar sirkulasi peminjaman dapat diawasi per alat.</p>
                             </div>
                         </div>
                     </div>

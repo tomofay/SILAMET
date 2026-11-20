@@ -241,7 +241,7 @@
                                 <input type="radio" name="outcome" value="broken" class="peer sr-only edit-outcome-radio" {{ $editSelectedOutcome === 'broken' ? 'checked' : '' }}>
                                 <div class="p-3 rounded-xl border border-neutral-200 bg-white hover:bg-neutral-50 peer-checked:border-rose-500 peer-checked:bg-rose-50/70 transition-colors">
                                     <div class="text-xs font-bold text-neutral-900">Rusak Permanen</div>
-                                    <p class="text-[11px] text-neutral-500 mt-0.5">Masuk daftar Barang Rusak &amp; kurangi Master Aset.</p>
+                                    <p class="text-[11px] text-neutral-500 mt-0.5">Masuk daftar Barang Rusak &amp; kurangi stok barang.</p>
                                 </div>
                             </label>
                         </div>

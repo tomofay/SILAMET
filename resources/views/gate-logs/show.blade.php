@@ -88,7 +88,7 @@
                                 </div>
                                 <div class="mt-3">
                                     <a href="{{ route('items.show', $log->item->id) }}" class="inline-flex items-center gap-1.5 text-xs font-semibold text-neutral-900 hover:underline">
-                                        <span>Buka Detail Master Aset</span>
+                                        <span>Buka Detail Barang &amp; Alat</span>
                                         <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
                                         </svg>
@@ -99,7 +99,7 @@
                     @else
                         <div class="p-4 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-800 space-y-1">
                             <span class="font-bold block">Tag Asing / Tidak Terdaftar di Database</span>
-                            <p class="text-rose-700 text-[11px]">EPC tag ini belum diasosiasikan dengan barang apapun di Master Aset laboratorium.</p>
+                            <p class="text-rose-700 text-[11px]">EPC tag ini belum diasosiasikan dengan barang apapun di data Barang &amp; Alat laboratorium.</p>
                         </div>
                     @endif
                 </div>

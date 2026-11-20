@@ -1,6 +1,6 @@
 <x-app-layout>
-    <x-slot name="heading">Peminjaman Alat Aktif</x-slot>
-    <x-slot name="title">Peminjaman Alat Aktif — SILAMET</x-slot>
+    <x-slot name="heading">Peminjaman Alat</x-slot>
+    <x-slot name="title">Peminjaman Alat — SILAMET</x-slot>
 
     <div class="space-y-6 max-w-7xl mx-auto">
         
@@ -9,10 +9,10 @@
             <div>
                 <div class="flex items-center gap-2.5">
                     <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-neutral-900 font-heading">
-                        Sirkulasi Peminjaman Alat Aktif
+                        Peminjaman Alat
                     </h1>
                     <span class="px-2.5 py-0.5 rounded-full text-xs font-mono font-semibold bg-sky-50 text-sky-700 border border-sky-200">
-                        {{ $activeTotal + $pendingApprovalTotal }} Sedang Berlangsung
+                        {{ $activeTotal + $pendingApprovalTotal }} Sedang Dipinjam
                     </span>
                 </div>
                 <p class="text-xs text-neutral-500 mt-1">
@@ -41,7 +41,7 @@
                     </svg>
                 </div>
                 <div>
-                    <div class="text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Aktif Dipinjam</div>
+                    <div class="text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Sedang Dipinjam</div>
                     <div class="flex items-baseline gap-1.5 mt-0.5">
                         <span class="text-xl font-extrabold text-neutral-900 font-heading">{{ $activeTotal }}</span>
                         <span class="text-xs text-neutral-400">unit di luar lab</span>
@@ -49,20 +49,20 @@
                 </div>
             </div>
 
-            <div class="bg-white rounded-2xl border border-neutral-200 p-4 shadow-sm flex items-center gap-3.5">
-                <div class="w-10 h-10 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600 shrink-0">
+            <a href="{{ route('loans.history') }}" class="bg-white rounded-2xl border border-neutral-200 p-4 shadow-sm flex items-center gap-3.5 hover:border-neutral-300 transition-colors">
+                <div class="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 shrink-0">
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                 </div>
                 <div>
-                    <div class="text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Menunggu Approval</div>
+                    <div class="text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Sudah Dikembalikan</div>
                     <div class="flex items-baseline gap-1.5 mt-0.5">
-                        <span class="text-xl font-extrabold text-neutral-900 font-heading">{{ $pendingApprovalTotal }}</span>
-                        <span class="text-xs text-neutral-400">perlu verifikasi</span>
+                        <span class="text-xl font-extrabold text-neutral-900 font-heading">{{ $returnedTotal ?? 0 }}</span>
+                        <span class="text-xs text-neutral-400">unit telah kembali</span>
                     </div>
                 </div>
-            </div>
+            </a>
 
             <div class="bg-white rounded-2xl border border-neutral-200 p-4 shadow-sm flex items-center gap-3.5">
                 <div class="w-10 h-10 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-600 shrink-0">
@@ -91,11 +91,11 @@
                     </a>
                     <a href="{{ route('loans.index', array_filter(['status' => 'aktif', 'q' => $search])) }}"
                        class="px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors {{ $statusFilter === 'aktif' ? 'bg-neutral-900 text-white shadow-2xs' : 'text-neutral-600 hover:text-neutral-900' }}">
-                        Aktif Dipinjam
+                        Sedang Dipinjam
                     </a>
-                    <a href="{{ route('loans.index', array_filter(['status' => 'menunggu_approval_kembali', 'q' => $search])) }}"
-                       class="px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors {{ $statusFilter === 'menunggu_approval_kembali' ? 'bg-neutral-900 text-white shadow-2xs' : 'text-neutral-600 hover:text-neutral-900' }}">
-                        Menunggu Approval
+                    <a href="{{ route('loans.history') }}"
+                       class="px-3.5 py-1.5 rounded-full text-xs font-semibold transition-colors text-neutral-600 hover:text-neutral-900">
+                        Sudah Dikembalikan
                     </a>
                 </div>
 
@@ -114,11 +114,6 @@
                                placeholder="Cari siswa, NIS, atau barang..."
                                class="w-full pl-9 pr-3 py-1.5 text-xs rounded-xl border-neutral-200 focus:border-primary focus:ring-primary bg-neutral-50/50 focus:bg-white transition-colors" />
                     </div>
-                    @if(filled($search) || filled($statusFilter))
-                        <a href="{{ route('loans.index') }}" class="px-3 py-1.5 rounded-xl border border-neutral-200 text-xs font-semibold text-neutral-500 hover:text-neutral-800 bg-white transition-colors whitespace-nowrap">
-                            Reset
-                        </a>
-                    @endif
                 </div>
             </form>
         </div>
@@ -216,7 +211,7 @@
                                     @endphp
                                     <div class="flex flex-col gap-1">
                                         <span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full border {{ $lbadge }} w-fit">
-                                            {{ $loan->status->label() }}
+                                            {{ $loan->status->value === 'aktif' ? 'Sedang Dipinjam' : $loan->status->label() }}
                                         </span>
                                         @if($loan->isKiosk())
                                             <span class="inline-flex items-center gap-1 text-[10px] font-mono font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 w-fit">

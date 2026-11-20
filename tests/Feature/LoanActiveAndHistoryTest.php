@@ -49,7 +49,7 @@ class LoanActiveAndHistoryTest extends TestCase
         $response = $this->actingAs($teknisi)->get(route('loans.index'));
 
         $response->assertOk();
-        $response->assertSee('Sirkulasi Peminjaman Alat Aktif');
+        $response->assertSee('Peminjaman Alat');
         $response->assertSee('Budi Siswa Aktif');
         $response->assertSee('MikroTik RB750Gr3');
         $response->assertSee('SLM-RTR-01');

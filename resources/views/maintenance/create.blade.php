@@ -37,14 +37,14 @@
                 <div class="lg:col-span-8 space-y-6">
                     <div class="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm space-y-5">
                         <div class="border-b border-neutral-100 pb-3">
-                            <h2 class="text-sm font-bold text-neutral-900 tracking-tight">Detail Barang & Kendala</h2>
-                            <p class="text-xs text-neutral-500 mt-0.5">Pilih barang Master Aset yang mengalami masalah dan uraikan kendalanya.</p>
+                            <h2 class="text-sm font-bold text-neutral-900 tracking-tight">Detail Barang &amp; Kendala</h2>
+                            <p class="text-xs text-neutral-500 mt-0.5">Pilih barang yang mengalami masalah dan uraikan kendalanya.</p>
                         </div>
 
                         <div>
-                            <x-input-label for="item_id" value="Nama Alat / Barang (Master Aset) *" />
+                            <x-input-label for="item_id" value="Nama Alat / Barang *" />
                             <select id="item_id" name="item_id" class="mt-1.5 w-full rounded-xl border-neutral-200 text-sm focus:border-neutral-900 focus:ring-neutral-900" required>
-                                <option value="">— Pilih alat / barang dari Master Aset —</option>
+                                <option value="">— Pilih alat / barang —</option>
                                 @foreach(($items ?? \App\Models\Item::orderBy('name')->orderBy('item_code')->get()) as $item)
                                     <option value="{{ $item->id }}" @selected(old('item_id', $preselectedItemId ?? null) == $item->id)>
                                         {{ $item->name }} ({{ $item->item_code }}) · {{ $item->type->label() }} — {{ $item->location }}

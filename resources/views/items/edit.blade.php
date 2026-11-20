@@ -13,11 +13,11 @@
         <!-- Top Action Bar (Discard & Save Buttons ala Dribbble Template) -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-neutral-200">
             <div class="flex items-center gap-3">
-                <a href="{{ $backUrl }}" class="p-2 rounded-full border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-600 hover:text-neutral-900 transition-colors shadow-sm inline-flex items-center gap-1.5" title="Kembali ke Daftar Aset">
+                <a href="{{ $backUrl }}" class="p-2 rounded-full border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-600 hover:text-neutral-900 transition-colors shadow-sm inline-flex items-center gap-1.5" title="Kembali ke Daftar Barang">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                     </svg>
-                    <span class="text-xs font-semibold pr-1">Kembali ke Daftar Aset</span>
+                    <span class="text-xs font-semibold pr-1">Kembali ke Daftar Barang</span>
                 </a>
                 <div>
                     <div class="flex items-center gap-2">
@@ -139,7 +139,7 @@
                         </div>
                     </div>
 
-                    <!-- Card 2B: Identifikasi & Tag RFID (KHUSUS UNIT PRAKTIKUM / ASET) -->
+                    <!-- Card 2B: Identifikasi & Tag RFID (KHUSUS UNIT PRAKTIKUM) -->
                     <div x-show="itemType === 'aset'" class="bg-white rounded-2xl border border-neutral-200 p-5 sm:p-6 shadow-sm space-y-4">
                         <div class="border-b border-neutral-100 pb-3 flex items-center justify-between">
                             <div>
@@ -190,13 +190,13 @@
                     <div class="bg-white rounded-2xl border border-neutral-200 p-5 sm:p-6 shadow-sm space-y-4">
                         <div class="border-b border-neutral-100 pb-3">
                             <h2 class="text-sm font-bold uppercase tracking-wider text-neutral-900 font-heading">Tipe Barang</h2>
-                            <p class="text-xs text-neutral-500 mt-0.5">Tentukan perlakuan sirkulasi barang (unit praktikum aset atau bahan habis pakai).</p>
+                            <p class="text-xs text-neutral-500 mt-0.5">Tentukan perlakuan sirkulasi barang (unit praktikum atau bahan habis pakai).</p>
                         </div>
 
                         <div>
                             <x-input-label for="type" value="Tipe Barang *" />
                             <select id="type" name="type" x-model="itemType" class="mt-1.5 w-full rounded-xl border-neutral-200 text-sm font-semibold focus:border-primary focus:ring-primary" required>
-                                <option value="aset" @selected(old('type', $item->type->value) === 'aset')>Barang Praktikum (Aset / Dipakai Berulang)</option>
+                                <option value="aset" @selected(old('type', $item->type->value) === 'aset')>Barang Praktikum (Dipakai Berulang)</option>
                                 <option value="bahan_habis_pakai" @selected(old('type', $item->type->value) === 'bahan_habis_pakai')>Bahan Habis Pakai (Sekali Pakai / BHP)</option>
                             </select>
                             <x-input-error :messages="$errors->get('type')" class="mt-2" />

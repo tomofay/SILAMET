@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="heading"></x-slot>
-    <x-slot name="title">Master Aset — SILAMET</x-slot>
+    <x-slot name="title">Barang &amp; Alat — SILAMET</x-slot>
 
     @php
         $canManageMaintenance = in_array(auth()->user()?->role?->value, ['teknisi', 'kabeng'], true);
@@ -23,7 +23,7 @@
                     <svg class="w-4 h-4 text-rose-600 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <span>Aksi Master Aset tidak dapat diproses:</span>
+                    <span>Aksi Barang &amp; Alat tidak dapat diproses:</span>
                 </div>
                 <ul class="list-disc pl-6 space-y-0.5">
                     @foreach($errors->all() as $err)
@@ -72,7 +72,7 @@
                         <select x-model="groupTypeFilter"
                                 class="pl-4 pr-9 py-2 rounded-full border border-neutral-300 bg-white text-xs font-bold text-neutral-800 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary shadow-sm cursor-pointer appearance-none">
                             <option value="all">Semua Kelompok ({{ count($groups) }})</option>
-                            <option value="aset">Barang Praktikum (Aset) ({{ $asetGroups->count() }})</option>
+                            <option value="aset">Barang Praktikum ({{ $asetGroups->count() }})</option>
                             <option value="bahan_habis_pakai">Bahan Sekali Pakai (BHP) ({{ $bhpGroups->count() }})</option>
                         </select>
                         <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-neutral-500">
@@ -103,12 +103,6 @@
                     <button type="submit" class="px-4 py-2 rounded-full bg-white hover:bg-neutral-50 text-neutral-800 text-xs font-bold border border-neutral-300 shadow-sm transition-colors shrink-0">
                         Cari
                     </button>
-                    @if($search !== '')
-                        <a href="{{ $activeGroup ? route('items.index', ['group' => $activeGroup['slug']]) : route('items.index') }}"
-                           class="px-2 py-2 text-xs font-semibold text-neutral-500 hover:text-neutral-900 shrink-0">
-                            Reset
-                        </a>
-                    @endif
                 </form>
 
                 @if($viewMode === 'groups')
@@ -138,7 +132,7 @@
                 <div x-show="groupTypeFilter === 'all' || groupTypeFilter === 'aset'" x-transition class="space-y-3">
                     <div class="flex items-center justify-between gap-3 px-1">
                         <div>
-                            <h2 class="text-xs font-bold uppercase tracking-wider text-neutral-900 font-heading">Barang Praktikum (Aset / Dipakai Berulang)</h2>
+                            <h2 class="text-xs font-bold uppercase tracking-wider text-neutral-900 font-heading">Barang Praktikum (Dipakai Berulang)</h2>
                             <p class="text-[11px] text-neutral-500">Perangkat jaringan, komputer, dan peralatan praktikum berseri dengan pengamanan RFID &amp; pemeliharaan berkala.</p>
                         </div>
                         <span class="px-2.5 py-0.5 rounded-full font-mono text-[10px] font-bold bg-neutral-100 text-neutral-700 border border-neutral-200">
@@ -176,7 +170,7 @@
                                                             </a>
                                                             @if($grp['is_explicit_category'])
                                                                 <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-primary-50 text-primary-700 border border-indigo-200">
-                                                                    Aset
+                                                                    Barang
                                                                 </span>
                                                             @endif
                                                         </div>
@@ -194,7 +188,7 @@
                                             </td>
                                             <td class="px-5 py-4">
                                                 <span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full border bg-primary-50 text-primary-700 border-indigo-200">
-                                                    Aset Praktikum
+                                                    Barang Praktikum
                                                 </span>
                                                 <div class="text-[11px] font-mono text-neutral-500 mt-1">
                                                     {{ !empty($grp['locations']) ? implode(', ', array_slice($grp['locations'], 0, 2)) : '—' }}
@@ -266,7 +260,7 @@
                                     @empty
                                         <tr>
                                             <td colspan="5" class="py-8 px-4 text-center">
-                                                <p class="text-xs text-neutral-400">Belum ada kelompok barang praktikum (aset).</p>
+                                                <p class="text-xs text-neutral-400">Belum ada kelompok barang praktikum.</p>
                                             </td>
                                         </tr>
                                     @endforelse
@@ -428,7 +422,7 @@
                                 @if($isBhpGroup)
                                     Menampilkan daftar stok bahan sekali pakai {{ $activeGroup['label'] }} beserta barcode kemasan dan lokasi penyimpanan.
                                 @else
-                                    Menampilkan seluruh unit {{ $activeGroup['label'] }} beserta kode aset, tag RFID, barcode, dan status maintenance.
+                                    Menampilkan seluruh unit {{ $activeGroup['label'] }} beserta kode barang, tag RFID, barcode, dan status maintenance.
                                 @endif
                             </p>
                         </div>
@@ -484,7 +478,7 @@
                                 <th class="px-4 py-3.5 text-left text-xs font-semibold text-neutral-500 uppercase tracking-wider w-10">
                                     <input type="checkbox" id="select-all-items" aria-label="Pilih semua barang" class="rounded border-neutral-300 text-primary focus:ring-primary">
                                 </th>
-                                <th class="px-4 py-3.5 text-left text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Kode Aset</th>
+                                <th class="px-4 py-3.5 text-left text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Kode Barang</th>
                                 <th class="px-4 py-3.5 text-left text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Nama Barang &amp; Tag RFID</th>
                                 <th class="px-4 py-3.5 text-left text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Tipe</th>
                                 @if($showStockColumn)
@@ -580,13 +574,13 @@
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
                                                 </svg>
                                             </a>
-                                            <a href="{{ route('items.show', $item->id) }}" class="p-1.5 rounded-lg border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-600 hover:text-neutral-900 transition-colors shadow-sm" title="Detail Aset" aria-label="Detail {{ $item->name }}">
+                                            <a href="{{ route('items.show', $item->id) }}" class="p-1.5 rounded-lg border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-600 hover:text-neutral-900 transition-colors shadow-sm" title="Detail Barang" aria-label="Detail {{ $item->name }}">
                                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                                 </svg>
                                             </a>
-                                            <a href="{{ route('items.edit', array_filter(['item' => $item->id, 'return_group' => $activeGroup['slug'] ?? null])) }}" class="p-1.5 rounded-lg border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-600 hover:text-neutral-900 transition-colors shadow-sm" title="Edit Aset" aria-label="Edit {{ $item->name }}">
+                                            <a href="{{ route('items.edit', array_filter(['item' => $item->id, 'return_group' => $activeGroup['slug'] ?? null])) }}" class="p-1.5 rounded-lg border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-600 hover:text-neutral-900 transition-colors shadow-sm" title="Edit Barang" aria-label="Edit {{ $item->name }}">
                                                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                                 </svg>
@@ -594,7 +588,7 @@
                                             <form method="POST" action="{{ route('items.destroy', $item->id) }}" class="inline" onsubmit="return confirm('Hapus barang ini?')">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="p-1.5 rounded-lg border border-neutral-200 bg-white hover:bg-rose-50 text-neutral-600 hover:text-rose-600 hover:border-rose-200 transition-colors shadow-sm" title="Hapus Aset" aria-label="Hapus {{ $item->name }}">
+                                                <button type="submit" class="p-1.5 rounded-lg border border-neutral-200 bg-white hover:bg-rose-50 text-neutral-600 hover:text-rose-600 hover:border-rose-200 transition-colors shadow-sm" title="Hapus Barang" aria-label="Hapus {{ $item->name }}">
                                                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
                                                         <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                                     </svg>
@@ -628,7 +622,7 @@
                                             @else
                                                 <h3 class="font-heading font-bold text-neutral-900 text-sm">Tidak Ada Barang Ditemukan</h3>
                                                 <p class="text-xs text-neutral-500 mt-1 text-center">
-                                                    Ubah kata kunci pencarian atau tambahkan unit baru ke Master Aset.
+                                                    Ubah kata kunci pencarian atau tambahkan unit baru ke Barang &amp; Alat.
                                                 </p>
                                             @endif
                                         </div>
@@ -691,7 +685,7 @@
                             <select id="new-group-type"
                                     name="type"
                                     class="mt-1.5 w-full text-xs rounded-xl border-neutral-200 focus:border-primary focus:ring-primary">
-                                <option value="aset" {{ old('type') === 'aset' ? 'selected' : '' }}>Barang Praktikum (Aset / Dipakai Berulang)</option>
+                                <option value="aset" {{ old('type') === 'aset' ? 'selected' : '' }}>Barang Praktikum (Dipakai Berulang)</option>
                                 <option value="bahan_habis_pakai" {{ old('type') === 'bahan_habis_pakai' ? 'selected' : '' }}>Bahan Habis Pakai (Sekali Pakai / BHP)</option>
                             </select>
                             <x-input-error :messages="$errors->get('type')" class="mt-1.5" />
@@ -759,7 +753,7 @@
                                     name="type"
                                     x-model="editGroupType"
                                     class="mt-1.5 w-full text-xs rounded-xl border-neutral-200 focus:border-primary focus:ring-primary">
-                                <option value="aset">Barang Praktikum (Aset / Dipakai Berulang)</option>
+                                <option value="aset">Barang Praktikum (Dipakai Berulang)</option>
                                 <option value="bahan_habis_pakai">Bahan Habis Pakai (Sekali Pakai / BHP)</option>
                             </select>
                             <x-input-error :messages="$errors->get('type')" class="mt-1.5" />

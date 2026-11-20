@@ -53,6 +53,7 @@ class LoanController extends Controller
         $overdueTotal = Loan::where('status', LoanStatus::AKTIF->value)
             ->where('due_at', '<', now())
             ->count();
+        $returnedTotal = Loan::where('status', LoanStatus::SELESAI->value)->count();
 
         $loans = $query->latest('borrowed_at')->paginate(15)->withQueryString();
 
@@ -62,7 +63,8 @@ class LoanController extends Controller
             'statusFilter',
             'activeTotal',
             'pendingApprovalTotal',
-            'overdueTotal'
+            'overdueTotal',
+            'returnedTotal'
         ));
     }
 

@@ -38,7 +38,7 @@
                 <table class="min-w-full divide-y divide-neutral-200 text-sm">
                     <thead class="bg-neutral-50/70 border-b border-neutral-200/80">
                         <tr>
-                            <th class="px-5 py-3.5 text-left text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Barang (Master Aset)</th>
+                            <th class="px-5 py-3.5 text-left text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Barang</th>
                             <th class="px-5 py-3.5 text-left text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Kegiatan &amp; Hasil</th>
                             <th class="px-5 py-3.5 text-center text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Jumlah Aman</th>
                             <th class="px-5 py-3.5 text-left text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Tanggal Maintenance</th>

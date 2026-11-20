@@ -171,12 +171,6 @@
                         <button type="submit" class="px-4 py-2 bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-semibold rounded-full transition-colors">
                             Terapkan
                         </button>
-                        @if($activeStatus !== '' || $activeSearch !== '' || ($activeReport['uses_dates'] && ($activeStart !== '' || $activeEnd !== '')))
-                            <a href="{{ route('reports.dashboard', $activeType) }}"
-                               class="px-3.5 py-2 bg-white hover:bg-neutral-100 text-neutral-600 border border-neutral-200 text-xs font-semibold rounded-full transition-colors">
-                                Reset
-                            </a>
-                        @endif
                     </div>
                 </form>
 
